@@ -15,6 +15,19 @@ Domain modules are reserved boundaries; implement only
 the scope requested for the current task. The web client and infrastructure
 have reserved folders; no frontend framework, broker, or database is wired up.
 
+## Quality checks and commits
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for local hooks and CI. `just setup`
+installs locked npm/Python dependencies and activates Husky. Pre-commit runs
+`just lint`, commit-msg checks commitlint, and pre-push runs `just test`. Keep
+checks read-only; use `just format` for deliberate backend formatting.
+
+When a commit is requested, use `verb(scope): short message`: one nonempty line,
+at most 72 characters, with lowercase verb and required lowercase service/target
+scope. Example: `fix(backend): handle missing sensor values`. Bodies and footers
+are rejected. Verbs are flexible; prefer established conventional verbs or a
+clear action. Follow the same convention for squash/merge messages.
+
 ## Start with focused context
 
 - Read [agents/STATE.md](agents/STATE.md) for decisions and reusable findings.

@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  HUSKY: "0"
+
+jobs:
+  checks:
+    name: Lint, tests, and commit messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v9
+        with:
+          version: "0.13.6"
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: services/backend/uv.lock
+
+      - name: Set up just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: "1.46.0"
+
+      - name: Install locked dependencies
+        run: just setup
+
+      - name: Lint
+        run: just lint
+
+      - name: Test
+        run: just test
+
+      - name: Check latest push commit message
+        if: github.event_name == 'push'
+        run: npm exec --no -- commitlint --last --verbose
+
+      - name: Check all pull request commit messages
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: npm exec --no -- commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose

@@ -6,7 +6,7 @@ It starts independently of databases, brokers, and external sensor services.
 ## Local development
 
 Requires Python 3.12+, [uv](https://docs.astral.sh/uv/getting-started/installation/),
-and `just` for the root development recipes.
+`just`, and Node.js 22+ with npm for the root development recipes and Git hooks.
 From the repository root:
 
 ```sh
@@ -65,4 +65,6 @@ uv run --locked ruff format --check .
 
 The lockfile is tracked. After deliberately changing dependencies, run `uv lock`
 and `uv sync`, then the checks. Tests use the application factory and no external
-services. The root `just test` also runs the existing agent-tool tests.
+services. The root `just test` also runs the existing agent-tool tests and commit
+convention tests. [Contribution guidance](../../CONTRIBUTING.md) describes Husky
+hooks and GitHub Actions checks.

@@ -6,7 +6,7 @@ scoring, starting with a Python/FastAPI backend scaffold.
 ## Development
 
 Requires Python 3.12+, [uv](https://docs.astral.sh/uv/getting-started/installation/),
-and `just`.
+`just`, and Node.js 22+ with npm for Git hooks and commit checks.
 
 ```sh
 just setup
@@ -17,6 +17,10 @@ API: `http://127.0.0.1:8000/health`. Interactive docs:
 `http://127.0.0.1:8000/docs`. Run `just test` and `just lint` for local checks.
 Run `just` to list the available recipes.
 Configuration and service details are in [services/backend](services/backend/README.md).
+`just setup` also activates Husky: lint before commits, commit-message validation,
+and tests before pushes. Use `verb(scope): short message`, with a required scope,
+one line, and a 72-character limit. For example: `feat(backend): add health endpoint`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the convention and CI details.
 
 ```text
 services/backend/   FastAPI app, domain module boundaries, tests, dependency lock

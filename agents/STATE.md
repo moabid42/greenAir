@@ -45,6 +45,23 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 - Next action: inspect one source, record its contract, and implement a thin
   ingestion-to-storage slice when requested.
 
+### CI and commit convention — 2026-10-28
+
+- The root [npm package](../package.json) contains Husky and commitlint tooling;
+  it does not choose or scaffold a web framework. `just setup` activates hooks.
+- Hooks: lint before commits, validate commit messages, and test before pushes.
+  GitHub [CI](../.github/workflows/ci.yml) runs the same lint/tests plus commitlint
+  on the latest push commit or all pull-request commits.
+- User convention: `verb(scope): short message`, a single line of at most 72
+  characters with a required lowercase scope. Lowercase verbs remain flexible.
+  Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).
+- Local validation: Husky's actual pre-commit and pre-push wrappers passed lint
+  and all 36 tests (4 backend, 12 agent-tool, 20 commit-rule cases). Its commit-msg
+  wrapper accepted a valid message and rejected an invalid one. `core.hooksPath`
+  is `.husky/_` in this clone; workflow YAML parsed locally.
+- Remote CI has not been executed from this workspace; pushing the workflow
+  enables it. Repository branch-protection settings are unchanged.
+
 Use this format for additional short entries:
 
 ```text

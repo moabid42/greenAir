@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Repository Node.js tooling and generated Husky wrappers
+node_modules/
+.husky/_/
+npm-debug.log*
