@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.exceptions import HTTPException
 
+from app.serving.errors import ServingDataError
+
 
 class ErrorInfo(BaseModel):
     type: Literal["type.googleapis.com/google.rpc.ErrorInfo"] = Field(
@@ -77,3 +79,7 @@ async def validation_error(request: Request, exception: RequestValidationError) 
     }
     code = 400 if request.url.path.startswith("/v1/") else 422
     return error_response(code, "Check the request parameters.", fields)
+
+
+async def serving_error(request: Request, exception: ServingDataError) -> JSONResponse:
+    return error_response(exception.status_code, str(exception))

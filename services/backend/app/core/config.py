@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 SERVICE_ROOT = Path(__file__).resolve().parents[2]
@@ -16,6 +17,10 @@ class Settings(BaseSettings):
 
     app_name: str = "greenAir API"
     cors_origins: list[str] = []
+
+    serving_data_mode: Literal["mock", "stored"] = "mock"
+    database_url: str | None = None
+    snapshot_stale_after_hours: float = Field(default=3, gt=0, le=168)
 
     station_data_mode: Literal["mock", "live"] = "mock"
 

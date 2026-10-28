@@ -29,3 +29,45 @@ tests check that daylight-only missing hours cannot produce recommendations, zer
 stays numeric, and partial windows exclude gaps. `just check-web` includes these
 checks plus lint/type-check/build; CI already calls the same recipe. Real provider
 projection and browser verification remain subsequent requirements.
+
+## Stored provider
+
+`GREENAIR_SERVING_DATA_MODE=stored` plus an explicit GREENAIR_DATABASE_URL selects
+`StoredRepository`. Default mock startup remains independent of infrastructure.
+Stored startup creates an engine lazily and disposes its pool on application shutdown;
+it never queries, migrates, polls or fetches upstreams during startup. Unavailable
+storage produces a typed 503 on data requests while health remains live. A date with
+no usable stored model coverage returns 404; `/v1/status` lists actual snapshot dates.
+
+The day projection reads Open-Meteo weather and CAMS air channels from their specific
+source namespaces. It does not blend other model runs or relabel modelled NO2 as a
+station reading. A repeated Berlin hour averages its two real UTC instants only if
+both are usable; a spring gap is null, with no fabricated timestamp. Each channel
+lists its source/valid/issue/retrieval times, original raw refs and canonical units.
+Wind is projected from processing m/s to the existing client km/h field once.
+Daylight is a derived approximate solar-position calculation at the city point,
+labelled independently; it asserts no street illumination coverage.
+
+Factors follow the existing frontend heat/air/wind formulas; client sport weighting
+is unchanged. Traffic and safety remain null, and whole-day status remains partial.
+Staleness uses the oldest required-channel retrieval versus a configurable three-hour
+application threshold, not build time. Last-success snapshots keep their original
+build IDs/times after restart or upstream failure. No response silently substitutes
+a demo value. Cache headers and X-Data-Source reflect the selected result.
+
+Sensor markers cover openSenseMap and the checked official UBA stations. Outdoor and
+indoor exposure, original sensor IDs via per-channel provenance/raw refs, units and
+actual observation times remain available. Parallel sensors get distinct channel
+labels. Stale flags consider every channel (30 minutes for community sensors,
+three hours for hourly UBA); these thresholds are application choices, not provider
+cadence guarantees. DWD weather inputs remain stored without being mislabelled as
+senseBox markers. Until spatial integration, the real grid is an explicitly disabled
+empty collection and street queries return no verified data. No synthetic spatial
+scores are mixed with real day/sensor results.
+
+Compose passes the explicit mode/database variables while retaining the separate
+hardened demo project and nonroot runtime. From Docker Desktop, an existing local
+PostgreSQL service uses host.docker.internal in its URL; use an explicitly selected
+migrated database and keep credentials in environment variables. The public API is
+read-only; refresh remains an independent command. Offline SQLite capture replay
+is also supported for local tests; it does not emulate PostGIS/TimescaleDB.

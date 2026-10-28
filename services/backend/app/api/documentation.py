@@ -47,13 +47,23 @@ including DST days. Best-time recommendations skip nonexistent spring hours and 
 the first occurrence of a repeated autumn hour. Demo dates: 2020-01-01 to 2100-12-31.
 
 `/stations/status` defaults to mock; only explicit `GREENAIR_STATION_DATA_MODE=live`
-uses the previously implemented openSenseMap adapter. Core serving remains mock.
-SSE, vector tiles, storage, and pipeline refresh are deferred, not simulated as working.
+uses the previously implemented openSenseMap adapter.
+Core serving also supports explicit `GREENAIR_SERVING_DATA_MODE=stored` with a migrated
+`GREENAIR_DATABASE_URL`. It reads versioned snapshots built by the separate refresh CLI;
+API startup performs no queries, upstream fetches or polling. Missing dates return 404,
+storage failures return 503, and old snapshots retain their original timestamps/stale label.
+The stored provider serves modelled day conditions and measured station markers; its
+spatial grid/streets remain unavailable until verified spatial layers are connected.
+OpenAPI examples below are explicitly synthetic mock examples in either mode.
+SSE and vector tiles remain deferred.
 """
 
 TAGS = [
-    {"name": "Conditions", "description": "City day and grid resources; synthetic factor scores."},
-    {"name": "Sensors", "description": "Synthetic markers and optional upstream station status."},
+    {
+        "name": "Conditions",
+        "description": "Day/grid source provenance and explicit missing values.",
+    },
+    {"name": "Sensors", "description": "Sensor provenance and optional upstream station status."},
     {"name": "Street scores", "description": "Demo segment geometry and sport-specific scores."},
     {"name": "Operations", "description": "Process health and data-build status."},
     {
