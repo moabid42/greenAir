@@ -136,3 +136,15 @@ def test_open_meteo_and_bright_sky_keys(key, value, unit, phenomenon, expected):
     obs = normalize(raw(key=key, value=value, unit=unit, kind="model"))
     assert (obs.phenomenon, obs.kind, obs.qc_flags) == (phenomenon, "model", ())
     assert obs.value == pytest.approx(expected)
+
+
+def test_sensor_checks_skip_model_output():
+    flat_model = normalize_batch(series(["4.0"] * 12, key="pm2_5", unit="μg/m³", kind="model"))
+    assert flat_model.flag_counts[QcFlag.STUCK] == 0
+    humid_model = normalize_batch(
+        [
+            raw(key="relative_humidity_2m", value="90", unit="%", kind="model"),
+            raw(key="pm2_5", value="12", unit="μg/m³", kind="model"),
+        ]
+    )
+    assert humid_model.flag_counts[QcFlag.HUMID_PM] == 0

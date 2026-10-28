@@ -205,7 +205,8 @@ def normalize_batch(
     humid_threshold: float = 75.0,
     humid_window: timedelta = timedelta(minutes=5),
 ) -> NormalizationReport:
-    """Normalize, deduplicate by `Observation.key`, then apply series checks:
+    """Normalize, deduplicate by `Observation.key`, then apply sensor checks to
+    measurements (`kind == "observation"`; model output is smooth by design):
     `stuck_run` identical consecutive values of a stationary series are STUCK; PM
     with the nearest humidity of the same station above `humid_threshold` within
     `humid_window` is HUMID_PM (the ATRAI rule, reference §3.3)."""
@@ -222,8 +223,9 @@ def normalize_batch(
             report.observations.append(observation)
 
     extra: dict[tuple, set[QcFlag]] = defaultdict(set)
-    _flag_stuck(report.observations, stuck_run, extra)
-    _flag_humid_pm(report.observations, humid_threshold, humid_window, extra)
+    measurements = [obs for obs in report.observations if obs.kind == "observation"]
+    _flag_stuck(measurements, stuck_run, extra)
+    _flag_humid_pm(measurements, humid_threshold, humid_window, extra)
     report.observations = sorted(
         (
             obs.model_copy(update={"qc_flags": obs.qc_flags + tuple(sorted(extra[obs.key]))})
