@@ -2,7 +2,8 @@
 
 Use Python 3.12, uv 0.13.6, just 1.46.0, and Node.js 24 with npm; see
 [the development pins](docs/development.md). The root npm package
-contains development tooling; the web client remains a reserved directory.
+contains development tooling. The mobile and admin apps have separate locked npm
+dependencies in `apps/web` and `apps/admin`.
 
 ```sh
 just setup
@@ -95,3 +96,11 @@ clean checkout; local `just lint` retains staged and unstaged whitespace checks.
 Workflow files take effect after they are pushed to GitHub. Branch protection
 can require the `Lint, tests, and commit messages` check when enabled in repository
 settings; this setup does not change remote repository settings.
+
+## Frontend checks
+
+Run `just setup-web` / `just setup-admin` to install each app's locked dependencies.
+Use `just check-web` and `just check-admin` to lint and build them; the admin command
+also runs its unit tests. CI runs both apps as separate matrix jobs using Node.js 24.
+Backend hooks keep running the root lint/test recipes. A frontend change must also
+pass its app-specific check before merging.

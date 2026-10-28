@@ -72,3 +72,12 @@ This review's temporary checkout is
 http://localhost:3000. Browser evidence is in
 `/private/tmp/greenair-frontend-integration/` (report JSON and screenshots).
 These are local review artifacts, not environmental data or committed datasets.
+
+## Integration follow-up — 2026-10-28
+
+The reviewed frontend branch has now been merged into dev with the separate admin
+app. Mock-day toasts, Coach/onboarding wording, sensor sheets, and optional street
+labels now honor synthetic provenance. Demo sensor factories explicitly mark their
+values mock. Vector tiles remain deferred; the optional street overlay stays off.
+Root just recipes and CI jobs now check both apps, and Compose CORS includes the
+admin's localhost:3200 origin. The original review evidence above remains historical.

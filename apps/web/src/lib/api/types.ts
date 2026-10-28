@@ -85,6 +85,8 @@ export type SensorKind = "sensebox_home" | "lubw" | "bike_counter";
 
 /** GET /api/v1/sensors */
 export interface Sensor {
+  /** Provenance supplied by the backend; optional for older API responses. */
+  source?: "mock" | "measured" | "forecast";
   id: string;
   name: string;
   kind: SensorKind;

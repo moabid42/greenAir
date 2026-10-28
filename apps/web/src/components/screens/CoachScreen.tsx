@@ -222,7 +222,7 @@ export default function CoachScreen({ active }: { active: boolean }) {
         </span>
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <h1 className="font-display text-xl font-extrabold">Coach</h1>
-          <span className="truncate text-xs font-bold text-mute">{aiOn ? "Private AI · on your phone" : "Answers from live data"}</span>
+          <span className="truncate text-xs font-bold text-mute">{day?.source === "mock" ? (aiOn ? "Private AI · simulated data" : "Answers from simulated data") : (aiOn ? "Private AI · on your phone" : "Answers from available data")}</span>
         </div>
         <button
           type="button"

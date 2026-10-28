@@ -24,7 +24,8 @@ box in the diagram. Keep polling and heavy jobs outside API startup/reload.
 | PostgreSQL + PostGIS + TimescaleDB | `services/backend/app/storage/`, `services/backend/migrations/` | Planned; no driver, schema, extensions, or server provisioned |
 | Event bus and cache | `services/backend/app/messaging/`, `infrastructure/` | Transport/cache choice deferred; no broker provisioned |
 | Vector tiles | `infrastructure/` | Martin/pg_tileserv choice deferred |
-| MapLibre web client | `apps/web/` | Reserved directory; frontend framework undecided |
+| MapLibre web client | `apps/web/` | Next.js mobile app integrated with mock backend core routes |
+| Admin frontend | `apps/admin/` | Separate Next.js app; real endpoint probes, simulated traffic data |
 
 ## Serving and containers — 2026-10-28
 

@@ -29,9 +29,9 @@ export default function MobileShell() {
   const { ready, prefs, tab, placeId, toast, day, date, showToast } = useApp();
   const onMap = tab === "today" || tab === "explore";
 
-  // Be honest when the live weather could not be reached.
+  // Mock data can be intentional; it does not imply an upstream failure.
   useEffect(() => {
-    if (day?.source === "mock") showToast("Live weather isn't reachable, so this day is simulated.");
+    if (day?.source === "mock") showToast("Demo mode: this day uses simulated conditions.");
   }, [day?.source, date, showToast]);
 
   return (

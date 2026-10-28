@@ -96,7 +96,7 @@ export default function Onboarding() {
                   </span>
                 ))}
               </div>
-              <p className="mt-3 text-xs font-semibold text-mute">From real sensors across Heilbronn: weather stations, the city air station and cyclists&apos; measurements.</p>
+              <p className="mt-3 text-xs font-semibold text-mute">{day?.source === "mock" ? "This demo uses simulated conditions and sensor readings, clearly labelled throughout the app." : "Weather, air quality and cycling conditions for Heilbronn. Check the data source and time before relying on a result."}</p>
             </div>
           </>
         )}

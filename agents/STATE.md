@@ -210,3 +210,18 @@ offline. Record a later successful check alongside the earlier failure.
   deliberate dummy mode. No application code was changed or pushed in this review.
 - The published dev tree/history contains no `playground/`. Preserve the user's
   existing local `.gitignore` exclusions; do not stage or push personal playground data.
+
+### Frontend integration prepared for user merge — 2026-10-28
+
+- Branch `feat/frontend-backend-integration` contains the frontend/admin merge,
+  preserved playground/runtime exclusions, explicit mock labels, frontend CI jobs,
+  root just recipes and admin CORS on localhost:3200. User will merge it into dev;
+  remote dev remains at the previously pushed backend integration `9dd12b4`.
+- Local checks: root lint/test (144 backend, 12 research, 45 commit tests), both
+  Node 24 production builds/lints and 11 admin unit tests passed. Container smoke
+  passed all 20 routes. Browser checks covered mock onboarding/sensor/Coach labels,
+  core mobile flows (21 successful backend responses) and all four admin pages with
+  a successful cross-origin health fetch from port 3200.
+- User chose local checks only because GitHub CLI is not authenticated for private
+  Actions logs. Remote CI success has not been asserted. No ingestion branches or
+  personal playground content are included. Optional tiles/SSE remain deferred.

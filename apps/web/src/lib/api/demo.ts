@@ -162,12 +162,12 @@ export function demoGrid(day: DayForecast): GridResponse {
   return { date: day.date, cellSizeM: 250, cells: { type: "FeatureCollection", features: cells } };
 }
 
-/** Fixed sensor list (openSenseMap GreenCityHN group + LUBW). */
+/** Demo readings placed at fixed sensor locations; these are never station observations. */
 export function demoSensors(day: DayForecast, hour: number): Sensor[] {
   const h = day.hours[hour];
   const now = new Date().toISOString();
   const box = (id: string, name: string, lng: number, lat: number): Sensor => ({
-    id, name, kind: "sensebox_home", lat, lng, updatedAt: now,
+    id, name, kind: "sensebox_home", source: "mock", lat, lng, updatedAt: now,
     latest: { Temperature: h.tempC, "PM2.5": h.pm25, Humidity: h.humidity },
   });
   return [
@@ -176,7 +176,7 @@ export function demoSensors(day: DayForecast, hour: number): Sensor[] {
     box("69bd6ceb867a8a00078d3c3f", "Innenstadt", 9.221977, 49.142487),
     box("69bd6f04867a8a000790717b", "Elly-Heuss-Knapp Gymnasium", 9.178809, 49.145848),
     {
-      id: "lubw-weinsberger", name: "LUBW Weinsberger Straße (approx.)", kind: "lubw",
+      id: "lubw-weinsberger", name: "LUBW Weinsberger Straße (approx.)", kind: "lubw", source: "mock",
       lat: 49.1497, lng: 9.2342, updatedAt: now, latest: { NO2: h.no2 },
     },
   ];

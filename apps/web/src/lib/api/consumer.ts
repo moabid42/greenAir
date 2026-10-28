@@ -16,6 +16,7 @@ const HOUR = /^\d{4}-\d\d-\d\dT\d\d:00:00Z$/;
 export type SegmentTuple = [number, number, number];
 
 export interface SegmentSnapshot {
+  source?: "mock" | "measured" | "forecast";
   profile: Profile;
   t: string;
   kind: "observed" | "forecast";
@@ -25,6 +26,7 @@ export interface SegmentSnapshot {
 }
 
 export interface SegmentDetail {
+  source?: "mock" | "measured" | "forecast";
   segment_id: number;
   name?: string;
   t: string;

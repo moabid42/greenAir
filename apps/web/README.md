@@ -122,13 +122,13 @@ It is written for the backend (`services/backend`) and for anyone wiring the cli
 | Endpoint | Needed for | Called by the client today | Exists in `services/backend` |
 |---|---|---|---|
 | `GET /health` | Liveness (deploy checks) | No | **Yes** |
-| `GET /api/v1/day?date=` | Best time, timeline, reasons, week outlook, Analytics, Coach | **Yes** (required) | No |
-| `GET /api/v1/grid?date=` | Best places, per-place view, ranking, tap-a-place | **Yes** (required) | No |
-| `GET /api/v1/sensors` | Sensor markers and their details sheet | **Yes** (optional, degrades to no markers) | No |
-| `GET /scores` | Street segment colours on the map | Only if `NEXT_PUBLIC_ECOMAB_API_BASE_URL` is set | No |
-| `GET /score` | "Street conditions" details sheet | Only if the above is set | No |
+| `GET /api/v1/day?date=` | Best time, timeline, reasons, week outlook, Analytics, Coach | **Yes** (required) | **Yes, mock data** |
+| `GET /api/v1/grid?date=` | Best places, per-place view, ranking, tap-a-place | **Yes** (required) | **Yes, mock data** |
+| `GET /api/v1/sensors` | Sensor markers and their details sheet | **Yes** (optional, degrades to no markers) | **Yes, mock data** |
+| `GET /scores` | Street segment colours on the map | Only if `NEXT_PUBLIC_ECOMAB_API_BASE_URL` is set | **Yes, mock data** |
+| `GET /score` | "Street conditions" details sheet | Only if the above is set | **Yes, mock data** |
 | `GET /tiles/segments/{z}/{x}/{y}.pbf` | Street segment geometry (vector tiles) | Only if the above is set | No |
-| `GET /status`, `GET /events` (SSE) | Build/freshness, live refresh | Not yet (reserved) | No |
+| `GET /status`, `GET /events` (SSE) | Build/freshness, live refresh | Not yet (reserved) | Status exists; SSE deferred |
 
 The three core endpoints (`day`, `grid`, `sensors`) are all the app needs to run end to end. Everything in section 6 is
 an optional enhancement and is **off** unless configured.
@@ -166,7 +166,7 @@ CORS preflight is triggered. Keep it that way: please do not require custom requ
 | Compression | Please serve gzip or brotli. The grid is roughly 600 KB uncompressed. |
 | Caching | `day` and `grid` for a past date are immutable; for today/future they change as forecasts update. Recommended: `Cache-Control: public, max-age=300` for today and the next days, `max-age=86400, immutable` for past dates. `sensors`: `max-age=60`. |
 | Versioning | Core paths are under `/api/v1`. A breaking change needs `/api/v2`; additive fields are safe (the client ignores unknown fields). |
-| Errors | The client only checks `res.ok`. Any non-2xx is a failure and the body is **not** read. Use standard codes anyway (below) and, ideally, a JSON body such as `{ "detail": "…" }` for logs. |
+| Errors | The client only checks `res.ok`. Any non-2xx is a failure and the body is **not** read. Use standard codes anyway (below) and, ideally, the backend Google-style `{ "error": { "code": 404, "status": "NOT_FOUND", "message": "…", "details": [] } }` envelope for logs. |
 | Auth | None. The API is public and read-only. |
 
 **Status codes the backend should use**
@@ -444,9 +444,10 @@ Off by default. Set `NEXT_PUBLIC_ECOMAB_API_BASE_URL` to switch it on. When on, 
 segment coloured by its score, and tapping a street opens a "Street conditions" sheet. Segment geometry arrives as vector
 tiles; scores arrive separately and are joined by an integer `segment_id`.
 
-> Status: implemented in the client (`src/lib/api/consumer.ts`, `src/components/map/segmentOverlay.ts`) and exercised only
-> against a stub server. **It has not been verified against a deployed backend, and no backend implements it yet.**
-> Responses are validated before use; anything that does not match is rejected and the normal map stays.
+> Status: backend score/detail JSON passes the actual client validators using mock data.
+> **Vector tiles remain deferred, so keep this optional overlay disabled.** The backend
+> serves demo segment GeoJSON separately. See [the backend API contract](../../docs/backend-api.md).
+> Mock provenance is labelled simulated; these responses are not current measurements.
 
 #### `GET /scores`
 
@@ -473,7 +474,7 @@ Scores for **all segments** for one profile and one hour.
 | Field | Rules |
 |---|---|
 | `profile`, `t` | **Must echo the request exactly**, or the client discards the response (guards against stale/out-of-order answers). |
-| `kind` | `observed` or `forecast`; shown as "Street scores · observed/forecast". |
+| `kind` | `observed` or `forecast`; `source: mock` overrides the badge to "Street scores · simulated". |
 | `version` | Non-empty string. |
 | `build_id` | Non-empty string identifying the segment geometry build. The client reloads tiles when it changes and never joins scores from a different build. |
 | `scores` | Object keyed by **integer** `segment_id` (as a string). Each value is the tuple `[score, confidence, flags]`: `score` integer 0–100 (**0 is a valid score**), `confidence` 0–1, `flags` non-negative integer bit field. An absent segment is drawn neutral grey. |
