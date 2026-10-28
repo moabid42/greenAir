@@ -105,6 +105,8 @@ class ProviderValue(BaseModel):
 
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     platform: Literal["stationary", "mobile"]
+    exposure: Literal["indoor", "outdoor"] | None = None
+    station_name: str | None = None
     sensor_id: str | None = None
     sample_id: str | None = None
     raw_key: str = Field(min_length=1)
