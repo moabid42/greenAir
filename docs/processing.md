@@ -118,3 +118,26 @@ output is not a stuck sensor. The e2e test found this case.
 The normalizer maps these keys. Bright Sky adapters must set `raw_unit`
 (`°C`, `%`, `km/h`, `mm`) because the payload has none. `mm` is accepted for
 precipitation only because both providers report hourly steps.
+
+## Spatial layer builder
+
+`app/processing/spatial.py` (scoring draft §3). Geometry is WGS84
+`[longitude, latitude]`; distances use haversine and a local equirectangular
+projection, without GIS libraries.
+
+- `Segment`: id, polyline and optional static ATRAI attributes (`roughness`,
+  `overtaking_share`, `flow`, each 0–1). Real segments will come from the ATRAI
+  `bumpy_roads`, `overtaking_distance` and `traffic_flow` layers (reference §3);
+  that adapter is ingestion work.
+- `SegmentIndex`: grid index; a sample matches the nearest segment within 20 m.
+- `build_layers(...)`: usable mobile PM2.5 samples give `r = x / L(hour)`, usable
+  mobile temperatures give `T - T_ref(hour)`; per segment the median is shrunk with
+  κ = 20 (§3.1, §3.2). Humid PM is already excluded by its QC flag. Ratios are
+  floored at 0.1, because a reading of 0 means "below detection". The report counts
+  matched, unmatched and level-less samples.
+- `station_ratios(...)` and `fill_uncovered(...)`: §3.4 long-run ratio of each box
+  (at least 24 shared hours) and inverse-distance-squared fill for segments without
+  samples (`pm_source="idw"`).
+
+Not yet: separate day and night heat anomalies, seasonal patterns, the §3.5
+rush-hour contrast, and an OSM `surface` fallback for roughness.
