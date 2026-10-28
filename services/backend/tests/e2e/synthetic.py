@@ -64,6 +64,7 @@ def station_records(start: datetime = START, hours: int = HOURS) -> list[RawObse
             value = 50.0 if stuck else round(factor * pm25_level(at) + noise, 3)
             records.append(raw(station, "PM25", f"{value}", "µg/m³", at))
             records.append(raw(station, "rel. Luftfeuchte", f"{60 + 100 * noise:.1f}", "%", at))
+            records.append(raw(station, "Temperatur", f"{15 + 10 * noise:.2f}", "°C", at))
     return records
 
 
@@ -84,3 +85,62 @@ def model_records(
         )
         for step in range(hours)
     ]
+
+
+SEGMENTS = [
+    {
+        "segment_id": "seg-busy",
+        "coordinates": [[9.2150, 49.1420], [9.2200, 49.1420]],
+        "roughness": 0.6,
+        "overtaking_share": 0.5,
+        "flow": 0.3,
+    },
+    {
+        "segment_id": "seg-park",
+        "coordinates": [[9.2050, 49.1500], [9.2050, 49.1550]],
+        "roughness": 0.1,
+        "overtaking_share": 0.05,
+        "flow": 0.9,
+    },
+    {
+        "segment_id": "seg-uncovered",
+        "coordinates": [[9.2010, 49.1395], [9.2020, 49.1395]],
+        "roughness": 0.3,
+    },
+]
+# (segment, PM factor, temperature offset, humidity, longitude, latitude) per sample group.
+RIDES = [
+    ("busy", 1.5, 2.0, 55, lambda i: (9.2150 + i * 0.0001, 49.14205)),
+    ("park", 0.7, -1.0, 55, lambda i: (9.20507, 49.1500 + i * 0.0001)),
+    ("humid", 3.0, None, 85, lambda i: (9.2150 + i * 0.0001, 49.14205)),
+    ("far", 5.0, 2.0, 55, lambda i: (9.2150 + i * 0.0001, 49.1425)),
+]
+RIDE_COUNTS = {"busy": 40, "park": 40, "humid": 10, "far": 10}
+
+
+def mobile_records(start: datetime = START + timedelta(days=1)) -> list[RawObservation]:
+    """ATRAI-like bike samples, 10 minutes apart, with naive timestamps."""
+    records = []
+    step = 0
+    for group, factor, offset, humidity, place in RIDES:
+        for i in range(RIDE_COUNTS[group]):
+            at = start + timedelta(minutes=10 * step)
+            longitude, latitude = place(i)
+            common = {
+                "source": "atrai:bike",
+                "platform": "mobile",
+                "longitude": longitude,
+                "latitude": latitude,
+                "sample_id": f"{group}-{i}",
+            }
+            naive = at.replace(tzinfo=None)
+            values = [
+                ("Finedust PM2.5", round(factor * pm25_level(at), 3)),
+                ("Rel. Humidity", humidity),
+            ]
+            if offset is not None:
+                values.append(("Temperature", 15 + offset))
+            for key, value in values:
+                records.append(raw("synthetic-bike", key, value, None, naive, **common))
+            step += 1
+    return records
