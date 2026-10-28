@@ -192,3 +192,16 @@ offline. Record a later successful check alongside the earlier failure.
 
 - Browser verification: Chrome rendered all 20 Swagger operations and executed
   GetDay through Try it out, returning HTTP 200 with 24 mock hourly slots.
+
+### Actual frontend compatibility — 2026-10-28
+
+- Fetched and tested frontend `17fd270` in a detached temporary worktree against
+  containerized dev `9dd12b4`. [Review](../docs/integrations/frontend-compatibility.md).
+  Production build passed; browser flows covered Today/week/history/Explore/place/
+  Analytics/Coach, with 21 successful backend responses and no runtime exceptions.
+- Actual frontend scoring/ranking code accepted core responses across all sports
+  and DST dates. Optional street JSON validates, but its overlay still needs vector
+  tiles and mock-aware provenance. Small frontend copy changes are needed for the
+  deliberate dummy mode. No application code was changed or pushed in this review.
+- The published dev tree/history contains no `playground/`. Preserve the user's
+  existing local `.gitignore` exclusions; do not stage or push personal playground data.
