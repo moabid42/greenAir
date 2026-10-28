@@ -19,6 +19,7 @@ UNITS = {
     "cloud_cover": "%",
     "sunshine": "s",
     "uv_index": "1",
+    "european_aqi": "EAQI",
     "bike_count": "count",
     "speed": "km/h",
     "overtaking_distance": "m",
