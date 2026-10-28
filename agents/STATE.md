@@ -184,8 +184,11 @@ offline. Record a later successful check alongside the earlier failure.
 - Evidence: local Docker image built and reported healthy; the HTTP smoke script
   exercised all 20 documented GET routes, Swagger/ReDoc/OpenAPI, mock provenance,
   gzip, CORS, and 400/404 errors. UID 10001 and absence of `.env`/tests were checked
-  inside the running container. `just lint` and `just test` passed (143 backend,
+  inside the running container. `just lint` and `just test` passed (144 backend,
   12 research tooling, 32 commit tooling tests). Standalone OpenAPI validation passed.
 - CI now builds the container and runs the same HTTP smoke script. Remote CI results
   remain separate from local validation. Real pipeline integration, SSE, and tiles
   are future work; no live environmental observations were claimed in this task.
+
+- Browser verification: Chrome rendered all 20 Swagger operations and executed
+  GetDay through Try it out, returning HTTP 200 with 24 mock hourly slots.
