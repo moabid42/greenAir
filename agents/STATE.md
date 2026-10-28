@@ -148,3 +148,19 @@ Next action: <concrete next step, or complete>
 Keep reported research claims distinct from new observations. If a probe fails,
 record the environment and response/error; do not conclude the entire source is
 offline. Record a later successful check alongside the earlier failure.
+
+### Mock serving API — 2026-10-28
+
+- Integrated the CI isolation, processing pipeline (including its stacked dependencies),
+  and station-status PR branches into local `dev`. No ingestion branches were merged.
+- `app/serving/repository.py` defines the replaceable query boundary. The demo provider
+  supplies synthetic day/grid/sensors and invented segment lines; street scores use the
+  existing sport engine with zero confidence. It performs no upstream requests.
+- Core contracts follow the frontend types on `origin/web/ecomab-frontend` and endpoint
+  guidance in `origin/main:apps/web/README.md`: 24 Berlin wall-clock slots, factor-only
+  scores, stable grid IDs, gzip, and explicit mock provenance. Pipeline integration,
+  vector tiles, SSE, and persistent storage remain deferred.
+- Station status defaults to mock; `GREENAIR_STATION_DATA_MODE=live` opts into the
+  existing adapter. Recorded historical probes above are not fresh verification.
+- Evidence: offline HTTP tests cover the frontend contracts, DST, coverage, pagination,
+  errors, and provider replacement. No live source checks were needed for dummy data.

@@ -118,7 +118,7 @@ def test_status_endpoint_returns_502_when_upstream_fails():
         response = client.get("/stations/status")
 
     assert response.status_code == 502
-    assert "HTTP 503" in response.json()["detail"]
+    assert "HTTP 503" in response.json()["error"]["message"]
 
 
 class FakeResponse(io.BytesIO):
