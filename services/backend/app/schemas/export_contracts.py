@@ -10,11 +10,13 @@ from pydantic import BaseModel
 
 from app.core.config import SERVICE_ROOT
 from app.schemas.observations import Observation, RawObservation
+from app.schemas.scores import PipelineResult
 
 CONTRACTS_DIR = SERVICE_ROOT.parents[1] / "docs" / "contracts"
 CONTRACTS: dict[str, type[BaseModel]] = {
     "raw-observation.schema.json": RawObservation,
     "observation.schema.json": Observation,
+    "pipeline-result.schema.json": PipelineResult,
 }
 
 
