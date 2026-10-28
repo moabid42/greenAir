@@ -14,11 +14,10 @@ at least once with stable event IDs; no broker runs or is required here.
 
 PostgreSQL migrations install PostGIS and TimescaleDB and create the observation
 hypertable plus segment/layer history. SQLite is used only for transaction tests;
-it does not verify extension behavior. The initial observation vocabulary and
-natural key are the recovered ingestion contract, pending the explicit processing
-boundary commit. In particular, do not ingest mobile samples through the initial
-station/time identity. Originals remain available in raw bytes; per-value provider
-identity and model issue-time semantics still need reconciliation before adapters.
+it does not verify extension behavior. The observation vocabulary remains the recovered ingestion contract, with an
+[explicit processing boundary](ingestion-processing-boundary.md). Revision 0003
+adds per-value originals, mobile/sensor identity, nulls and unknown model issuance.
+Legacy rows without originals require adapter replay before processing.
 
 ## Commands and validation
 
