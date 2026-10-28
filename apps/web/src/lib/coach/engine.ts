@@ -1,6 +1,6 @@
 import { getDay, getGrid } from "@/lib/api/client";
 import type { Activity, DayForecast, Factor, GridFeature, GridResponse, Hour, TimeWindow } from "@/lib/api/types";
-import { dayWord, shortDate, tempWord } from "@/lib/format";
+import { finiteValues, rangeText, dayWord, shortDate, tempWord } from "@/lib/format";
 import { MAX_OUTSIDE_KM, type LngLat, fmtKm, nearestCell, rankSpots, type Spot } from "@/lib/rank";
 import { reasons } from "@/lib/reasons";
 import { bestWindows, cellFactors, cellScore, fmtHour, hourScore, maskPast, type Tune, VERDICT_TEXT, verdict } from "@/lib/score";
@@ -174,6 +174,7 @@ export async function answer(question: string, ctx: CoachCtx): Promise<CoachRepl
   // A specific hour: "Can I run after work?" / "Is 6 pm OK?"
   if (hour != null && best) {
     const s = i.scores[hour];
+    if (!Number.isFinite(s)) return { text: "Some weather or air inputs are missing for that hour. I cannot recommend it." };
     const here = bestSpot?.place ?? place;
     const passed = date === ctx.today && hour < ctx.hourNow;
     const inBest = hour >= best.start && hour < best.end;
@@ -204,22 +205,24 @@ export async function answer(question: string, ctx: CoachCtx): Promise<CoachRepl
 
   if (has("hot", "heat", "warm", "cool", "temperature", "sweat", "sun")) {
     const temps = i.day.hours.map((h) => h.tempC);
-    const max = Math.max(...temps);
-    const min = Math.min(...temps);
+    if (!finiteValues(temps).length) return { text: "Temperature data are unavailable for this day." };
+    const max = Math.max(...finiteValues(temps));
+    const min = Math.min(...finiteValues(temps));
     const hottest = temps.indexOf(max);
-    const cool = i.day.hours.map((h, k) => ({ k, v: factorsAt(i, k).heat ?? 0, h })).filter((x) => x.k >= 5 && x.k < 23 && x.v >= 75);
+    const cool = i.day.hours.map((h, k) => ({ k, v: factorsAt(i, k).heat ?? Number.NaN, h })).filter((x) => x.k >= 5 && x.k < 23 && x.v >= 75);
     const tooHot = max >= 28;
     return {
       text: `${when === "today" ? "Today" : when} runs ${Math.round(min)}° to ${Math.round(max)}°, warmest around ${pad(hottest)}:00 (${tempWord(max).toLowerCase()}). ${
         tooHot ? `It's too hot to ${verb} in the middle of the day. ` : ""
       }${cool.length ? `Comfortable from ${pad(cool[0].k)}:00 to ${pad(cool[cool.length - 1].k + 1)}:00.` : "No hour is really comfortable today."}`,
-      cards: [{ score: Math.round(factorsAt(i, hottest).heat ?? 0), title: `${pad(hottest)}:00 · warmest`, sub: `${Math.round(max)} °C` }],
+      cards: factorsAt(i,hottest).heat == null ? [] : [{ score: Math.round(factorsAt(i, hottest).heat!), title: `${pad(hottest)}:00 · warmest`, sub: `${Math.round(max)} °C` }],
       actions: compact<CoachAction>([best ? { kind: "day", label: "Show the day", date } : null]),
     };
   }
 
   if (has("air", "asthma", "pollut", "pollen", "breath", "no2", "dust", "lung", "allerg")) {
-    const waking = i.day.hours.map((h, k) => ({ k, v: factorsAt(i, k).air ?? 0, rush: h.rush > 0.45 })).filter((x) => x.k >= 5 && x.k < 23);
+    const waking = i.day.hours.map((h, k) => ({ k, v: factorsAt(i, k).air ?? Number.NaN, rush: h.rush != null && h.rush > 0.45 })).filter((x) => x.k >= 5 && x.k < 23 && Number.isFinite(x.v));
+    if (!waking.length) return { text: "Air data are unavailable for this day." };
     const top = waking.reduce((a, b) => (b.v > a.v ? b : a));
     const low = waking.reduce((a, b) => (b.v < a.v ? b : a));
     const rush = waking.filter((x) => x.rush).map((x) => pad(x.k));
@@ -237,8 +240,11 @@ export async function answer(question: string, ctx: CoachCtx): Promise<CoachRepl
 
   if (has("wind", "rain", "storm", "weather")) {
     const winds = i.day.hours.map((h) => h.windKmh);
-    const maxW = Math.max(...winds);
-    const minW = Math.min(...winds.slice(5, 23));
+    if (!finiteValues(winds).length) return { text: "Wind data are unavailable for this day." };
+    const maxW = Math.max(...finiteValues(winds));
+    const wakingWind = finiteValues(winds.slice(5,23));
+    if (!wakingWind.length) return { text: "Wind data are missing during daytime hours." };
+    const minW = Math.min(...wakingWind);
     return {
       text: `I don't track rain yet, only wind. ${when === "today" ? "Today" : when} wind peaks at ${Math.round(maxW)} km/h around ${pad(winds.indexOf(maxW))}:00 and is calmest (${Math.round(minW)} km/h) around ${pad(winds.indexOf(minW, 5))}:00.`,
     };
@@ -317,7 +323,7 @@ async function weekReply(ctx: CoachCtx): Promise<CoachReply> {
   const top = days.slice(0, 3);
   return {
     text: `${shortDate(top[0].i.date)} looks like your best day this week: ${range(top[0].w)} scores ${top[0].w.score}.`,
-    cards: top.map((d) => ({ score: d.w.score, title: shortDate(d.i.date), sub: `${range(d.w)} · ${Math.round(Math.min(...d.i.day.hours.map((h) => h.tempC)))}° to ${Math.round(Math.max(...d.i.day.hours.map((h) => h.tempC)))}°` })),
+    cards: top.map((d) => ({ score: d.w.score, title: shortDate(d.i.date), sub: `${range(d.w)} · ${rangeText(d.i.day.hours.map((h) => h.tempC))}` })),
     actions: [{ kind: "day", label: `Open ${shortDate(top[0].i.date)}`, date: top[0].i.date }],
   };
 }
@@ -331,8 +337,8 @@ export function buildFacts(ctx: CoachCtx, reply: CoachReply) {
     area: ctx.homeLabel ?? "Heilbronn (whole city)",
     reachKm: ctx.radiusKm,
     sensitiveToAir: ctx.airSensitive,
-    tempRangeC: [Math.round(Math.min(...waking.map((h) => h.tempC))), Math.round(Math.max(...waking.map((h) => h.tempC)))],
-    rushHours: waking.filter((h) => h.rush > 0.45).map((h) => fmtHour(h.hour)),
+    tempRangeC: finiteValues(waking.map((h) => h.tempC)).length ? [Math.round(Math.min(...finiteValues(waking.map((h) => h.tempC)))), Math.round(Math.max(...finiteValues(waking.map((h) => h.tempC))))] : [],
+    rushHours: waking.filter((h) => h.rush != null && h.rush > 0.45).map((h) => fmtHour(h.hour)),
     analysis: reply.text,
     options: (reply.cards ?? []).map((c) => `${c.title}: score ${c.score} (${c.sub})`),
   };

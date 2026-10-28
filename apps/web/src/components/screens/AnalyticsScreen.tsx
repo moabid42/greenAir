@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber } from "@/lib/format";
+
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { getDay } from "@/lib/api/client";
 import type { DayForecast, HourConditions } from "@/lib/api/types";
@@ -12,7 +14,7 @@ import { shiftDate, useApp } from "@/state/app";
 type Range = "today" | "7" | "30";
 const card = "rounded-[20px] bg-white p-4 shadow-sm";
 const secondary = "inline-flex min-h-11 items-center justify-center rounded-xl bg-wash px-3.5 text-[13px] font-bold";
-const SOURCE = { measured: "measured", forecast: "forecast", mock: "simulated" } as const;
+const SOURCE = { measured: "measured", forecast: "modelled", mock: "simulated", mixed: "mixed sources", unavailable: "unavailable" } as const;
 
 const berlin = (t: string, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Berlin", ...o }).format(new Date(t));
 const clock = (t: string) => berlin(t, { hour: "2-digit", minute: "2-digit" });
@@ -65,7 +67,7 @@ export default function AnalyticsScreen() {
       setWeek(
         days
           .filter((d): d is DayForecast => d != null)
-          .map((d) => ({ date: d.date, score: bestWindows(d.hours.map((h) => hourScore(h, activity, tune)))[0]?.score ?? 0 })),
+          .map((d) => ({ date: d.date, score: bestWindows(d.hours.map((h) => hourScore(h, activity, tune)))[0]?.score ?? Number.NaN })),
       );
     });
     return () => {
@@ -100,12 +102,12 @@ export default function AnalyticsScreen() {
           {range === "today" && day ? (
             <>
               <p className="mt-1 text-[13px]">
-                Selected {fmtHour(hour)} · score <b>{focusScores[hour]}/100</b>
-                {conditions && <span className="text-mute"> · {Math.round(conditions.tempC)} °C · PM2.5 {Math.round(conditions.pm25 * 10) / 10} µg/m³ · wind {Math.round(conditions.windKmh)} km/h</span>}
+                Selected {fmtHour(hour)} · score <b>{displayNumber(focusScores[hour])}/100</b>
+                {conditions && <span className="text-mute"> · {displayNumber(conditions.tempC)} °C · PM2.5 {displayNumber(conditions.pm25, 1)} µg/m³ · wind {displayNumber(conditions.windKmh)} km/h</span>}
               </p>
               <div className="mt-3 flex h-20 items-end gap-[3px]" role="img" aria-label="Score for each hour of today">
                 {focusScores.map((s, h) => (
-                  <span key={h} title={`${fmtHour(h)}: ${s}`} className={cn("min-w-[2px] flex-1 rounded-t-[3px]", h === hour && "outline outline-2 outline-ink")} style={{ height: `${Math.max(3, s)}%`, backgroundColor: scoreColor(s) }} />
+                  <span key={h} title={`${fmtHour(h)}: ${displayNumber(s)}`} className={cn("min-w-[2px] flex-1 rounded-t-[3px]", h === hour && "outline outline-2 outline-ink")} style={{ height: `${Number.isFinite(s) ? Math.max(3, s) : 3}%`, backgroundColor: scoreColor(s) }} />
                 ))}
               </div>
               <div className="mt-1 flex justify-between text-[10px] font-semibold text-mute">
@@ -119,8 +121,8 @@ export default function AnalyticsScreen() {
                 <div className="mt-3 flex h-24 items-end gap-2">
                   {week.map((d) => (
                     <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
-                      <span className="text-[10px] font-extrabold">{d.score}</span>
-                      <span className="w-full rounded-t-md" style={{ height: `${Math.max(4, d.score)}%`, backgroundColor: scoreColor(d.score) }} />
+                      <span className="text-[10px] font-extrabold">{displayNumber(d.score)}</span>
+                      <span className="w-full rounded-t-md" style={{ height: `${Number.isFinite(d.score) ? Math.max(4, d.score) : 4}%`, backgroundColor: scoreColor(d.score) }} />
                       <span className="text-[10px] font-semibold text-mute">{berlin(`${d.date}T12:00:00Z`, { weekday: "short" })}</span>
                     </div>
                   ))}
@@ -180,7 +182,7 @@ export default function AnalyticsScreen() {
                 return (
                   <p key={s.timestamp} className="text-[13px] leading-snug">
                     <b>{clock(s.timestamp)}</b> · {s.heartRateBpm} bpm ·{" "}
-                    {h ? <span>{Math.round(h.tempC)} °C · PM2.5 {Math.round(h.pm25 * 10) / 10} µg/m³ <span className="text-mute">({SOURCE[sessionDays[berlinDate(s.timestamp)].source]})</span></span> : <span className="text-mute">environment loading or unavailable</span>}
+                    {h ? <span>{displayNumber(h.tempC)} °C · PM2.5 {displayNumber(h.pm25, 1)} µg/m³ <span className="text-mute">({SOURCE[sessionDays[berlinDate(s.timestamp)].source]})</span></span> : <span className="text-mute">environment loading or unavailable</span>}
                   </p>
                 );
               })}

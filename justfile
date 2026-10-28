@@ -80,6 +80,7 @@ dev-admin:
 # Lint, type-check, and build the mobile frontend.
 check-web:
     npm run lint --prefix apps/web
+    npm test --prefix apps/web
     npm run build --prefix apps/web
 
 # Lint, test, type-check, and build the admin frontend.

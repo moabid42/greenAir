@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber } from "@/lib/format";
+
 import { useState, type ReactNode } from "react";
 import { BellRing, Check } from "lucide-react";
 import DayDial from "@/components/ui/DayDial";
@@ -39,7 +41,7 @@ export default function WatchAlerts() {
   const [buzzing, setBuzzing] = useState(false);
   const best = windows[0];
   const h = nowHour ?? hour;
-  const score = focusScores[h] ?? 0;
+  const score = focusScores[h] ?? Number.NaN;
   const place = bestSpot?.place ?? "Heilbronn";
 
   const buzz = async () => {
@@ -69,7 +71,7 @@ export default function WatchAlerts() {
         <Watch caption="Glance" sub="your day, live">
           {day ? (
             <DayDial scores={focusScores} size={78} hour={h} window={best} label="Watch face preview">
-              <span className="font-display text-[19px] font-extrabold leading-none">{score}</span>
+              <span className="font-display text-[19px] font-extrabold leading-none">{displayNumber(score)}</span>
               <span className="text-[7px] font-extrabold tracking-wider text-brand">{SHORT_VERDICT[verdict(score)]}</span>
             </DayDial>
           ) : (

@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber } from "@/lib/format";
+
 import { useMemo } from "react";
 import { ArrowRight, Bookmark, ChevronLeft, Watch } from "lucide-react";
 import DayDial from "@/components/ui/DayDial";
@@ -36,11 +38,11 @@ export default function PlaceScreen() {
   const saved = prefs.saved.some((s) => s.id === p.id);
 
   const rows: { f: Factor | "green"; raw: string; v: number | null }[] = [
-    { f: "heat", raw: `${Math.round(city.tempC)} °C`, v: factors.heat },
-    { f: "air", raw: `PM2.5 ${Math.round(city.pm25)} · NO₂ ${Math.round(city.no2)}`, v: factors.air },
-    { f: "wind", raw: `${Math.round(city.windKmh)} km/h`, v: factors.wind },
-    { f: "traffic", raw: city.rush > 0.45 ? "Rush hour" : "Quiet", v: factors.traffic },
-    activity === "ride" ? { f: "safety", raw: "measured", v: factors.safety } : { f: "light", raw: city.daylight > 0.9 ? "Daylight" : city.daylight > 0.1 ? "Twilight" : "Dark", v: factors.light },
+    { f: "heat", raw: `${displayNumber(city.tempC)} °C`, v: factors.heat },
+    { f: "air", raw: `PM2.5 ${displayNumber(city.pm25)} · NO₂ ${displayNumber(city.no2)}`, v: factors.air },
+    { f: "wind", raw: `${displayNumber(city.windKmh)} km/h`, v: factors.wind },
+    { f: "traffic", raw: city.rush == null ? "No traffic data" : city.rush > 0.45 ? "Rush hour" : "Quiet", v: factors.traffic },
+    activity === "ride" ? { f: "safety", raw: "measured", v: factors.safety } : { f: "light", raw: city.daylight == null ? "No light data" : city.daylight > 0.9 ? "Daylight" : city.daylight > 0.1 ? "Twilight" : "Dark", v: factors.light },
     { f: "green", raw: `${Math.round(p.green * 100)}%`, v: Math.round(p.green * 100) },
   ];
 
@@ -88,7 +90,7 @@ export default function PlaceScreen() {
 
         <div className="flex items-center gap-3.5">
           <DayDial scores={scores} size={92} hour={hour} nowHour={nowHour} window={best} onPick={setHour} label={`${p.place}, your day. Drag around the ring to choose the hour.`}>
-            <span className="font-display text-xl font-extrabold leading-none">{scores[hour]}</span>
+            <span className="font-display text-xl font-extrabold leading-none">{displayNumber(scores[hour])}</span>
             <span className="mt-0.5 text-[8px] font-extrabold tracking-wider text-mute">{hour === nowHour ? "NOW" : fmtHour(hour)}</span>
           </DayDial>
           <div className="flex flex-col gap-0.5">

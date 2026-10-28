@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber } from "@/lib/format";
+
 import type { KeyboardEvent, PointerEvent, ReactNode } from "react";
 import type { TimeWindow } from "@/lib/api/types";
 import { hourFromPointer, ringGradient, windowGradient } from "@/lib/dial";
@@ -43,7 +45,7 @@ export default function DayDial({ scores, size, hour, nowHour, window: best, onP
       aria-valuemin={interactive ? 0 : undefined}
       aria-valuemax={interactive ? 23 : undefined}
       aria-valuenow={interactive ? hour : undefined}
-      aria-valuetext={interactive ? `${fmtHour(hour)}, score ${scores[hour]}` : undefined}
+      aria-valuetext={interactive ? `${fmtHour(hour)}, score ${displayNumber(scores[hour])}` : undefined}
       tabIndex={interactive ? 0 : undefined}
       onKeyDown={onKey}
       onPointerDown={(e) => {

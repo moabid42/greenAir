@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber, finiteValues } from "@/lib/format";
+
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Pause, Play, TriangleAlert } from "lucide-react";
 import HourBars from "@/components/ui/HourBars";
@@ -24,17 +26,17 @@ export default function ExploreScreen() {
 
   // The city-wide value of the active layer for every hour.
   const series = useMemo(() => {
-    if (!day) return Array<number>(24).fill(0);
+    if (!day) return Array<number>(24).fill(Number.NaN);
     return day.hours.map((h) => {
       if (lens === "index") return hourScore(h, activity, tune);
-      if (lens === "safety") return h.factors.safety;
-      return h.factors[lens];
+      if (lens === "safety") return h.factors.safety ?? Number.NaN;
+      return h.factors[lens] ?? Number.NaN;
     });
   }, [day, lens, activity, tune]);
 
   const hot = useMemo(() => {
     if (!day) return null;
-    const max = Math.max(...day.hours.map((h) => h.tempC));
+    const max = Math.max(...finiteValues(day.hours.map((h) => h.tempC)));
     return max >= 28 ? { max: Math.round(max), at: day.hours.findIndex((h) => h.tempC === max) } : null;
   }, [day]);
 
@@ -42,15 +44,15 @@ export default function ExploreScreen() {
   const subtitle = !cond
     ? ""
     : lens === "heat"
-      ? `${Math.round(cond.tempC)} °C · ${tempWord(cond.tempC)}`
+      ? `${displayNumber(cond.tempC)} °C · ${tempWord(cond.tempC)}`
       : lens === "air"
-        ? `PM2.5 ${Math.round(cond.pm25)} · NO₂ ${Math.round(cond.no2)} µg/m³`
+        ? `PM2.5 ${displayNumber(cond.pm25)} · NO₂ ${displayNumber(cond.no2)} µg/m³`
         : lens === "traffic"
-          ? cond.rush > 0.45
+          ? cond.rush == null ? "No traffic data" : cond.rush > 0.45
             ? "Commuter peak"
             : "Quiet roads"
           : lens === "wind"
-            ? `${Math.round(cond.windKmh)} km/h wind`
+            ? `${displayNumber(cond.windKmh)} km/h wind`
             : lens === "safety"
               ? "Surface & overtaking safety"
               : VERDICT_TEXT[verdict(series[hour])];
@@ -91,7 +93,7 @@ export default function ExploreScreen() {
             <span className="truncate text-xs font-bold text-mute">{subtitle}</span>
           </span>
           <span className="rounded-xl px-2.5 py-1.5 font-display text-sm font-extrabold" style={{ backgroundColor: scoreColor(series[hour]), color: series[hour] >= 60 ? "#162c29" : "#fff" }}>
-            {series[hour]}
+            {displayNumber(series[hour])}
           </span>
         </div>
 

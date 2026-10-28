@@ -53,12 +53,12 @@ export function combine(factors: Partial<Record<Factor, number | null>>, activit
   let worst = 100;
   (Object.keys(w) as Factor[]).forEach((f) => {
     const v = factors[f];
-    if (w[f] === 0 || v == null) return;
+    if (w[f] === 0 || v == null || !Number.isFinite(v)) return;
     sum += v * w[f];
     wsum += w[f];
     worst = Math.min(worst, v);
   });
-  if (wsum === 0) return 0;
+  if (wsum === 0) return Number.NaN;
   const mean = sum / wsum;
   const penalty = Math.max(0, 45 - worst) * 0.9;
   let score = Math.max(0, Math.min(100, mean - penalty));
@@ -83,6 +83,8 @@ export function cellScore(c: CellProperties, hour: Hour, activity: Activity, tun
 }
 
 export function hourScore(h: HourConditions, activity: Activity, tune?: Tune): number {
+  // No index/recommendation without the core weather and air channels.
+  if ([h.factors.heat, h.factors.air, h.factors.wind].some((v) => v == null)) return Number.NaN;
   return combine(h.factors, activity, tune);
 }
 
@@ -109,7 +111,7 @@ export function bestWindows(scores: number[], threshold = 70, max = 3): TimeWind
   }
   if (out.length === 0) {
     // Nothing clears the bar: suggest the single best hour instead.
-    const waking = scores.slice(WAKING.from, WAKING.to);
+    const waking = scores.slice(WAKING.from, WAKING.to).map((v) => Number.isFinite(v) ? v : -Infinity);
     if (waking.length === 0 || Math.max(...waking) <= 0) return [];
     const best = WAKING.from + waking.indexOf(Math.max(...waking));
     return [{ start: best, end: best + 1, score: scores[best] }];
@@ -117,9 +119,10 @@ export function bestWindows(scores: number[], threshold = 70, max = 3): TimeWind
   return out.sort((a, b) => b.score - a.score).slice(0, max);
 }
 
-export type Verdict = "great" | "good" | "meh" | "poor";
+export type Verdict = "great" | "good" | "meh" | "poor" | "unknown";
 
 export function verdict(score: number): Verdict {
+  if (!Number.isFinite(score)) return "unknown";
   if (score >= 75) return "great";
   if (score >= 60) return "good";
   if (score >= 40) return "meh";
@@ -127,6 +130,7 @@ export function verdict(score: number): Verdict {
 }
 
 export const VERDICT_TEXT: Record<Verdict, string> = {
+  unknown: "Data unavailable",
   great: "Go now",
   good: "Good to go",
   meh: "Could be better",
@@ -135,6 +139,7 @@ export const VERDICT_TEXT: Record<Verdict, string> = {
 
 /** One-word versions for tight spaces (watch faces, badges). */
 export const SHORT_VERDICT: Record<Verdict, string> = {
+  unknown: "NO DATA",
   great: "GO NOW",
   good: "GOOD",
   meh: "OK",
@@ -151,6 +156,7 @@ export const SCORE_STOPS: [number, string][] = [
 ];
 
 export function scoreColor(score: number): string {
+  if (!Number.isFinite(score)) return "#a8b4b0";
   for (let i = 1; i < SCORE_STOPS.length; i++) {
     const [s1, c1] = SCORE_STOPS[i - 1];
     const [s2, c2] = SCORE_STOPS[i];

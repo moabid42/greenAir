@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber } from "@/lib/format";
+
 import { useMemo } from "react";
 import { ArrowRight, ChevronRight, Leaf, Sparkles, Thermometer, Car, Watch } from "lucide-react";
 import { ActivityPill } from "@/components/ui/ActivityPicker";
@@ -76,8 +78,8 @@ export default function TodayScreen() {
             {day && !best ? (
               <div className="flex flex-col gap-3 py-1">
                 <div>
-                  <p className="font-display text-lg font-extrabold">Nothing good left today</p>
-                  <p className="text-sm text-mute">The best hours have passed. Tomorrow is a fresh start.</p>
+                  <p className="font-display text-lg font-extrabold">No recommendation available</p>
+                  <p className="text-sm text-mute">Hours may have passed or required weather and air inputs may be missing.</p>
                 </div>
                 <button type="button" onClick={() => setDate(shiftDate(today, 1))} className="flex h-[50px] items-center justify-center gap-2 rounded-2xl bg-ink text-[15px] font-extrabold text-lime">
                   See tomorrow
@@ -97,7 +99,7 @@ export default function TodayScreen() {
               <>
                 <div className="flex items-center gap-3.5">
                   <DayDial scores={focusScores} size={88} hour={hour} nowHour={nowHour} window={best} onPick={setHour} label="Your day. Drag around the ring to choose the hour.">
-                    <span className="font-display text-base font-extrabold leading-none">{focusScores[hour]}</span>
+                    <span className="font-display text-base font-extrabold leading-none">{displayNumber(focusScores[hour])}</span>
                     <span className="mt-0.5 text-[8px] font-extrabold tracking-wider text-mute">{hour === nowHour ? "NOW" : fmtHour(hour)}</span>
                   </DayDial>
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -119,8 +121,8 @@ export default function TodayScreen() {
 
                 {factors && traffic && (
                   <div className="grid grid-cols-3 gap-1.5">
-                    <Stat icon={<Thermometer className="size-4" aria-hidden />} value={`${Math.round(day.hours[hour].tempC)}°`} label={tempWord(day.hours[hour].tempC)} className={TONE_CLASS[toneOf(factors.heat ?? 0)]} />
-                    <Stat icon={<Leaf className="size-4" aria-hidden />} value={airWord(factors.air ?? 0)} label="Air" className={TONE_CLASS[toneOf(factors.air ?? 0)]} />
+                    <Stat icon={<Thermometer className="size-4" aria-hidden />} value={`${displayNumber(day.hours[hour].tempC)}°`} label={tempWord(day.hours[hour].tempC)} className={TONE_CLASS[toneOf(factors.heat)]} />
+                    <Stat icon={<Leaf className="size-4" aria-hidden />} value={airWord(factors.air)} label="Air" className={TONE_CLASS[toneOf(factors.air)]} />
                     <Stat icon={<Car className="size-4" aria-hidden />} value={traffic.title} label={traffic.sub} className={TONE_CLASS[traffic.tone]} />
                   </div>
                 )}

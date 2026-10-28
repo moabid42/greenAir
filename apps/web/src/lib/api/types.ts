@@ -14,6 +14,18 @@ export type Factor = "heat" | "air" | "wind" | "traffic" | "light" | "safety";
 
 /** Hour of day in Europe/Berlin local time, 0–23. */
 export type Hour = number;
+export type DataSource = "mock" | "forecast" | "measured" | "mixed" | "unavailable";
+export interface ChannelProvenance {
+  sourceId: string;
+  kind: "model" | "observation" | "derived" | "mock";
+  observedAt: string[];
+  retrievedAt: string | null;
+  issuedAt: string | null;
+  rawRefs: number[];
+  unit: string;
+  method?: string | null;
+  qcFlags?: string[];
+}
 
 /** 24 values, index = local hour. */
 export type Hourly<T = number> = T[];
@@ -21,17 +33,20 @@ export type Hourly<T = number> = T[];
 /** Raw measurements / model outputs for one hour, city-wide. */
 export interface HourConditions {
   hour: Hour;
-  tempC: number;
-  humidity: number; // %
-  pm25: number; // µg/m³ (senseBox:home)
-  no2: number; // µg/m³ (LUBW Weinsberger Straße)
-  windKmh: number;
+  tempC: number | null;
+  humidity: number | null; // %
+  pm25: number | null; // µg/m³ (senseBox:home)
+  no2: number | null; // µg/m³ (LUBW Weinsberger Straße)
+  windKmh: number | null;
   /** 0–1, how strongly this hour is a commuter peak (bike counts + NO2 fingerprint). */
-  rush: number;
+  rush: number | null;
   /** 0–1, 0 = dark, 1 = full daylight. */
-  daylight: number;
+  daylight: number | null;
   /** Factor scores 0–100 (100 = best). `safety` only meaningful for ride. */
-  factors: Record<Factor, number>;
+  factors: Record<Factor, number | null>;
+  instants?: string[];
+  provenance?: Record<string, ChannelProvenance>;
+  missing?: string[];
 }
 
 export interface TimeWindow {
@@ -46,7 +61,11 @@ export interface DayForecast {
   timezone: "Europe/Berlin";
   generatedAt: string; // ISO
   /** "measured" | "forecast" | "mock" — shown as a badge so users know what they see. */
-  source: "measured" | "forecast" | "mock";
+  source: DataSource;
+  status?: "available" | "partial" | "stale";
+  retrievedAt?: string | null;
+  buildId?: string | null;
+  attribution?: string[];
   hours: HourConditions[]; // length 24
 }
 
@@ -76,6 +95,9 @@ export interface GridFeature {
 
 /** GET /api/v1/grid?date=YYYY-MM-DD */
 export interface GridResponse {
+  source?: DataSource;
+  status?: "available" | "partial" | "unavailable";
+  message?: string | null;
   date: string;
   cellSizeM: number;
   cells: { type: "FeatureCollection"; features: GridFeature[] };
@@ -86,7 +108,10 @@ export type SensorKind = "sensebox_home" | "lubw" | "bike_counter";
 /** GET /api/v1/sensors */
 export interface Sensor {
   /** Provenance supplied by the backend; optional for older API responses. */
-  source?: "mock" | "measured" | "forecast";
+  source?: DataSource;
+  exposure?: "indoor" | "outdoor" | null;
+  stale?: boolean;
+  channelProvenance?: Record<string, ChannelProvenance>;
   id: string;
   name: string;
   kind: SensorKind;

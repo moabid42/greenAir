@@ -181,6 +181,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     setDay(null);
+    setGrid(null);
+    setSensors([]);
     setError(null);
     (async () => {
       try {
@@ -200,7 +202,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!day) return;
-    getSensors(day, hour).then(setSensors).catch(() => setSensors([]));
+    let cancelled = false;
+    getSensors(day, hour).then((rows) => !cancelled && setSensors(rows)).catch(() => !cancelled && setSensors([]));
+    return () => { cancelled = true; };
   }, [day, hour]);
 
   const retry = useCallback(() => setAttempt((a) => a + 1), []);
@@ -249,7 +253,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [grid, hour, effectiveLens, activity, tune]);
 
   const focusScores = useMemo(() => {
-    if (!day) return Array<number>(24).fill(0);
+    if (!day) return Array<number>(24).fill(Number.NaN);
     if (homeCell) return Array.from({ length: 24 }, (_, h) => cellScore(homeCell.properties, h, activity, tune));
     return day.hours.map((h) => hourScore(h, activity, tune));
   }, [day, homeCell, activity, tune]);
