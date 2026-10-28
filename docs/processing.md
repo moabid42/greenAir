@@ -87,3 +87,34 @@ do not.
 No reference station (UBA/LUBW) is connected yet, so calibrations default to the
 identity. The e2e test uses synthetic data with a known pattern and checks that
 the climatology recovers it across the 2026-10-25 DST change.
+
+## Forecaster
+
+`app/processing/forecaster.py` (scoring draft §4.3). Results are labelled
+forecasts (`Forecast.method`), never observations.
+
+- `model_series(observations, phenomenon)`: hourly mean of usable `kind == "model"`
+  values (Open-Meteo air quality, Bright Sky or Open-Meteo weather).
+- `forecast(...)` chooses, in order:
+  1. `model_bias_corrected`: `M(t) · b(t0)`, with `b` = mean level / mean model over
+     the hours of the last 24 h present in both;
+  2. `model_uncorrected`: the model when no overlap exists;
+  3. `climatology_decay`: climatology times today's anomaly ratio, decaying with
+     `exp(-τ/6 h)`.
+- Temperature uses the additive form (difference instead of ratio), because a
+  ratio of °C values is undefined around 0 °C. This is an extension of the draft.
+
+Sensor checks (`stuck`, `humid_pm`) apply only to measurements; smooth model
+output is not a stuck sensor. The e2e test found this case.
+
+### Weather and air-quality keys (probe 2026-10-28T18:38:58Z)
+
+| Request | Result |
+|---|---|
+| `GET https://air-quality-api.open-meteo.com/v1/air-quality?latitude=49.1427&longitude=9.2109&hourly=pm2_5,pm10,nitrogen_dioxide,ozone,uv_index&forecast_days=1&timezone=UTC` | HTTP 200 JSON; `hourly_units`: `μg/m³` (U+03BC) for PM and gases, `""` for `uv_index`; grid point 49.1, 9.2 |
+| `GET https://api.open-meteo.com/v1/forecast?...&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation` | HTTP 200 JSON; `°C`, `%`, `km/h`, `mm` |
+| `GET https://api.brightsky.dev/weather?lat=49.1427&lon=9.2109&date=2026-10-28&last_date=2026-10-28T02:00` | HTTP 200 JSON; fields `temperature`, `relative_humidity`, `wind_speed`, `precipitation`; no units in the payload |
+
+The normalizer maps these keys. Bright Sky adapters must set `raw_unit`
+(`°C`, `%`, `km/h`, `mm`) because the payload has none. `mm` is accepted for
+precipitation only because both providers report hourly steps.
