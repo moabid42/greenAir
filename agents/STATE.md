@@ -87,6 +87,18 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
   [development guidance](../docs/development.md). CI reads the Node.js pin.
 - User review preference: no CODEOWNERS file; request reviews from `moabid42`.
 
+### Sport scoring formulas — 2026-10-28
+
+Decision and reason: implement the team scoring draft v0.1 as pure functions
+first, so that data adapters can plug in later without changing the formulas.
+Contract / implementation: [scoring draft](../docs/scoring.md),
+`services/backend/app/scoring/`.
+Evidence: offline only; 29 scoring tests, including the §8 worked example
+(score 64, confidence 0.67). No data source involved.
+Still uncertain: all constants are untuned defaults. Open points (wrong §3.1
+example value, PM10 without weight) are listed at the end of the draft.
+Next action: build the city level `L(t)` from live station data (§4.1).
+
 Use this format for additional short entries:
 
 ```text

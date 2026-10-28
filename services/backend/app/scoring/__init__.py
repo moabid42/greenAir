@@ -1,1 +1,1 @@
-"""Reserved: versioned sport-profile scoring by street segment and hour."""
+"""Sport-profile scoring formulas (docs/scoring.md); pure functions without data access."""
