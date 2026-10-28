@@ -121,6 +121,19 @@ a reference station for calibration (UBA/LUBW), and tuned constants.
 Next action: agree the contract with ingestion, then run the pipeline on real
 adapter output.
 
+### Green City station status (openSenseMap) — 2026-10-28
+
+Decision and reason: live box status comes from openSenseMap
+`/boxes?grouptag=GreenCityHN&full=true` (14 stationary boxes). The catalog tag
+`heilbronn` returns mobile bike boxes. The ATRAI home mirror is a 2026-09-30
+sync with unstable offset order; use it for history only.
+Contract / implementation: [integration note](../docs/integrations/opensensemap-stations.md),
+`GET /stations/status`.
+Evidence: 2026-10-28T17:08:18Z HTTP 200 JSON, 14 boxes; 17:10:09Z via the route:
+6 online, 7 stale (30 min), 1 no data. 10 offline tests pass.
+Still uncertain: license, stuck sensors, sun exposure of outdoor boxes.
+Next action: scoring functions from the team scoring draft (separate branch).
+
 Use this format for additional short entries:
 
 ```text
