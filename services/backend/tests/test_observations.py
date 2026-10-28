@@ -84,3 +84,11 @@ def test_raw_observation_keeps_provider_values_and_allows_naive_time():
     assert raw.observed_at.tzinfo is None
     with pytest.raises(ValidationError):
         RawObservation(**(raw.model_dump() | {"retrieved_at": datetime(2026, 10, 28)}))
+
+
+def test_published_json_schemas_match_the_models():
+    from app.schemas.export_contracts import CONTRACTS, CONTRACTS_DIR, render
+
+    for name, model in CONTRACTS.items():
+        published = (CONTRACTS_DIR / name).read_text(encoding="utf-8")
+        assert published == render(model), f"regenerate {name} with app.schemas.export_contracts"

@@ -1,0 +1,121 @@
+{
+  "description": "One provider value as received. `observed_at` may be naive when the provider\nomits a time zone; the normalizer then assumes UTC and flags it.",
+  "properties": {
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "station_id": {
+      "minLength": 1,
+      "title": "Station Id",
+      "type": "string"
+    },
+    "platform": {
+      "enum": [
+        "stationary",
+        "mobile"
+      ],
+      "title": "Platform",
+      "type": "string"
+    },
+    "kind": {
+      "default": "observation",
+      "enum": [
+        "observation",
+        "model",
+        "derived"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "raw_key": {
+      "minLength": 1,
+      "title": "Raw Key",
+      "type": "string"
+    },
+    "raw_value": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Raw Value"
+    },
+    "raw_unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Unit"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "longitude": {
+      "maximum": 180,
+      "minimum": -180,
+      "title": "Longitude",
+      "type": "number"
+    },
+    "latitude": {
+      "maximum": 90,
+      "minimum": -90,
+      "title": "Latitude",
+      "type": "number"
+    },
+    "retrieved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retrieved At"
+    },
+    "sample_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sample Id"
+    }
+  },
+  "required": [
+    "source",
+    "station_id",
+    "platform",
+    "raw_key",
+    "raw_value",
+    "observed_at",
+    "longitude",
+    "latitude"
+  ],
+  "title": "RawObservation",
+  "type": "object"
+}
