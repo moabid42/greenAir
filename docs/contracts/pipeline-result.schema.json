@@ -1,0 +1,347 @@
+{
+  "$defs": {
+    "BestTime": {
+      "properties": {
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "windows": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Windows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "profile",
+        "windows"
+      ],
+      "title": "BestTime",
+      "type": "object"
+    },
+    "ForecastSummary": {
+      "properties": {
+        "kind": {
+          "const": "forecast",
+          "default": "forecast",
+          "title": "Kind",
+          "type": "string"
+        },
+        "phenomenon": {
+          "title": "Phenomenon",
+          "type": "string"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "correction": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correction"
+        },
+        "points": {
+          "title": "Points",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "phenomenon",
+        "method",
+        "correction",
+        "points"
+      ],
+      "title": "ForecastSummary",
+      "type": "object"
+    },
+    "LayerRecord": {
+      "properties": {
+        "kind": {
+          "const": "derived",
+          "default": "derived",
+          "title": "Kind",
+          "type": "string"
+        },
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "pm_ratio": {
+          "title": "Pm Ratio",
+          "type": "number"
+        },
+        "pm_samples": {
+          "title": "Pm Samples",
+          "type": "integer"
+        },
+        "pm_source": {
+          "enum": [
+            "samples",
+            "idw",
+            "none"
+          ],
+          "title": "Pm Source",
+          "type": "string"
+        },
+        "heat_anomaly": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heat Anomaly"
+        },
+        "heat_samples": {
+          "title": "Heat Samples",
+          "type": "integer"
+        },
+        "roughness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Roughness"
+        },
+        "overtaking_share": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Overtaking Share"
+        },
+        "flow": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Flow"
+        }
+      },
+      "required": [
+        "segment_id",
+        "pm_ratio",
+        "pm_samples",
+        "pm_source",
+        "heat_anomaly",
+        "heat_samples",
+        "roughness",
+        "overtaking_share",
+        "flow"
+      ],
+      "title": "LayerRecord",
+      "type": "object"
+    },
+    "NormalizationSummary": {
+      "properties": {
+        "observations": {
+          "title": "Observations",
+          "type": "integer"
+        },
+        "duplicates": {
+          "title": "Duplicates",
+          "type": "integer"
+        },
+        "unmapped_keys": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Unmapped Keys",
+          "type": "object"
+        },
+        "qc_flags": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Qc Flags",
+          "type": "object"
+        }
+      },
+      "required": [
+        "observations",
+        "duplicates",
+        "unmapped_keys",
+        "qc_flags"
+      ],
+      "title": "NormalizationSummary",
+      "type": "object"
+    },
+    "Profile": {
+      "enum": [
+        "running",
+        "road_cycling",
+        "walking"
+      ],
+      "title": "Profile",
+      "type": "string"
+    },
+    "ScoreRecord": {
+      "properties": {
+        "kind": {
+          "const": "derived",
+          "default": "derived",
+          "title": "Kind",
+          "type": "string"
+        },
+        "scoring_version": {
+          "default": "docs/scoring.md v0.1",
+          "title": "Scoring Version",
+          "type": "string"
+        },
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "hours_ahead": {
+          "minimum": 1,
+          "title": "Hours Ahead",
+          "type": "integer"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "components": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Components",
+          "type": "object"
+        },
+        "gates": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Gates",
+          "type": "object"
+        }
+      },
+      "required": [
+        "segment_id",
+        "profile",
+        "at",
+        "hours_ahead",
+        "score",
+        "confidence",
+        "components",
+        "gates"
+      ],
+      "title": "ScoreRecord",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "issued_at": {
+      "format": "date-time",
+      "title": "Issued At",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "normalization": {
+      "$ref": "#/$defs/NormalizationSummary"
+    },
+    "forecasts": {
+      "items": {
+        "$ref": "#/$defs/ForecastSummary"
+      },
+      "title": "Forecasts",
+      "type": "array"
+    },
+    "layers": {
+      "items": {
+        "$ref": "#/$defs/LayerRecord"
+      },
+      "title": "Layers",
+      "type": "array"
+    },
+    "scores": {
+      "items": {
+        "$ref": "#/$defs/ScoreRecord"
+      },
+      "title": "Scores",
+      "type": "array"
+    },
+    "best_times": {
+      "items": {
+        "$ref": "#/$defs/BestTime"
+      },
+      "title": "Best Times",
+      "type": "array"
+    }
+  },
+  "required": [
+    "issued_at",
+    "generated_at",
+    "normalization",
+    "forecasts",
+    "layers",
+    "scores",
+    "best_times"
+  ],
+  "title": "PipelineResult",
+  "type": "object"
+}

@@ -87,6 +87,40 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
   [development guidance](../docs/development.md). CI reads the Node.js pin.
 - User review preference: no CODEOWNERS file; request reviews from `moabid42`.
 
+### Sport scoring formulas — 2026-10-28
+
+Decision and reason: implement the team scoring draft v0.1 as pure functions
+first, so that data adapters can plug in later without changing the formulas.
+Contract / implementation: [scoring draft](../docs/scoring.md),
+`services/backend/app/scoring/`.
+Evidence: offline only; 29 scoring tests, including the §8 worked example
+(score 64, confidence 0.67). No data source involved.
+Still uncertain: all constants are untuned defaults. Open points (wrong §3.1
+example value, PM10 without weight) are listed at the end of the draft.
+Next action: build the city level `L(t)` from live station data (§4.1).
+
+### Processing box — 2026-10-28
+
+Decision and reason: the team splits the architecture; Mouad owns ingestion,
+this work owns processing (normalizer/QC, temporal and spatial builders,
+forecaster, scoring engine). Processing is pure Python without database or
+broker, so each stage has an in-process e2e test from fixture files.
+Contract / implementation: [processing](../docs/processing.md),
+`RawObservation` -> `Observation` in `services/backend/app/schemas/observations.py`,
+JSON Schema in `docs/contracts/`.
+Pipeline: `python -m app.processing.pipeline INPUT.json` (in `services/backend`)
+runs normalizer -> temporal -> forecaster -> spatial -> scoring engine and writes
+`PipelineResult` (`docs/contracts/pipeline-result.schema.json`).
+Evidence: offline e2e tests per stage; the full run goes through the CLI as a
+subprocess. Captured ATRAI fixture is historical (2026-07-08); other e2e data is
+labelled synthetic. Open-Meteo and Bright Sky keys/units probed
+2026-10-28T18:38:58Z (see processing doc). Stuck/humid checks apply only to
+measurements, not model output (found by the forecaster e2e test).
+Still uncertain: contract agreement with ingestion; real segment layers (ATRAI),
+a reference station for calibration (UBA/LUBW), and tuned constants.
+Next action: agree the contract with ingestion, then run the pipeline on real
+adapter output.
+
 Use this format for additional short entries:
 
 ```text
