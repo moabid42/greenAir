@@ -1,8 +1,8 @@
 # Green City Heilbronn Hackathon — Comprehensive Data & API Reference
 
-**Version:** 1.0 · **Reviewed:** 2026-10-28 · **Audience:** first-time participants, data scientists, map developers, backend engineers  
-**Primary source:** <https://hackathon.greencity.hn/resources> and <https://hackathon.greencity.hn/resources/bike-data>  
-**Coverage:** the six Materials data cards, all 13 user-supplied card links, the additional bike-data guide, and supporting openSenseMap/Birdiary services.  
+**Version:** 1.0 · **Reviewed:** 2026-10-28 · **Audience:** first-time participants, data scientists, map developers, backend engineers\
+**Primary source:** <https://hackathon.greencity.hn/resources> and <https://hackathon.greencity.hn/resources/bike-data>\
+**Coverage:** the six Materials data cards, all 13 user-supplied card links, the additional bike-data guide, and supporting openSenseMap/Birdiary services.\
 **Nature of this file:** documentation and source reconciliation, **not** a downloaded data archive or a guarantee of ongoing service availability.
 
 > **Read this first.** This guide separates (a) endpoints explicitly documented by their owners, (b) endpoints reported to work by another agent on 2026-10-28, (c) unverified proposed routes, and (d) inaccessible/registration-only data. It does **not** treat a dashboard's refresh setting as a sensor sampling interval, a catalog as one dataset, or a bulk-download URL as an API. API responses can change between requests.
@@ -214,8 +214,8 @@ A **directly accessible** `/campaigns/heilbronn` response during this review rep
 
 ## 4. Mobile Datalogger / Heat-Island Summer School: re:edu files
 
-**Card:** Mobile Datalogger / *Heat-Island-Summerschool 2026*. Logged walks with handheld/mobile sensors, useful for urban heat-island comparison.  
-**Public share:** <https://cloud.reedu.de/s/X9x2XE9a9xCxLm8>  
+**Card:** Mobile Datalogger / *Heat-Island-Summerschool 2026*. Logged walks with handheld/mobile sensors, useful for urban heat-island comparison.\
+**Public share:** <https://cloud.reedu.de/s/X9x2XE9a9xCxLm8>\
 **Likely whole-share ZIP action (standard Nextcloud):** <https://cloud.reedu.de/s/X9x2XE9a9xCxLm8/download>
 
 | Attribute | Description / limitations |
@@ -362,7 +362,7 @@ Three monitored hives at/around OpenSpace: internal/brood and outdoor probes, te
 
 ### 7.2 Labelled hive entrance videos
 
-**Public Nextcloud share:** <https://cloud.reedu.de/s/YkHckREGAM89z9m>  
+**Public Nextcloud share:** <https://cloud.reedu.de/s/YkHckREGAM89z9m>\
 **Candidate share ZIP:** <https://cloud.reedu.de/s/YkHckREGAM89z9m/download>
 
 Per the data card this has labelled entrance videos useful for machine learning (senseBox MCU Eye). Genspark reports `senseBox_hive/data/recordings_sessions/*.tar.gz`, `traindata_20260916.tar.gz`, `uncropped_all.tar.gz`, `rgbee.mp4` and a README, approximate **496.7 MB** whole ZIP. This precise file list and size **could not be independently verified** from the JavaScript-only Nextcloud share. No live video or label API is documented. Uploaded/recorded timestamps are dataset-specific; request a share listing before assuming content or completeness.
@@ -407,7 +407,7 @@ Genspark reports municipal bike-counter CSVs, long-term annual climate, city dis
 
 ## 9. Smart City Heilbronn Data Library
 
-**Portal:** <https://data-library.smartcity.hn/>  
+**Portal:** <https://data-library.smartcity.hn/>\
 **Resource type:** developer-facing API discovery / access-registration portal.
 
 At the public landing-page level, the reports did **not identify an anonymous data API endpoint**, reliable schemas, or an unrestricted historical bulk export. An HTTP 200 shell/landing page is **not equivalent to usable public data**. Look for a specific API product, read its swagger/OpenAPI docs, register/request credentials if the owner allows, and then document product-specific URL, fields, policies, quota and update cadence. **Status: PUBLIC RAW ENDPOINT UNVERIFIED / ACCESS MAY REQUIRE REGISTRATION.**
