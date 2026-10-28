@@ -282,7 +282,7 @@ class Scheduler:
                     now = utc(self.clock())
                     control.update(
                         last_run_status="PARTIAL"
-                        if partial or page.manifest.status != "SUCCESS"
+                        if more or partial or page.manifest.status != "SUCCESS"
                         else "SUCCESS",
                         last_attempt_at=now.isoformat(),
                         in_progress=more,

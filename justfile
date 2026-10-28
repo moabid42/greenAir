@@ -99,3 +99,11 @@ test-storage:
 # One bounded real-source pass; select a migrated database explicitly via env.
 ingest-once *args:
     uv run --locked --directory services/backend python -m app.ingestion.worker --once {{args}}
+
+# Persist day/sensor results from stored inputs; no upstream requests.
+process-results *args:
+    uv run --locked --directory services/backend python -m app.processing.refresh {{args}}
+
+# Run one ingestion pass and build snapshots even when upstream coverage is partial.
+refresh-once *args:
+    uv run --locked --directory services/backend python -m app.ingestion.refresh {{args}}

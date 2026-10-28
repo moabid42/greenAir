@@ -1,0 +1,63 @@
+{
+  "checked_at_utc": "2026-10-28T23:10:01.079992+00:00",
+  "runs": [
+    {
+      "exit_code": 0,
+      "results": [
+        {
+          "build_id": "218921d70dc75bf916fcc7a7d2645719e32ca807bf0e89025f78b744fa523875",
+          "resource_key": "days/2026-10-29",
+          "schema_version": "conditions-v1",
+          "input_sha256": "63933075bbde4d91e6f86d861056909d1081c38c6b637157d1b06e74f6095ab9",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "SUCCESS"
+        },
+        {
+          "build_id": "6b38daad0338a4e14cb7485b75bc6589d0460b6214921a142f50236d0b090487",
+          "resource_key": "days/2026-10-30",
+          "schema_version": "conditions-v1",
+          "input_sha256": "965b73d4aedb7bdd416ed55c7281cb5fd25884c43822c1aca266794050d3d3fc",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "PARTIAL"
+        },
+        {
+          "build_id": "f82b4557eb6b94ce50cf230ceaeec22044e9fc76d6da25e98eb52ae9b808f5fe",
+          "resource_key": "sensors",
+          "schema_version": "conditions-v1",
+          "input_sha256": "395c4d5e79e6dbd3acb7f81869fa2c7dcb4fa4577d0b5108277226df1baaaa03",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "exit_code": 0,
+      "results": [
+        {
+          "build_id": "218921d70dc75bf916fcc7a7d2645719e32ca807bf0e89025f78b744fa523875",
+          "resource_key": "days/2026-10-29",
+          "schema_version": "conditions-v1",
+          "input_sha256": "63933075bbde4d91e6f86d861056909d1081c38c6b637157d1b06e74f6095ab9",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "SUCCESS"
+        },
+        {
+          "build_id": "6b38daad0338a4e14cb7485b75bc6589d0460b6214921a142f50236d0b090487",
+          "resource_key": "days/2026-10-30",
+          "schema_version": "conditions-v1",
+          "input_sha256": "965b73d4aedb7bdd416ed55c7281cb5fd25884c43822c1aca266794050d3d3fc",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "PARTIAL"
+        },
+        {
+          "build_id": "f82b4557eb6b94ce50cf230ceaeec22044e9fc76d6da25e98eb52ae9b808f5fe",
+          "resource_key": "sensors",
+          "schema_version": "conditions-v1",
+          "input_sha256": "395c4d5e79e6dbd3acb7f81869fa2c7dcb4fa4577d0b5108277226df1baaaa03",
+          "built_at": "2026-10-28T23:10:00.323832Z",
+          "status": "PARTIAL"
+        }
+      ]
+    }
+  ]
+}
