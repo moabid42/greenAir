@@ -66,3 +66,24 @@ Rules for adapters:
 
 The thresholds are defaults. `Observation.usable` is false for blocking flags
 and for `null` values.
+
+## Temporal profile builder
+
+`app/processing/temporal.py` (scoring draft §4.1–§4.2). Only usable stationary
+measurements (`kind == "observation"`) count; mobile, model and flagged values
+do not.
+
+- `current_level(...)`: §4.1 median of the latest value of each live station. A
+  station is live with a usable value in the last 30 minutes. Optional per-station
+  `Calibration` (`x_ref ≈ alpha·x + beta`, fitted with `fit_calibration` on
+  overlapping history). Without live stations, an optional reference value is
+  used (`method="reference"`); otherwise the level is unknown (`None`).
+- `hourly_levels(...)`: per UTC hour, the median over stations of each station's
+  hourly mean.
+- `climatology(levels)`: §4.2 median per local (weekday, hour) in
+  `Europe/Berlin`, so rush hours keep their wall-clock time across DST. On the
+  night the clocks go back, both UTC hours count toward local 02:00.
+
+No reference station (UBA/LUBW) is connected yet, so calibrations default to the
+identity. The e2e test uses synthetic data with a known pattern and checks that
+the climatology recovers it across the 2026-10-25 DST change.
