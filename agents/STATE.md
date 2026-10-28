@@ -108,10 +108,18 @@ broker, so each stage has an in-process e2e test from fixture files.
 Contract / implementation: [processing](../docs/processing.md),
 `RawObservation` -> `Observation` in `services/backend/app/schemas/observations.py`,
 JSON Schema in `docs/contracts/`.
-Evidence: offline only. The captured ATRAI fixture is historical (2026-07-08).
-Still uncertain: the contract needs agreement with ingestion before adapters
-depend on it.
-Next action: normalizer and QC.
+Pipeline: `python -m app.processing.pipeline INPUT.json` (in `services/backend`)
+runs normalizer -> temporal -> forecaster -> spatial -> scoring engine and writes
+`PipelineResult` (`docs/contracts/pipeline-result.schema.json`).
+Evidence: offline e2e tests per stage; the full run goes through the CLI as a
+subprocess. Captured ATRAI fixture is historical (2026-07-08); other e2e data is
+labelled synthetic. Open-Meteo and Bright Sky keys/units probed
+2026-10-28T18:38:58Z (see processing doc). Stuck/humid checks apply only to
+measurements, not model output (found by the forecaster e2e test).
+Still uncertain: contract agreement with ingestion; real segment layers (ATRAI),
+a reference station for calibration (UBA/LUBW), and tuned constants.
+Next action: agree the contract with ingestion, then run the pipeline on real
+adapter output.
 
 Use this format for additional short entries:
 

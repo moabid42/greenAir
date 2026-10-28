@@ -292,9 +292,14 @@ Same segment at 07:00: PM level 28 (rush) → $\hat{x} = 33.3$, $f \approx 0.06$
 
 `services/backend/app/scoring/` implements the pure formulas, with the worked
 example (§8) as a regression test: §3.1/§3.2 shrinkage, §3.4 IDW, §4.4, §5,
-§6.1–6.3, §7. Not implemented: segment matching, calibration and level/forecast
-building (§4.1–4.3), §3.5 rush-hour contrast, pollen anchors (weight 0 by
-default), and any API endpoint. These need ingested data first.
+§6.1–6.3, §7. The processing modules implement segment matching and patterns
+(§3.1–§3.4), calibration and levels (§4.1), climatology (§4.2), forecasts (§4.3),
+the optional §3.5 rush-hour contrast (off by default) and the engine that
+combines them; see [processing](processing.md).
+
+Not implemented: separate day/night heat anomalies (§3.2), seasonal patterns
+(§3.1), pollen anchors (weight 0 by default), crowding (no counter source yet),
+and API endpoints (serving is outside the processing box).
 
 Open points found while implementing (2026-10-28):
 

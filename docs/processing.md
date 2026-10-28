@@ -141,3 +141,38 @@ projection, without GIS libraries.
 
 Not yet: separate day and night heat anomalies, seasonal patterns, the §3.5
 rush-hour contrast, and an OSM `surface` fallback for roughness.
+
+## Scoring engine and pipeline
+
+`app/scoring/engine.py` scores every segment × hour × profile (scoring draft
+§5–§7): PM2.5 is the forecast level times the segment ratio (optionally with the
+§3.5 exponent γ(t) from the NO₂ climatology), temperature adds the segment
+anomaly, NO₂, O₃, UV and wind are city-level, and daylight comes from an
+approximate sun-position formula (±0.5°). Missing components are dropped and
+lower the confidence (IDW segments: coverage 0.3; no data: 0).
+
+`app/processing/pipeline.py` runs all stages in one process:
+
+```sh
+cd services/backend
+uv run --locked python -m app.processing.pipeline INPUT.json [--output RESULT.json]
+```
+
+| Input (`PipelineInput`) | Meaning |
+|---|---|
+| `issued_at` | forecast issue time; scores cover the next `horizon_hours` (default 24) full hours |
+| `raw_observations` | `RawObservation` records: stations, bike samples and `kind="model"` forecasts |
+| `segments` | `Segment` records with optional static attributes |
+| `profiles` | default: running, road cycling, walking |
+| `severe_weather_alert` | closes the alert gate |
+| `rush_hour_contrast` | enables §3.5 (default off, as the draft advises) |
+
+The output (`PipelineResult`, [JSON Schema](contracts/pipeline-result.schema.json))
+contains the normalization summary, the forecast method per phenomenon, the
+segment layers, every score with its components, gates and confidence, and the
+top three hours per segment and profile. Layers and scores are `kind="derived"`,
+forecasts `kind="forecast"`. This is the `scores.updated` payload.
+
+The e2e test runs the command as a separate process on two weeks of synthetic
+stations, bike rides, an air-quality model and a weather model, and checks the
+rain gate, daylight, rush-hour ranking, best times and confidence.
