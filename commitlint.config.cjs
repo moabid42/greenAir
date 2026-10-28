@@ -1,6 +1,9 @@
 module.exports = {
   extends: ["@commitlint/config-conventional"],
   defaultIgnores: false,
+  ignores: [
+    (message) => /^Merge (?:pull request #\d+ from \S+|(?:remote-tracking )?branch '[^'\r\n]+'|tag '[^'\r\n]+')/.test(message),
+  ],
   parserPreset: {
     parserOpts: {
       headerPattern: /^([a-z][a-z0-9-]*)\(([a-z0-9][a-z0-9._/-]*)\): (\S(?:.*\S)?)$/,

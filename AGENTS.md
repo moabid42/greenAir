@@ -26,7 +26,8 @@ When a commit is requested, use `verb(scope): short message`: one nonempty line,
 at most 72 characters, with lowercase verb and required lowercase service/target
 scope. Example: `fix(backend): handle missing sensor values`. Bodies and footers
 are rejected. Verbs are flexible; prefer established conventional verbs or a
-clear action. Follow the same convention for squash/merge messages.
+clear action. Follow the same convention for squash messages. Standard generated
+Git/GitHub merge messages are exempt, including their generated bodies.
 
 ## Start with focused context
 
