@@ -40,3 +40,29 @@ Rules for adapters:
 - Set `kind` to `model` for forecasts and model output (Bright Sky forecast,
   Open-Meteo), never `observation`.
 - The upsert identity is `(source, station_id, phenomenon, observed_at, sample_id)`.
+
+## Normalizer and QC
+
+`app/processing/normalizer.py`: `normalize(raw)` for one value and
+`normalize_batch(raws)` for a batch with series checks.
+
+- Provider keys map case-insensitively to a phenomenon (`RAW_KEYS`): openSenseMap
+  German titles (`Temperatur`, `PM25`), ATRAI keys (`Finedust PM2.5`) and generic
+  names. Unknown keys are skipped and counted in `unmapped_keys`.
+- Units convert to the canonical unit (`CONVERSIONS`), for example K and °F to °C,
+  Pa to hPa, km/h to m/s. Both micro characters (U+00B5, U+03BC) are accepted.
+- Duplicates by `Observation.key` are removed and counted.
+- Values are never silently dropped. A failed check keeps the value and adds a flag.
+
+| Flag | Meaning | Blocks use |
+|---|---|---|
+| `assumed_utc` | provider time had no time zone (ATRAI `createdAt`) | no |
+| `assumed_unit` | provider gave no unit; canonical unit assumed | no |
+| `non_numeric` | value cannot be parsed | yes |
+| `unknown_unit` | unit has no conversion; value set to `null` | yes |
+| `out_of_range` | outside `PLAUSIBLE` bounds | yes |
+| `stuck` | ≥ 10 identical consecutive values of a stationary temperature, humidity, pressure or PM series | yes |
+| `humid_pm` | PM with the nearest humidity of the same station within 5 min above 75 % (ATRAI rule, reference §3.3) | yes |
+
+The thresholds are defaults. `Observation.usable` is false for blocking flags
+and for `null` values.
