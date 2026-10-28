@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.exceptions import HTTPException
 
+from app.api.documentation import DESCRIPTION, configure_openapi
 from app.api.errors import http_error, validation_error
 from app.api.router import router
 from app.core.config import Settings
@@ -18,8 +19,9 @@ def create_app(
     settings = settings if settings is not None else Settings()
     application = FastAPI(
         title=settings.app_name,
-        version="0.1.0",
-        description="Green City Heilbronn API. Demo data is synthetic and labelled mock.",
+        version="0.2.0",
+        swagger_ui_parameters={"displayRequestDuration": True, "filter": True},
+        description=DESCRIPTION,
     )
     application.state.settings = settings
     application.state.serving_repository = (
@@ -36,6 +38,7 @@ def create_app(
             allow_headers=["*"],
         )
     application.include_router(router)
+    configure_openapi(application)
     return application
 
 

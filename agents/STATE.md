@@ -164,3 +164,12 @@ offline. Record a later successful check alongside the earlier failure.
   existing adapter. Recorded historical probes above are not fresh verification.
 - Evidence: offline HTTP tests cover the frontend contracts, DST, coverage, pagination,
   errors, and provider replacement. No live source checks were needed for dummy data.
+
+### Dynamic API documentation — 2026-10-28
+
+- Swagger, ReDoc, and OpenAPI are generated from live routes and validated models.
+  Versioned resources and Google-style errors follow selected Google AIP guidance;
+  compatibility exceptions and dummy provenance are explicit in
+  [the API contract](../docs/backend-api.md). `just openapi` exports JSON on stdout.
+- Standalone openapi-spec-validator accepted the generated OpenAPI 3.1 document;
+  route/error/example tests keep the schema synchronized with runtime behavior.

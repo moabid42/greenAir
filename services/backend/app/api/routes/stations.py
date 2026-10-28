@@ -11,7 +11,7 @@ from app.processing.station_status import classify
 from app.schemas.stations import StationStatusResponse
 from app.serving.demo import DemoRepository
 
-router = APIRouter(tags=["stations"])
+router = APIRouter(tags=["Sensors"])
 
 BoxFetcher = Callable[[Settings], list[dict[str, Any]]]
 
@@ -54,11 +54,15 @@ def get_box_fetcher(request: Request) -> BoxFetcher:
     )
 
 
-@router.get("/stations/status", response_model=StationStatusResponse)
+@router.get(
+    "/stations/status", response_model=StationStatusResponse, operation_id="GetStationStatus"
+)
 def station_status(
     request: Request, fetcher: Annotated[BoxFetcher, Depends(get_box_fetcher)]
 ) -> StationStatusResponse:
-    """Live upload status and latest readings of the Green City stationary senseBoxes."""
+    """Station upload status and latest readings. Defaults to synthetic data; explicit
+    GREENAIR_STATION_DATA_MODE=live opts into openSenseMap requests.
+    """
     settings: Settings = request.app.state.settings
     try:
         snapshots = parse_boxes(fetcher(settings))
