@@ -1,0 +1,6 @@
+// Requests go only to the local development server, which holds the API key.
+export class CloudInferenceEngine {
+  constructor(fetcher=(...args)=>globalThis.fetch(...args)){this.fetcher=fetcher;this.abort=null;this.busy=false;this.backend='openrouter'}
+  async generate(messages,onText){if(this.busy)throw Error('A response is already in progress.');this.busy=true;this.abort=new AbortController();try{console.info('[EcoMAB AI] Cloud request started. Provider: OpenRouter, model: recursive/flint-v1.0:free.');const response=await this.fetcher('/api/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages}),signal:this.abort.signal});const body=await response.json();if(!response.ok)throw Error(body.error||`Cloud request failed (HTTP ${response.status})`);if(typeof body.text!=='string'||!body.text.trim())throw Error('The cloud model returned no visible answer.');onText(body.text);console.info('[EcoMAB AI] Cloud request completed.');return body.text}catch(e){if(e.name==='AbortError')console.info('[EcoMAB AI] Cloud request cancelled.');else console.error('[EcoMAB AI] Cloud request failed. Error type:',e.name||'Error');throw e}finally{this.busy=false;this.abort=null}}
+  stop(){this.abort?.abort()}
+}

@@ -1,0 +1,295 @@
+{
+  "schemaVersion": "demo-1",
+  "city": "Heilbronn",
+  "location": {
+    "latitude": 49.1427,
+    "longitude": 9.2109,
+    "displayName": "Heilbronn, Germany"
+  },
+  "timeZone": "Europe/Berlin",
+  "scenarioDate": "2026-10-29",
+  "scenarioWindowLocal": "14:00–16:00",
+  "createdForDemoOn": "2026-10-28",
+  "mode": "demo",
+  "disclaimer": "Simulated UI/test scenario, NOT actual environmental sensor observations or a live forecast feed. Weather temperatures roughly follow publicly checked 2026-10-29 forecasts, but all metrics in this fixture are demo values.",
+  "forecastReference": {
+    "checkedAt": "2026-10-28",
+    "sourceType": "external_weather_forecast_summary",
+    "url": "https://www.wetter24.de/vorhersage/7tage/deutschland/heilbronn/18224443/",
+    "note": "Approx. afternoon 12–14°C, dry in a checked forecast; do not display as live weather data."
+  },
+  "timeSlices": [
+    {
+      "time": "2026-10-29T14:00:00+01:00",
+      "weather": {
+        "temperature": {
+          "value": 14,
+          "unit": "°C",
+          "mode": "demo",
+          "source": "mock_forecast_guided",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "windSpeed": {
+          "value": 8,
+          "unit": "km/h",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "relativeHumidity": {
+          "value": 61,
+          "unit": "%",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "precipitation": {
+          "value": 0,
+          "unit": "mm",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        }
+      },
+      "air": {
+        "pm25": {
+          "value": 7,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "pm10": {
+          "value": 13,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "no2": {
+          "value": 17,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        }
+      },
+      "traffic": {
+        "trafficExposureScore": {
+          "value": 56,
+          "unit": "index/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        }
+      },
+      "sportSuitability": {
+        "running": {
+          "value": 86,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "cycling": {
+          "value": 81,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        },
+        "walking": {
+          "value": 89,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T14:00:00+01:00"
+        }
+      }
+    },
+    {
+      "time": "2026-10-29T15:00:00+01:00",
+      "weather": {
+        "temperature": {
+          "value": 13,
+          "unit": "°C",
+          "mode": "demo",
+          "source": "mock_forecast_guided",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "windSpeed": {
+          "value": 9,
+          "unit": "km/h",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "relativeHumidity": {
+          "value": 64,
+          "unit": "%",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "precipitation": {
+          "value": 0,
+          "unit": "mm",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        }
+      },
+      "air": {
+        "pm25": {
+          "value": 8,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "pm10": {
+          "value": 15,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "no2": {
+          "value": 19,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        }
+      },
+      "traffic": {
+        "trafficExposureScore": {
+          "value": 62,
+          "unit": "index/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        }
+      },
+      "sportSuitability": {
+        "running": {
+          "value": 84,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "cycling": {
+          "value": 79,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        },
+        "walking": {
+          "value": 87,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T15:00:00+01:00"
+        }
+      }
+    },
+    {
+      "time": "2026-10-29T16:00:00+01:00",
+      "weather": {
+        "temperature": {
+          "value": 12,
+          "unit": "°C",
+          "mode": "demo",
+          "source": "mock_forecast_guided",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "windSpeed": {
+          "value": 10,
+          "unit": "km/h",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "relativeHumidity": {
+          "value": 68,
+          "unit": "%",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "precipitation": {
+          "value": 0,
+          "unit": "mm",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        }
+      },
+      "air": {
+        "pm25": {
+          "value": 8,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "pm10": {
+          "value": 16,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "no2": {
+          "value": 22,
+          "unit": "µg/m³",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        }
+      },
+      "traffic": {
+        "trafficExposureScore": {
+          "value": 69,
+          "unit": "index/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        }
+      },
+      "sportSuitability": {
+        "running": {
+          "value": 79,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "cycling": {
+          "value": 75,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        },
+        "walking": {
+          "value": 82,
+          "unit": "score/100",
+          "mode": "demo",
+          "source": "mock",
+          "observedAt": "2026-10-29T16:00:00+01:00"
+        }
+      }
+    }
+  ],
+  "sensorFeatures": null,
+  "routeFeatures": null,
+  "dataCoverage": {
+    "sensorGeometry": "unavailable",
+    "routeGeometry": "unavailable",
+    "trafficModel": "synthetic",
+    "environment": "synthetic"
+  }
+}

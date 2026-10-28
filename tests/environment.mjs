@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {fetchEnvironment,normalizeEnvironment} from '../src/environment.js';
+const demo=JSON.parse(fs.readFileSync(new URL('../public/fixtures/environment_heilbronn_2026-10-29.json',import.meta.url)));
+const live={timeSlices:[{time:demo.timeSlices[0].time,weather:{temperature:{value:15,unit:'°C',source:'test station',observedAt:'2026-10-29T13:50:00+01:00',confidence:0.8}}}]};
+const now=Date.parse('2026-10-29T14:00:00+01:00');
+let out=normalizeEnvironment(demo,live,{now});
+assert.equal(out.timeSlices[0].weather.temperature.mode,'live');
+assert.equal(out.timeSlices[0].weather.temperature.value,15);
+assert.equal(out.timeSlices[0].air.pm25.mode,'demo');
+assert.equal(out.timeSlices[1].weather.temperature.value,13);
+assert.equal(normalizeEnvironment(demo,live,{now:now+7*3600000}).timeSlices[0].weather.temperature.mode,'stale');
+live.timeSlices[0].weather.temperature.unit='F';
+assert.equal(normalizeEnvironment(demo,live,{now}).timeSlices[0].weather.temperature.mode,'demo');
+let calls=[];const fetcher=async url=>{calls.push(url);if(url==='backend')throw Error('offline');return {ok:true,json:async()=>demo}};
+out=await fetchEnvironment({url:'backend',fetcher,now});assert.equal(out.timeSlices[0].weather.temperature.mode,'demo');assert.deepEqual(calls,['fixtures/environment_heilbronn_2026-10-29.json','backend']);
+console.log('PASS: environmental field fallback, provenance, stale data and backend failure');

@@ -1,0 +1,9 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const code=fs.readFileSync(new URL('../src/services.js',import.meta.url),'utf8');const svc=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+assert.equal(svc.parseHeartRate(new DataView(Uint8Array.from([0,72]).buffer)),72);
+assert.equal(svc.parseHeartRate(new DataView(Uint8Array.from([1,44,1]).buffer)),300);
+assert.throws(()=>svc.parseHeartRate(new DataView(Uint8Array.from([1,1]).buffer)));
+let mem={};globalThis.localStorage={getItem:k=>mem[k]??null,setItem:(k,v)=>mem[k]=v,removeItem:k=>delete mem[k]};let store=new svc.LocalSampleStore();store.save({timestamp_utc:new Date().toISOString(),value:77});assert.equal(store.read().length,1);store.clear();assert.equal(store.read().length,0);await assert.rejects(new svc.WearableUploadClient().upload());assert.equal(new svc.ConsentManager().sync,false);
+const d=JSON.parse(fs.readFileSync(new URL('../public/demo_snapshot.json',import.meta.url)));assert.equal(d.hourly_scores.length,72);for(const sport of ['running','cycling','walking']){let a=d.hourly_scores.filter(x=>x.activity===sport);assert.equal(a.length,24);assert.equal(new Set(a.map(x=>x.at)).size,24);assert.ok(a.every(x=>x.overall>=0&&x.overall<=100))}assert.equal(d.observations.length,0);assert.equal(d.features.features.length,0);assert.equal(d.routes.features.length,0);
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');const icons=fs.readFileSync(new URL('../src/icons.js',import.meta.url),'utf8');assert.ok(!html.includes('lucide@'));for(const name of ['navigation','layers-2','crosshair'])assert.ok(icons.includes(name));assert.ok(icons.includes('<svg'));
+console.log('PASS: HR 8/16-bit parsing, truncation, local store/delete, disabled uploads, opt-out default, 72 demo scores, empty geometry, local SVG definitions');

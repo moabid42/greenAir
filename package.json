@@ -1,0 +1,26 @@
+{
+  "name": "ecomab",
+  "version": "4.0.0-dev",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --configLoader runner",
+    "build": "vite build --configLoader runner",
+    "preview": "vite preview --configLoader runner",
+    "test": "node tests/check.mjs && node tests/startup.mjs && node tests/demo-devices.mjs && node tests/environment.mjs && node tests/ai-context.mjs && node tests/map-analytics.mjs && node tests/consumer-api.mjs && node tests/local-inference.mjs && node tests/model-download.mjs && node tests/vite-assets.mjs && node tests/cloud-inference.mjs && python3 tests/fixtures_consistency.py",
+    "lint": "node --check src/app.js && node --check src/v3.js && node --check src/services.js && node --check src/demo-devices.js && node --check src/environment.js && node --check src/ai-context.js && node --check src/map-layers.js && node --check src/analytics.js && node --check src/consumer-api.js && node --check src/segment-overlay.js && node --check src/local-inference.js && node --check src/ai-chat.js && node --check src/model-download.js && node --check src/cloud-inference.js && node --check cloud-proxy.js",
+    "test:browser": "playwright test",
+    "setup:ai": "node scripts/install-wllama-assets.mjs"
+  },
+  "overrides": {
+    "rollup": "4.62.4",
+    "esbuild": "0.25.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "vite": "6.4.3"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  }
+}

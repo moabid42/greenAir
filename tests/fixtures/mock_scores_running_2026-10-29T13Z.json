@@ -1,0 +1,33 @@
+{
+  "_demo_note": "Synthetic contract fixture only. Not a live response; strip this field before validating a strict backend schema.",
+  "profile": "running",
+  "t": "2026-10-29T13:00:00Z",
+  "kind": "forecast",
+  "horizon_h": 22,
+  "version": "2026-10-28T16:00:00Z",
+  "build_id": "demo-build-2026-10-29",
+  "flags_legend": {
+    "1": "gated_rain",
+    "2": "gated_air",
+    "4": "gated_alert",
+    "8": "interpolated",
+    "16": "stale_level"
+  },
+  "scores": {
+    "10234": [
+      72,
+      0.8,
+      0
+    ],
+    "10235": [
+      0,
+      0.65,
+      1
+    ],
+    "10301": [
+      55,
+      0.25,
+      8
+    ]
+  }
+}

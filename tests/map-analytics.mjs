@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {layerMetric,layerColor} from '../src/map-layers.js';
+import {nearestEnvironment,renderDemoAnalytics} from '../src/analytics.js';
+const temp={value:14,unit:'°C',mode:'demo',source:'mock',confidence:'synthetic'};
+const slices=[{time:'2026-10-29T14:00:00+01:00',weather:{temperature:temp},air:{pm25:{value:7,unit:'µg/m³',mode:'demo',source:'mock'}},sportSuitability:{running:{value:86}}}];
+assert.equal(layerMetric('heat',slices[0],'running'),temp);assert.equal(layerMetric('safety',slices[0],'running'),null);
+assert.equal(layerColor('overall',{value:86}),'#14966f');assert.equal(layerColor('air',null),'#8b9e96');
+assert.equal(nearestEnvironment(slices,'2026-10-29T14:30:00+01:00'),slices[0]);assert.equal(nearestEnvironment(slices,'2026-10-29T14:31:00+01:00'),null);
+const device={id:'whoop-demo-01',name:'WHOOP',connected:false,samples:[{timestamp:slices[0].time,heartRateBpm:91,sessionStrainDemoIndex:0}]};
+const html=renderDemoAnalytics([device],device.id,{timeSlices:slices});assert.match(html,/previously recorded history/);assert.match(html,/91 bpm/);assert.match(html,/Example conditions/);
+assert.match(renderDemoAnalytics([], '', {timeSlices:slices}),/No sample readings/);
+console.log('PASS: map metric selection and timestamp-aligned demo analytics');

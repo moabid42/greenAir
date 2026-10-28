@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {ModelInstaller,MODEL_NAME,MODEL_SHA256,MODEL_URL,verifyModel} from '../src/model-download.js';
+const bytes=new Uint8Array(1024*1024);bytes.set([71,71,85,70]);
+const digest=Uint8Array.from(MODEL_SHA256.match(/../g),x=>parseInt(x,16)).buffer;
+const cryptoProvider={subtle:{digest:async()=>digest}};let stored=null,requests=[];
+const dir={async *entries(){if(stored)yield [MODEL_NAME,{kind:'file',getFile:async()=>stored}]},async getFileHandle(name,{create}={}){if(!stored&&!create)throw Object.assign(Error(),{name:'NotFoundError'});return {getFile:async()=>stored,createWritable:async()=>{let parts=[];return {write:async data=>parts.push(data),close:async()=>{stored=new File(parts,name)},abort:async()=>{}}}}},async removeEntry(){stored=null}};
+const storage={getDirectory:async()=>({getDirectoryHandle:async()=>dir}),estimate:async()=>({quota:2*1024**3,usage:0})};
+const fetcher=async(url,options)=>{requests.push({url,options});return {ok:true,headers:new Headers({'content-length':String(bytes.length)}),body:new ReadableStream({start(c){c.enqueue(bytes);c.close()}})}};
+const installer=new ModelInstaller({storage,fetcher,cryptoProvider});const file=await installer.install();assert.equal(file.name,MODEL_NAME);assert.equal(requests[0].url,MODEL_URL);assert.equal(requests[0].options.credentials,'omit');assert.equal((await installer.existing()).size,bytes.length);await installer.remove();assert.equal(await installer.existing(),null);
+await assert.rejects(()=>verifyModel(new File([bytes],'x.gguf'),'00',cryptoProvider),/integrity/);
+const denied=new ModelInstaller({storage:{...storage,estimate:async()=>({quota:1,usage:0})},fetcher,cryptoProvider});await assert.rejects(()=>denied.install(),/storage/);
+console.log('PASS: model download, integrity check, reuse, deletion and storage preflight (mock transport)');

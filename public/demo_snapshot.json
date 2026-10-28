@@ -1,0 +1,942 @@
+{
+  "_demo_warning": "SYNTHETIC DEMONSTRATION DATA ONLY. Not observations or forecasts from Heilbronn. Never label as live.",
+  "schema_version": "0.1-demo-proposal",
+  "demo": true,
+  "generated_at": "2026-10-28T12:00:00+01:00",
+  "timezone": "Europe/Berlin",
+  "city": "Heilbronn",
+  "sources": [
+    {
+      "id": "DEMO-ONLY",
+      "name": "Synthetic UI demonstration",
+      "lastObservedAt": null,
+      "license": "N/A — not real data"
+    }
+  ],
+  "observations": [],
+  "hourly_scores": [
+    {
+      "at": "2026-10-28T00:00:00+01:00",
+      "activity": "running",
+      "overall": 82,
+      "factors": {
+        "air": 80,
+        "heat": 80,
+        "wind": 78,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T01:00:00+01:00",
+      "activity": "running",
+      "overall": 82,
+      "factors": {
+        "air": 81,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T02:00:00+01:00",
+      "activity": "running",
+      "overall": 82,
+      "factors": {
+        "air": 81,
+        "heat": 81,
+        "wind": 79,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T03:00:00+01:00",
+      "activity": "running",
+      "overall": 83,
+      "factors": {
+        "air": 81,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T04:00:00+01:00",
+      "activity": "running",
+      "overall": 82,
+      "factors": {
+        "air": 80,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 87
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T05:00:00+01:00",
+      "activity": "running",
+      "overall": 81,
+      "factors": {
+        "air": 78,
+        "heat": 82,
+        "wind": 81,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T06:00:00+01:00",
+      "activity": "running",
+      "overall": 78,
+      "factors": {
+        "air": 74,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 74
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T07:00:00+01:00",
+      "activity": "running",
+      "overall": 73,
+      "factors": {
+        "air": 68,
+        "heat": 81,
+        "wind": 80,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T08:00:00+01:00",
+      "activity": "running",
+      "overall": 70,
+      "factors": {
+        "air": 65,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 57
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T09:00:00+01:00",
+      "activity": "running",
+      "overall": 72,
+      "factors": {
+        "air": 66,
+        "heat": 79,
+        "wind": 78,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T10:00:00+01:00",
+      "activity": "running",
+      "overall": 74,
+      "factors": {
+        "air": 70,
+        "heat": 77,
+        "wind": 76,
+        "traffic": 74
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T11:00:00+01:00",
+      "activity": "running",
+      "overall": 76,
+      "factors": {
+        "air": 72,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T12:00:00+01:00",
+      "activity": "running",
+      "overall": 76,
+      "factors": {
+        "air": 73,
+        "heat": 70,
+        "wind": 72,
+        "traffic": 87
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T13:00:00+01:00",
+      "activity": "running",
+      "overall": 74,
+      "factors": {
+        "air": 72,
+        "heat": 67,
+        "wind": 70,
+        "traffic": 86
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T14:00:00+01:00",
+      "activity": "running",
+      "overall": 72,
+      "factors": {
+        "air": 71,
+        "heat": 64,
+        "wind": 70,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T15:00:00+01:00",
+      "activity": "running",
+      "overall": 69,
+      "factors": {
+        "air": 68,
+        "heat": 62,
+        "wind": 69,
+        "traffic": 76
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T16:00:00+01:00",
+      "activity": "running",
+      "overall": 66,
+      "factors": {
+        "air": 65,
+        "heat": 63,
+        "wind": 69,
+        "traffic": 67
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T17:00:00+01:00",
+      "activity": "running",
+      "overall": 66,
+      "factors": {
+        "air": 65,
+        "heat": 65,
+        "wind": 70,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T18:00:00+01:00",
+      "activity": "running",
+      "overall": 68,
+      "factors": {
+        "air": 67,
+        "heat": 68,
+        "wind": 71,
+        "traffic": 67
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T19:00:00+01:00",
+      "activity": "running",
+      "overall": 73,
+      "factors": {
+        "air": 71,
+        "heat": 71,
+        "wind": 73,
+        "traffic": 76
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T20:00:00+01:00",
+      "activity": "running",
+      "overall": 76,
+      "factors": {
+        "air": 75,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T21:00:00+01:00",
+      "activity": "running",
+      "overall": 78,
+      "factors": {
+        "air": 77,
+        "heat": 76,
+        "wind": 75,
+        "traffic": 86
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T22:00:00+01:00",
+      "activity": "running",
+      "overall": 80,
+      "factors": {
+        "air": 79,
+        "heat": 78,
+        "wind": 76,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T23:00:00+01:00",
+      "activity": "running",
+      "overall": 81,
+      "factors": {
+        "air": 80,
+        "heat": 79,
+        "wind": 77,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T00:00:00+01:00",
+      "activity": "cycling",
+      "overall": 80,
+      "factors": {
+        "air": 80,
+        "heat": 80,
+        "wind": 78,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T01:00:00+01:00",
+      "activity": "cycling",
+      "overall": 81,
+      "factors": {
+        "air": 81,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T02:00:00+01:00",
+      "activity": "cycling",
+      "overall": 81,
+      "factors": {
+        "air": 81,
+        "heat": 81,
+        "wind": 79,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T03:00:00+01:00",
+      "activity": "cycling",
+      "overall": 81,
+      "factors": {
+        "air": 81,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T04:00:00+01:00",
+      "activity": "cycling",
+      "overall": 81,
+      "factors": {
+        "air": 80,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 87,
+        "safety": 83,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T05:00:00+01:00",
+      "activity": "cycling",
+      "overall": 80,
+      "factors": {
+        "air": 78,
+        "heat": 82,
+        "wind": 81,
+        "traffic": 83,
+        "safety": 81,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T06:00:00+01:00",
+      "activity": "cycling",
+      "overall": 76,
+      "factors": {
+        "air": 74,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 74,
+        "safety": 76,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T07:00:00+01:00",
+      "activity": "cycling",
+      "overall": 72,
+      "factors": {
+        "air": 68,
+        "heat": 81,
+        "wind": 80,
+        "traffic": 63,
+        "safety": 69,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T08:00:00+01:00",
+      "activity": "cycling",
+      "overall": 70,
+      "factors": {
+        "air": 65,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 57,
+        "safety": 65,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T09:00:00+01:00",
+      "activity": "cycling",
+      "overall": 71,
+      "factors": {
+        "air": 66,
+        "heat": 79,
+        "wind": 78,
+        "traffic": 63,
+        "safety": 69,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T10:00:00+01:00",
+      "activity": "cycling",
+      "overall": 74,
+      "factors": {
+        "air": 70,
+        "heat": 77,
+        "wind": 76,
+        "traffic": 74,
+        "safety": 76,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T11:00:00+01:00",
+      "activity": "cycling",
+      "overall": 76,
+      "factors": {
+        "air": 72,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83,
+        "safety": 81,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T12:00:00+01:00",
+      "activity": "cycling",
+      "overall": 76,
+      "factors": {
+        "air": 73,
+        "heat": 70,
+        "wind": 72,
+        "traffic": 87,
+        "safety": 83,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T13:00:00+01:00",
+      "activity": "cycling",
+      "overall": 75,
+      "factors": {
+        "air": 72,
+        "heat": 67,
+        "wind": 70,
+        "traffic": 86,
+        "safety": 83,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T14:00:00+01:00",
+      "activity": "cycling",
+      "overall": 74,
+      "factors": {
+        "air": 71,
+        "heat": 64,
+        "wind": 70,
+        "traffic": 83,
+        "safety": 81,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T15:00:00+01:00",
+      "activity": "cycling",
+      "overall": 70,
+      "factors": {
+        "air": 68,
+        "heat": 62,
+        "wind": 69,
+        "traffic": 76,
+        "safety": 76,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T16:00:00+01:00",
+      "activity": "cycling",
+      "overall": 68,
+      "factors": {
+        "air": 65,
+        "heat": 63,
+        "wind": 69,
+        "traffic": 67,
+        "safety": 71,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T17:00:00+01:00",
+      "activity": "cycling",
+      "overall": 67,
+      "factors": {
+        "air": 65,
+        "heat": 65,
+        "wind": 70,
+        "traffic": 63,
+        "safety": 69,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T18:00:00+01:00",
+      "activity": "cycling",
+      "overall": 69,
+      "factors": {
+        "air": 67,
+        "heat": 68,
+        "wind": 71,
+        "traffic": 67,
+        "safety": 71,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T19:00:00+01:00",
+      "activity": "cycling",
+      "overall": 73,
+      "factors": {
+        "air": 71,
+        "heat": 71,
+        "wind": 73,
+        "traffic": 76,
+        "safety": 76,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T20:00:00+01:00",
+      "activity": "cycling",
+      "overall": 76,
+      "factors": {
+        "air": 75,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83,
+        "safety": 81,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T21:00:00+01:00",
+      "activity": "cycling",
+      "overall": 78,
+      "factors": {
+        "air": 77,
+        "heat": 76,
+        "wind": 75,
+        "traffic": 86,
+        "safety": 83,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T22:00:00+01:00",
+      "activity": "cycling",
+      "overall": 80,
+      "factors": {
+        "air": 79,
+        "heat": 78,
+        "wind": 76,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T23:00:00+01:00",
+      "activity": "cycling",
+      "overall": 80,
+      "factors": {
+        "air": 80,
+        "heat": 79,
+        "wind": 77,
+        "traffic": 88,
+        "safety": 84,
+        "surface": 78
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T00:00:00+01:00",
+      "activity": "walking",
+      "overall": 84,
+      "factors": {
+        "air": 80,
+        "heat": 80,
+        "wind": 78,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T01:00:00+01:00",
+      "activity": "walking",
+      "overall": 84,
+      "factors": {
+        "air": 81,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T02:00:00+01:00",
+      "activity": "walking",
+      "overall": 84,
+      "factors": {
+        "air": 81,
+        "heat": 81,
+        "wind": 79,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T03:00:00+01:00",
+      "activity": "walking",
+      "overall": 85,
+      "factors": {
+        "air": 81,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T04:00:00+01:00",
+      "activity": "walking",
+      "overall": 84,
+      "factors": {
+        "air": 80,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 87
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T05:00:00+01:00",
+      "activity": "walking",
+      "overall": 83,
+      "factors": {
+        "air": 78,
+        "heat": 82,
+        "wind": 81,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T06:00:00+01:00",
+      "activity": "walking",
+      "overall": 80,
+      "factors": {
+        "air": 74,
+        "heat": 82,
+        "wind": 80,
+        "traffic": 74
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T07:00:00+01:00",
+      "activity": "walking",
+      "overall": 75,
+      "factors": {
+        "air": 68,
+        "heat": 81,
+        "wind": 80,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T08:00:00+01:00",
+      "activity": "walking",
+      "overall": 72,
+      "factors": {
+        "air": 65,
+        "heat": 80,
+        "wind": 79,
+        "traffic": 57
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T09:00:00+01:00",
+      "activity": "walking",
+      "overall": 74,
+      "factors": {
+        "air": 66,
+        "heat": 79,
+        "wind": 78,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T10:00:00+01:00",
+      "activity": "walking",
+      "overall": 76,
+      "factors": {
+        "air": 70,
+        "heat": 77,
+        "wind": 76,
+        "traffic": 74
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T11:00:00+01:00",
+      "activity": "walking",
+      "overall": 78,
+      "factors": {
+        "air": 72,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T12:00:00+01:00",
+      "activity": "walking",
+      "overall": 78,
+      "factors": {
+        "air": 73,
+        "heat": 70,
+        "wind": 72,
+        "traffic": 87
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T13:00:00+01:00",
+      "activity": "walking",
+      "overall": 76,
+      "factors": {
+        "air": 72,
+        "heat": 67,
+        "wind": 70,
+        "traffic": 86
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T14:00:00+01:00",
+      "activity": "walking",
+      "overall": 74,
+      "factors": {
+        "air": 71,
+        "heat": 64,
+        "wind": 70,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T15:00:00+01:00",
+      "activity": "walking",
+      "overall": 71,
+      "factors": {
+        "air": 68,
+        "heat": 62,
+        "wind": 69,
+        "traffic": 76
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T16:00:00+01:00",
+      "activity": "walking",
+      "overall": 68,
+      "factors": {
+        "air": 65,
+        "heat": 63,
+        "wind": 69,
+        "traffic": 67
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T17:00:00+01:00",
+      "activity": "walking",
+      "overall": 68,
+      "factors": {
+        "air": 65,
+        "heat": 65,
+        "wind": 70,
+        "traffic": 63
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T18:00:00+01:00",
+      "activity": "walking",
+      "overall": 70,
+      "factors": {
+        "air": 67,
+        "heat": 68,
+        "wind": 71,
+        "traffic": 67
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T19:00:00+01:00",
+      "activity": "walking",
+      "overall": 75,
+      "factors": {
+        "air": 71,
+        "heat": 71,
+        "wind": 73,
+        "traffic": 76
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T20:00:00+01:00",
+      "activity": "walking",
+      "overall": 78,
+      "factors": {
+        "air": 75,
+        "heat": 74,
+        "wind": 74,
+        "traffic": 83
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T21:00:00+01:00",
+      "activity": "walking",
+      "overall": 80,
+      "factors": {
+        "air": 77,
+        "heat": 76,
+        "wind": 75,
+        "traffic": 86
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T22:00:00+01:00",
+      "activity": "walking",
+      "overall": 82,
+      "factors": {
+        "air": 79,
+        "heat": 78,
+        "wind": 76,
+        "traffic": 88
+      },
+      "confidence": null
+    },
+    {
+      "at": "2026-10-28T23:00:00+01:00",
+      "activity": "walking",
+      "overall": 83,
+      "factors": {
+        "air": 80,
+        "heat": 79,
+        "wind": 77,
+        "traffic": 88
+      },
+      "confidence": null
+    }
+  ],
+  "features": {
+    "type": "FeatureCollection",
+    "features": []
+  },
+  "routes": {
+    "type": "FeatureCollection",
+    "features": []
+  },
+  "warnings": [
+    "All 72 scores are synthetic illustrative examples, not observations or forecasts. No measured sensor readings, sensor locations or street-level route geometry are supplied."
+  ]
+}

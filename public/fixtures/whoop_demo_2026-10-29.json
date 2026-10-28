@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "demo-1",
+  "deviceId": "whoop-demo-01",
+  "displayName": "WHOOP (Demo)",
+  "kind": "mock_whoop",
+  "isDemo": true,
+  "source": "mock",
+  "connectionState": "disconnected",
+  "recordRetentionPolicy": "disconnect_retains_history; forget_deletes_history",
+  "syncConsent": false,
+  "scenarioDate": "2026-10-29",
+  "timeZone": "Europe/Berlin",
+  "startedAt": "2026-10-29T14:00:00+01:00",
+  "lastObservedAt": "2026-10-29T16:00:00+01:00",
+  "description": "Entire dataset is synthetic; not actual readings or official access to this brand.",
+  "samples": [
+    {
+      "timestamp": "2026-10-29T14:00:00+01:00",
+      "heartRateBpm": 91,
+      "sessionStrainDemoIndex": 0.0,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T14:30:00+01:00",
+      "heartRateBpm": 128,
+      "sessionStrainDemoIndex": 4.7,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T15:00:00+01:00",
+      "heartRateBpm": 143,
+      "sessionStrainDemoIndex": 8.4,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T15:30:00+01:00",
+      "heartRateBpm": 136,
+      "sessionStrainDemoIndex": 10.3,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T16:00:00+01:00",
+      "heartRateBpm": 100,
+      "sessionStrainDemoIndex": 10.8,
+      "mode": "demo",
+      "source": "mock"
+    }
+  ],
+  "summary": {
+    "sessionDurationMin": 120,
+    "recordedActivity": "cycling",
+    "avgHeartRateBpm": 120,
+    "peakHeartRateBpm": 143,
+    "restingHeartRateBpmDemo": 57,
+    "hrvMsDemo": 53,
+    "recoveryScoreDemo": 71,
+    "notes": "Not actual WHOOP algorithm outputs. Strain/recovery are synthetic UI placeholders and must not be used for medical or training prescriptions."
+  }
+}
