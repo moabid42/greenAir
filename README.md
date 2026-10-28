@@ -6,7 +6,8 @@ scoring, starting with a Python/FastAPI backend scaffold.
 ## Development
 
 Requires Python 3.12+, [uv](https://docs.astral.sh/uv/getting-started/installation/),
-`just`, and Node.js 22+ with npm for Git hooks and commit checks.
+`just`, and Node.js 24 with npm for Git hooks and commit checks. Development uses
+Python 3.12; [tool versions](docs/development.md) match the CI configuration.
 
 ```sh
 just setup

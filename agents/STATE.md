@@ -62,6 +62,13 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 - Remote CI has not been executed from this workspace; pushing the workflow
   enables it. Repository branch-protection settings are unchanged.
 
+### Team handoff configuration — 2026-10-28
+
+- Development pins: Node.js 24 in `.nvmrc`, Python 3.12 in the backend's
+  `.python-version`; uv/just versions are documented in
+  [development guidance](../docs/development.md). CI reads the Node.js pin.
+- User review preference: no CODEOWNERS file; request reviews from `moabid42`.
+
 Use this format for additional short entries:
 
 ```text

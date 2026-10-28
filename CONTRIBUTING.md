@@ -1,6 +1,7 @@
 # Development checks and commits
 
-Install Python 3.12+, uv, just, and Node.js 22+ with npm. The root npm package
+Use Python 3.12, uv 0.13.6, just 1.46.0, and Node.js 24 with npm; see
+[the development pins](docs/development.md). The root npm package
 contains development tooling; the web client remains a reserved directory.
 
 ```sh
