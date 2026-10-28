@@ -58,6 +58,14 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 - CI also [checks committed whitespace](../scripts/check-whitespace.mjs), using
   PR merge bases, push before/after trees, or the empty tree for initial history.
   Local lint keeps its staged and unstaged checks.
+- `just setup` installs actionlint 1.7.12 under ignored `.tools/` with the
+  version-tagged official downloader. `just lint`/`just lint-workflows` validate
+  GitHub Actions locally and in CI without downloading during lint. Optional
+  ShellCheck/Pyflakes integrations are disabled for consistent prerequisites.
+- CI hardening validation: `just setup`, `just lint`, and all 48 tests passed
+  locally (4 backend, 12 agent-tool, 32 commit/range/whitespace cases). Actionlint
+  accepted the workflow and rejected an invalid-expression fixture; its
+  versioned installer was checked on macOS arm64, including a repeat setup.
 - User convention: `verb(scope): short message`, a single line of at most 72
   characters with a required lowercase scope. Lowercase verbs remain flexible.
   Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).

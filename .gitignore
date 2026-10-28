@@ -223,3 +223,6 @@ __marimo__/
 node_modules/
 .husky/_/
 npm-debug.log*
+
+# Repository-local development binaries installed by just setup
+.tools/

@@ -10,7 +10,8 @@ just lint
 just test
 ```
 
-`just setup` runs `npm ci` and installs locked Python dependencies. The npm
+`just setup` runs `npm ci`, installs locked Python dependencies, and downloads
+the pinned actionlint binary into the ignored `.tools/` directory. The npm
 `prepare` script activates [Husky](https://typicode.github.io/husky/get-started.html)
 for this clone. After pulling changes to npm dependencies, run `npm ci` again.
 Keep `package-lock.json` and `services/backend/uv.lock` tracked.
@@ -19,7 +20,7 @@ Keep `package-lock.json` and `services/backend/uv.lock` tracked.
 
 | Hook | Check |
 |---|---|
-| `pre-commit` | `just lint`: backend Ruff lint/format, research integrity, tooling syntax, and staged/unstaged whitespace |
+| `pre-commit` | `just lint`: backend Ruff lint/format, research integrity, actionlint workflow checks, tooling syntax, and staged/unstaged whitespace |
 | `commit-msg` | commitlint enforces the message convention below |
 | `pre-push` | `just test`: backend, agent-tool, and commit-rule regression tests |
 
@@ -27,6 +28,12 @@ Lint checks the working tree and does not change or stage files. Run `just forma
 to format backend Python deliberately. The hooks require `just`, `uv`, `node`,
 and `npm` on the Git process's PATH; run setup from the same environment used by
 your terminal or Git client. Tests do not contact data providers or need a database.
+
+`just lint-workflows` runs only the GitHub Actions checks. Setup downloads the
+pinned binary using actionlint's [official installer](https://github.com/rhysd/actionlint/blob/v1.7.12/docs/install.md#download-script)
+and requires Bash, curl, and tar on macOS/Linux; Go is not required. Lint itself
+does not download tools. Optional ShellCheck/Pyflakes integrations are disabled
+so workflow checks do not depend on additional tools being installed.
 
 ## Commit convention
 

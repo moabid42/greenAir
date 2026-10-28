@@ -1,3 +1,5 @@
+actionlint_version := "1.7.12"
+
 default:
     @just --list
 
@@ -5,6 +7,7 @@ default:
 setup:
     npm ci
     uv sync --locked --directory services/backend
+    bash scripts/setup-actionlint.sh {{actionlint_version}}
 
 # Start the local API with reload enabled.
 dev:
@@ -16,8 +19,8 @@ test:
     python3 -m unittest discover -s agents/tests -v
     npm run test:commits
 
-# Check backend style, research integrity, tooling syntax, and whitespace.
-lint:
+# Check backend style, research integrity, workflows, tooling syntax, and whitespace.
+lint: lint-workflows
     uv run --locked --directory services/backend ruff check .
     uv run --locked --directory services/backend ruff format --check .
     python3 agents/context.py check
@@ -26,8 +29,13 @@ lint:
     node --check scripts/check-whitespace.mjs
     node --check scripts/tests/ci-range.test.mjs
     node --check scripts/tests/commitlint.test.mjs
+    bash -n scripts/setup-actionlint.sh
     git diff --check
     git diff --cached --check
+
+# Check GitHub Actions workflows with the pinned linter installed by setup.
+lint-workflows:
+    .tools/actionlint/{{actionlint_version}}/actionlint -shellcheck= -pyflakes=
 
 # Format backend Python files.
 format:
