@@ -52,6 +52,15 @@ RAW_KEYS: dict[str, Phenomenon] = {
     "uv intensity": P.UV_INTENSITY,
     "beleuchtungsstärke": P.ILLUMINANCE,
     "illuminance": P.ILLUMINANCE,
+    # Open-Meteo hourly variables and Bright Sky weather fields (checked 2026-10-28).
+    "temperature_2m": P.TEMPERATURE,
+    "relative_humidity_2m": P.RELATIVE_HUMIDITY,
+    "relative_humidity": P.RELATIVE_HUMIDITY,
+    "wind_speed_10m": P.WIND_SPEED,
+    "pm2_5": P.PM2_5,
+    "nitrogen_dioxide": P.NO2,
+    "ozone": P.O3,
+    "uv_index": P.UV_INDEX,
 }
 
 
@@ -84,8 +93,9 @@ CONVERSIONS: dict[Phenomenon, dict[str, Converter]] = {
     P.NO2: _MASS,
     P.O3: _MASS,
     P.WIND_SPEED: {"m/s": _identity, "km/h": lambda v: v / 3.6},
-    P.PRECIPITATION: {"mm/h": _identity},
-    P.UV_INDEX: {"1": _identity, "index": _identity},
+    # Open-Meteo and Bright Sky report "mm" per hourly step; only valid for hourly values.
+    P.PRECIPITATION: {"mm/h": _identity, "mm": _identity},
+    P.UV_INDEX: {"1": _identity, "index": _identity, "": _identity},
     P.UV_INTENSITY: {"µw/cm²": _identity, "µw/cm2": _identity},
     P.ILLUMINANCE: {"lx": _identity, "lux": _identity},
 }

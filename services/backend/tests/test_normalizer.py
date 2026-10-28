@@ -117,3 +117,22 @@ def test_humid_pm_uses_nearest_humidity_of_the_same_station_within_window():
         if QcFlag.HUMID_PM in obs.qc_flags
     }
     assert humid == {("box-1", T0 + timedelta(minutes=2))}
+
+
+@pytest.mark.parametrize(
+    ("key", "value", "unit", "phenomenon", "expected"),
+    [
+        ("pm2_5", 12.7, "μg/m³", P.PM2_5, 12.7),
+        ("nitrogen_dioxide", 21.0, "μg/m³", P.NO2, 21.0),
+        ("ozone", 60.0, "μg/m³", P.O3, 60.0),
+        ("uv_index", 2.5, "", P.UV_INDEX, 2.5),
+        ("temperature_2m", 9.3, "°C", P.TEMPERATURE, 9.3),
+        ("wind_speed_10m", 18.0, "km/h", P.WIND_SPEED, 5.0),
+        ("precipitation", 0.4, "mm", P.PRECIPITATION, 0.4),
+        ("relative_humidity", 99, "%", P.RELATIVE_HUMIDITY, 99.0),
+    ],
+)
+def test_open_meteo_and_bright_sky_keys(key, value, unit, phenomenon, expected):
+    obs = normalize(raw(key=key, value=value, unit=unit, kind="model"))
+    assert (obs.phenomenon, obs.kind, obs.qc_flags) == (phenomenon, "model", ())
+    assert obs.value == pytest.approx(expected)
