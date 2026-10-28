@@ -3,6 +3,18 @@
 Build from the collected Green City Heilbronn research. Keep data selection,
 interpretation, and verification traceable throughout development.
 
+## Application foundation
+
+The backend uses Python/FastAPI in `services/backend`. Read
+[docs/architecture.md](docs/architecture.md) for the implementation mapping of
+[docs/research.md](docs/research.md), and the backend's own
+[AGENTS.md](services/backend/AGENTS.md) before backend changes. Run `just setup`
+to install locked dependencies, `just dev` to serve locally, and `just test` /
+`just lint` for checks. Use the root `justfile` for development tasks.
+Domain modules are reserved boundaries; implement only
+the scope requested for the current task. The web client and infrastructure
+have reserved folders; no frontend framework, broker, or database is wired up.
+
 ## Start with focused context
 
 - Read [agents/STATE.md](agents/STATE.md) for decisions and reusable findings.

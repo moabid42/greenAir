@@ -7,9 +7,10 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 
 ## Current foundation — 2026-10-28
 
-- The repository currently contains research and agent tooling; no application
-  stack, product scope, data adapter, or downloaded measurement archive has been
-  established. Choose implementation details from subsequent development tasks.
+- The repository contains research, agent tooling, and an initial FastAPI backend
+  in `services/backend`. Python 3.12+, Pydantic 2, and uv are selected. The app
+  exposes liveness and OpenAPI; data adapters, storage, scoring, and workers are
+  reserved modules. No measurement archive has been downloaded.
 - The canonical research files are the 2026-10-28 detailed reference and endpoint
   CSV linked in [AGENTS.md](../AGENTS.md). The initial catalog has 101 endpoints
   across 13 source cards, including 45 ATRAI collection URLs across all cities.
@@ -24,7 +25,27 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 
 ## Active integrations and decisions
 
-None recorded yet. When work begins, replace this sentence with short entries:
+### Backend scaffold — 2026-10-28
+
+- Decision: implement the target architecture initially as modules in one Python
+  backend service. FastAPI is the user's explicit choice. Keep pollers/workers
+  outside API startup; defer deployment splitting, bus choice, database drivers,
+  and actual feature implementations.
+- Task runner: use the root `justfile` for setup, development, tests, lint, and
+  formatting, per the user's preference. Run `just` to list recipes.
+- Structure and rationale: [architecture mapping](../docs/architecture.md),
+  [service setup](../services/backend/README.md),
+  [architecture proposal](../docs/research.md).
+- Evidence: local research reconciliation only; no external data-source probe.
+  UBA scope/stations, source-specific QC, and proposed polling rates still need
+  integration checks. MobiData counter candidates already appear in reference §10.2.
+- Local validation: `just lint` and `just test` passed on Python 3.13.5:
+  four backend tests plus twelve existing agent-tool tests. Health/OpenAPI,
+  settings precedence, and allowed/disallowed CORS origins were exercised.
+- Next action: inspect one source, record its contract, and implement a thin
+  ingestion-to-storage slice when requested.
+
+Use this format for additional short entries:
 
 ```text
 ### <source/feature> — <YYYY-MM-DD>
