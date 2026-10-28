@@ -7,6 +7,9 @@ application is scaffolded on `main` yet.
 
 See the [architecture mapping](../../docs/architecture.md).
 
+This README documents **both frontends**: the public web client ([Expected API endpoints](#expected-api-endpoints)) and the
+admin frontend ([Admin frontend](#admin-frontend)). If you are new here, read `readme_before_readme.txt` in this folder first.
+
 ## Expected API endpoints
 
 Every HTTP interface the web client (EcoMAB Heilbronn) uses or expects: what each endpoint
@@ -554,3 +557,314 @@ says "Live forecast", so the pill alone does not prove the backend is in use.)
   a regular lng/lat grid will be required again.
 - **Street scores (section 6)** come from a proposed contract. The shapes are validated by the client but have never been
   run against a real service. Treat section 6 as a proposal to agree on, not a finished interface.
+
+## Admin frontend
+
+A second frontend for the people who run the platform: it monitors the data endpoints, shows incoming client data and
+reviews system health. It shares the web client's visual identity (palette, Inter, logo) but is a **separate app**, so its
+code and endpoint settings never ship inside the public phone app.
+
+- **Where it lives:** the `admin/` app in the frontend workspace (Next.js, `npm run dev` serves it on port 3200). It is
+  **not in this repository yet**; its intended place is `apps/admin`.
+- **Source of truth (in that app):** `src/lib/types.ts` (shapes), `src/lib/defaults.ts` (the endpoint catalogue),
+  `src/lib/health.ts` (status rules), `src/lib/validate.ts` (input rules) and `src/lib/sim.ts` (the shape of the simulated
+  client data).
+- **Works without the backend today.** It checks real endpoints from the browser and labels everything else as simulated.
+  This section describes what it needs from the backend to make the simulated parts real.
+
+### Contents
+
+- [A1. What the admin does today](#a1-what-the-admin-does-today)
+- [A2. Backend status at a glance](#a2-backend-status-at-a-glance)
+- [A3. How endpoint checks work (what the backend must allow)](#a3-how-endpoint-checks-work-what-the-backend-must-allow)
+- [A4. Proposed admin API](#a4-proposed-admin-api)
+- [A5. Access control and security expectations](#a5-access-control-and-security-expectations)
+- [A6. Conventions for the admin API](#a6-conventions-for-the-admin-api)
+- [A7. Failure behaviour in the admin](#a7-failure-behaviour-in-the-admin)
+- [A8. Acceptance checklist](#a8-acceptance-checklist)
+- [A9. Open questions](#a9-open-questions)
+
+### A1. What the admin does today
+
+| Section | What it shows or does |
+|---|---|
+| **Overview** | Counts of healthy and degraded endpoints, total requests, client data received (each with a trend), the endpoint health table, the selected endpoint's details (URL, status, last check, average latency, uptime, edit, redirect), the aggregated client-data chart (records and unique clients over time) and the breakdown by data type. On a window of at least 1360×720 it is one screen with no page scroll. |
+| **Endpoints** | Every endpoint the web client uses or expects. Search, filter by status and source, sort, add, edit, remove, check now, redirect configuration and a latency history per endpoint. |
+| **Client data** | Records, unique clients and requests for a date range (7, 14, 30 or 90 days) with trends against the previous period, a chart, the breakdown by type, recent uploads with filters and CSV export. |
+| **Settings** | Backend URL, check interval, timeout and "slow" threshold, default date range, export and import of the configuration, restore defaults, clear history. |
+
+**Real or simulated**
+
+| Part | Source today |
+|---|---|
+| Endpoint status, latency, last check, uptime, recent checks, healthy and degraded counts | **Real.** A timed `GET` from the admin's browser to each URL. |
+| Total requests, client data received, unique clients, data types, recent uploads | **Simulated sample**, labelled "Simulated" everywhere, including exports. Nothing produces this data yet. |
+| Add, edit, remove endpoint and redirect settings | **Saved in the admin's browser only** (local storage). They change what the admin checks, not what the web client calls. |
+| Sign-in | **None.** Anyone who can open the admin can use it. See A5. |
+
+### A2. Backend status at a glance
+
+| Capability | Used by the admin today | In `services/backend` |
+|---|---|---|
+| `GET /health` and the three web client endpoints (`/api/v1/day`, `/grid`, `/sensors`) are checked | **Yes**, from the browser | `/health` only |
+| Server-side registry of endpoints and their health history | No (the browser keeps its own) | No |
+| Create, update, delete endpoints and set redirects | No (local only) | No |
+| Request totals per day | No (simulated) | No |
+| Client-data summary, time series, recent uploads | No (simulated) | No |
+| Client-data ingestion (clients send data to the platform) | No | No |
+| Authentication and roles for admin routes | No | No |
+
+The first row is the only one that works end to end. Everything else is a proposal in A4 for the team to agree on.
+
+### A3. How endpoint checks work (what the backend must allow)
+
+Each check is a plain request from the admin's browser. For an endpoint to be reported accurately:
+
+| Rule | Detail |
+|---|---|
+| Method and headers | `GET` with only `Accept: application/json`; no cookies, no credentials, no custom headers (so no CORS preflight). Checked endpoints therefore must be readable without authentication. |
+| Success | Any `2xx`. Redirects are followed by the browser. |
+| Latency | Time until the **response headers** arrive. The body is never downloaded, so large responses such as `/api/v1/grid` (about 600 KB) cost nothing. |
+| Timeout | 8 seconds by default (1–30 s in Settings). A timeout counts as offline. |
+| Frequency | Every 60 seconds by default (off, 30 s, 1 min or 5 min), only while an admin tab is open: about ten small requests a minute per open admin. |
+| Placeholders | `{base}` is the backend URL from Settings and `{today}` is today's date (`YYYY-MM-DD`). The default catalogue checks `{base}/api/v1/day?date={today}` and `{base}/api/v1/grid?date={today}`. |
+| **CORS** | **The admin's origin must be in `GREENAIR_CORS_ORIGINS`.** Without it the browser hides the response: the admin can still tell the server is reachable, but it cannot read the status code or tell success from an error, and says so ("status hidden by CORS"). |
+
+**Status rules** (`src/lib/health.ts`). The admin shows one of four states, and a server-side implementation should use the
+same rules so both views agree:
+
+| Status | Rule |
+|---|---|
+| `unconfigured` | No URL, or a `{base}` URL with no backend URL set. Not counted as healthy or degraded. |
+| `offline` | The latest check failed: non-2xx, timeout or unreachable. |
+| `degraded` | The latest check passed but took longer than **1,000 ms** (configurable), or one of the previous four checks failed. |
+| `healthy` | Everything else. |
+
+**Uptime** is successful checks divided by all checks in the window. **Average latency** is taken over the successful
+checks. In the browser both only cover checks made in that browser since its first one; a server-side check history
+would replace this.
+
+**Default catalogue** (all `GET`): backend health `/health`, day forecast `/api/v1/day`, place grid `/api/v1/grid`,
+sensors `/api/v1/sensors`, Open-Meteo weather and air quality, atrai.bike cycling data, Photon address search, the
+OpenFreeMap base map style, and a planned wearable sync `/api/wearables` (no URL: no such endpoint exists).
+
+### A4. Proposed admin API
+
+> **Status: proposal, not implemented, not called by the admin yet.** Today the admin uses the simulated figures in A1.
+> These endpoints would make them real. All admin routes live under `/api/v1/admin` and require authentication (A5).
+
+#### A4.1 `GET /api/v1/admin/endpoints` — registry with server-side health
+
+Replaces the browser-only history. Response `200`:
+
+```json
+{
+  "generatedAt": "2026-10-28T21:54:00Z",
+  "endpoints": [
+    {
+      "id": "backend-day",
+      "name": "Day forecast",
+      "path": "/api/v1/day",
+      "url": "https://api.example.org/api/v1/day?date={today}",
+      "category": "environment",
+      "origin": "backend",
+      "note": "City-wide hourly conditions.",
+      "redirect": { "mode": "off", "target": "" },
+      "health": {
+        "status": "healthy",
+        "checkedAt": "2026-10-28T21:53:30Z",
+        "latencyMs": 184,
+        "avgLatencyMs": 210,
+        "p95LatencyMs": 380,
+        "uptimePct": 99.8,
+        "checks": 4320,
+        "windowDays": 30,
+        "lastError": null
+      }
+    }
+  ]
+}
+```
+
+| Field | Rules |
+|---|---|
+| `id` | Stable, URL-safe slug. |
+| `name` | 2–40 characters, unique (case-insensitive). |
+| `path` | Optional label, starts with `/`, at most 80 characters. Derived from the URL's path when empty. |
+| `url` | `http(s)` URL; may contain `{today}`. Empty means unconfigured. |
+| `category` | `backend`, `environment`, `weather`, `air`, `wearable`, `geo`, `map`, `bike` or `other`. |
+| `origin` | `backend`, `third-party`, `planned` or `custom`. |
+| `note` | At most 200 characters. |
+| `redirect` | `mode` is `off`, `on-failure` or `always`; `target` is an `http(s)` URL (required unless `off`). |
+| `health.status` | `healthy`, `degraded`, `offline` or `unconfigured` (rules in A3). `latencyMs` and `lastError` are `null` when the last check failed or none exists. |
+
+#### A4.2 Managing endpoints
+
+| Method and path | Purpose | Success |
+|---|---|---|
+| `POST /api/v1/admin/endpoints` | Create an endpoint. Body: `name`, `path` (optional), `url`, `category`, `note` (optional). | `201` and the endpoint |
+| `PUT /api/v1/admin/endpoints/{id}` | Update the same fields. If `url` changes, the health history resets. | `200` and the endpoint |
+| `DELETE /api/v1/admin/endpoints/{id}` | Remove it and its history. | `204` |
+| `PUT /api/v1/admin/endpoints/{id}/redirect` | Set `{ "mode", "target" }`. | `200` and the endpoint |
+| `POST /api/v1/admin/endpoints/{id}/check` | Optional: run a check now and return the result. | `200` with a `health` object |
+
+Validation errors return `422` with one message per field, using the form's field names, so the admin can show them
+next to the input:
+
+```json
+{ "errors": { "name": "Another endpoint already has this name.", "url": "Remove \"api_key\" from the URL." } }
+```
+
+The rules the admin already enforces (`src/lib/validate.ts`), and the backend should enforce again:
+
+- **URL:** valid `http` or `https`; **no username or password**; **no secret-looking query keys** (`api_key`, `key`, `token`,
+  `access_token`, `auth`, `authorization`, `secret`, `password`, `passwd`, `pwd`, `signature`, `sig`); not already used by
+  another endpoint. Credentials must never be stored in an endpoint URL.
+- **Redirect target:** valid `http(s)` URL under the same secret rules, different from the endpoint's own URL, required
+  unless the mode is `off`; `https` is recommended.
+- **Redirect meaning (to decide, see A9):** `off` does nothing; `on-failure` sends requests for the endpoint to the target
+  while its status is `offline`; `always` sends every request to the target, for example during a migration.
+
+#### A4.3 `GET /api/v1/admin/summary` — the four overview cards
+
+| Param | Format |
+|---|---|
+| `from`, `to` | `YYYY-MM-DD`, inclusive, Europe/Berlin days. The admin asks for the last 7, 14, 30 or 90 days ending today. |
+
+Response `200`. `previous` is the period of the same length directly before `current` (used for "vs. previous 30
+days"); it is `null` if there is not enough history.
+
+```json
+{
+  "timezone": "Europe/Berlin",
+  "from": "2026-09-29", "to": "2026-10-28",
+  "current": {
+    "requests": 12480,
+    "records": 2847,
+    "uniqueClients": 1180,
+    "types": { "activity": 1420, "environment": 855, "wearable": 572 }
+  },
+  "previous": { "requests": 10065, "records": 2410, "uniqueClients": 1012, "types": { "activity": 1190, "environment": 730, "wearable": 490 } }
+}
+```
+
+- `requests`: all requests to the public API in the period, excluding health checks and admin traffic so the number
+  reflects real use.
+- `uniqueClients`: **distinct** opaque client ids in the period, not the sum of daily counts.
+- `types` always sums to `records`.
+
+#### A4.4 `GET /api/v1/admin/client-data/timeseries` — the chart
+
+Same `from` and `to`. Response `200`: one entry per day, **continuous** (days with no data are present with zeros).
+
+```json
+{
+  "timezone": "Europe/Berlin",
+  "days": [
+    { "date": "2026-10-27", "records": 96, "clients": 60, "requests": 410,
+      "types": { "activity": 48, "environment": 29, "wearable": 19 } }
+  ]
+}
+```
+
+Rules: `types.activity + types.environment + types.wearable === records`; `clients <= records`; at most 180 days.
+
+#### A4.5 `GET /api/v1/admin/client-data/uploads` — recent uploads
+
+| Param | Meaning |
+|---|---|
+| `limit` | Default 20, maximum 100. |
+| `type` | Optional: `activity`, `environment` or `wearable`. |
+| `status` | Optional: `accepted`, `partial` or `rejected`. |
+| `before` | Opaque cursor from the previous page's `nextCursor`. |
+
+```json
+{
+  "uploads": [
+    { "id": "u_8f2c", "receivedAt": "2026-10-28T21:40:12Z", "source": "Environmental data",
+      "type": "environment", "records": 34, "clients": 21, "status": "accepted" }
+  ],
+  "nextCursor": null
+}
+```
+
+`status`: `accepted` (all records stored), `partial` (some rejected) or `rejected` (none stored). Newest first. Aggregates
+only: no per-person rows, no client ids.
+
+#### A4.6 Client-data ingestion (clients to backend) — needs a team decision first
+
+Nothing sends client data to a server today: the web client keeps wearable and location data on the device, and its
+privacy notes say so. The three data types in the admin (`activity`, `environment`, `wearable`) are a design assumption.
+A possible shape, **proposal only**:
+
+`POST /api/v1/client-data` — a batch of one type, answered with `202` and `{ "accepted": 34, "rejected": 0 }`.
+
+```json
+{ "schemaVersion": 1, "clientId": "7b1f…", "type": "wearable", "sentAt": "2026-10-28T21:40:00Z",
+  "records": [ { "at": "2026-10-28T21:39:00Z", "metric": "heart_rate", "value": 128, "unit": "bpm" } ] }
+```
+
+If this is built, it must come with: an explicit opt-in in the web client and an updated privacy notice; an **opaque,
+rotating client id** (no accounts, no device identifiers); no names and no precise location; size and rate limits; a
+validation schema per type; a retention period; and a way for a client to delete its data. Please do not build it before
+the team agrees on these.
+
+### A5. Access control and security expectations
+
+**The admin is not access-protected today.** There is no sign-in, no roles and no server-side check, and the app says so in
+its sidebar, on the Overview and in Settings. Until the backend enforces access, it must be kept on a private network or
+behind an authenticating proxy. For the admin API (A4) we expect:
+
+- **Authentication on every `/api/v1/admin/*` route.** Public routes (`/api/v1/day`, `/grid`, `/sensors`, `/health`) stay
+  open. Suggested: OpenID Connect (authorization code with PKCE) or a short-lived signed token; `401` when not signed in.
+  The admin currently sends no credentials and has no login screen; one has to be added when this exists.
+- **Roles.** At least `viewer` (read-only: summary, series, uploads, registry) and `admin` (create, update, delete, redirect).
+  `403` when the role is not enough.
+- **CORS** for admin routes limited to the admin's own origin, never `*`.
+- **Audit log** of every change to endpoints and redirects: who, when, what changed.
+- **No secrets in responses**, and none accepted in endpoint URLs (rules in A4.2).
+- **Aggregate data only** on client-data routes. Hide or merge groups too small to be anonymous if a breakdown could single
+  someone out.
+- HTTPS only; rate limits on the admin routes; `Cache-Control: private, no-store` on admin responses.
+
+### A6. Conventions for the admin API
+
+| Topic | Rule |
+|---|---|
+| Format | JSON, UTF-8. |
+| Days | `YYYY-MM-DD`, Europe/Berlin day boundaries. Ranges are inclusive and at most 180 days. |
+| Instants | ISO 8601 UTC with `Z`. |
+| Errors | Standard status codes. `422` carries `{ "errors": { "<field>": "<message>" } }`; other errors carry `{ "detail": "…" }`. |
+| Compression | gzip or brotli. |
+| Versioning | Under `/api/v1/admin`. A breaking change needs `/api/v2`; additive fields are safe, the admin ignores unknown fields. |
+
+### A7. Failure behaviour in the admin
+
+| Situation | Admin result |
+|---|---|
+| A checked endpoint is down, slow or times out | That row shows Offline or Degraded with the reason; counts and trends update. |
+| Backend URL not set | The greenAir endpoints show Not configured instead of failing. |
+| Admin API unreachable (when it exists) | Keep showing the browser's own endpoint checks and label the rest as unavailable. Never show old numbers as live. |
+| Admin API missing | Today's behaviour: simulated figures, labelled as such. |
+
+### A8. Acceptance checklist
+
+- [ ] The admin's origin is in `GREENAIR_CORS_ORIGINS`, so checks can read status codes.
+- [ ] `/health` and the three web client endpoints answer `GET` with `2xx` and no authentication, and respond within a second
+      in normal conditions.
+- [ ] *(Admin API)* every `/api/v1/admin/*` route requires authentication and enforces roles.
+- [ ] *(Admin API)* `endpoints`, `summary`, `client-data/timeseries` and `client-data/uploads` return the shapes in A4, with
+      continuous day series, `types` summing to `records`, and `uniqueClients` counted as distinct clients.
+- [ ] *(Admin API)* endpoint changes validate with the same rules as A4.2 and are written to an audit log.
+- [ ] *(Ingestion)* not started before the privacy points in A4.6 are agreed.
+
+### A9. Open questions
+
+- **Who checks the endpoints?** Browser checks only measure what that admin can reach. A server-side scheduler (and where it
+  runs) would give real uptime history; the registry in A4.1 assumes one.
+- **What does a redirect do?** An HTTP 307 to the target, or a proxy on the backend? And who is allowed to switch it on?
+- **Does client-data ingestion exist at all,** and with which data types and consent flow? Until then the Client data page
+  stays simulated.
+- **What counts as a request** for "Total requests": public API calls only, per endpoint, per client?
+- **Who signs in to the admin** and with which identity provider?
+- **Where is the admin hosted,** and is it reachable from the public internet?
