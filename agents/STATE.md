@@ -99,6 +99,20 @@ Still uncertain: all constants are untuned defaults. Open points (wrong §3.1
 example value, PM10 without weight) are listed at the end of the draft.
 Next action: build the city level `L(t)` from live station data (§4.1).
 
+### Processing box — 2026-10-28
+
+Decision and reason: the team splits the architecture; Mouad owns ingestion,
+this work owns processing (normalizer/QC, temporal and spatial builders,
+forecaster, scoring engine). Processing is pure Python without database or
+broker, so each stage has an in-process e2e test from fixture files.
+Contract / implementation: [processing](../docs/processing.md),
+`RawObservation` -> `Observation` in `services/backend/app/schemas/observations.py`,
+JSON Schema in `docs/contracts/`.
+Evidence: offline only. The captured ATRAI fixture is historical (2026-07-08).
+Still uncertain: the contract needs agreement with ingestion before adapters
+depend on it.
+Next action: normalizer and QC.
+
 Use this format for additional short entries:
 
 ```text
