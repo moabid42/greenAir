@@ -63,7 +63,11 @@ def parse_hour(t: str) -> datetime:
 def page(items: list, page_size: int, page_token: str) -> tuple[list, str]:
     # A versioned cursor, deliberately independent of future database row identities.
     if page_token:
-        if not page_token.startswith("mock-v1-") or not page_token[8:].isdigit():
+        if (
+            not page_token.startswith("mock-v1-")
+            or not page_token[8:].isascii()
+            or not page_token[8:].isdigit()
+        ):
             raise HTTPException(400, "Use next_page_token from a previous response.")
         offset = int(page_token[8:])
         if offset > len(items):

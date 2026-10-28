@@ -122,6 +122,7 @@ def test_street_score_ids_detail_and_best_times(client):
         ("/v1/sensors/missing", 404, "NOT_FOUND"),
         ("/v1/sensors?page_size=101", 400, "INVALID_ARGUMENT"),
         ("/v1/sensors?page_token=garbage", 400, "INVALID_ARGUMENT"),
+        ("/v1/sensors?page_token=mock-v1-²", 400, "INVALID_ARGUMENT"),
         ("/v1/segments?bbox=nan,0,2,1", 400, "INVALID_ARGUMENT"),
         ("/v1/scores?profile=cycling&t=2026-02-30T12:00:00Z", 400, "INVALID_ARGUMENT"),
         ("/v1/scores?profile=cycling&t=2026-10-29T12:30:00Z", 400, "INVALID_ARGUMENT"),

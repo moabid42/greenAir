@@ -173,3 +173,22 @@ offline. Record a later successful check alongside the earlier failure.
   [the API contract](../docs/backend-api.md). `just openapi` exports JSON on stdout.
 - Standalone openapi-spec-validator accepted the generated OpenAPI 3.1 document;
   route/error/example tests keep the schema synchronized with runtime behavior.
+
+### Containerized demo backend — 2026-10-28
+
+- `compose.yaml` runs a separate `greenair-demo` backend on localhost:8000. The
+  production image installs locked dependencies, runs as UID 10001, excludes `.env`
+  and tests, and supports a read-only filesystem. No database or broker is required.
+- Tasks: `just backend-up`, `backend-smoke`, `backend-logs`, `backend-down`.
+  [Service instructions](../services/backend/README.md) cover ports and CORS.
+- Evidence: local Docker image built and reported healthy; the HTTP smoke script
+  exercised all 20 documented GET routes, Swagger/ReDoc/OpenAPI, mock provenance,
+  gzip, CORS, and 400/404 errors. UID 10001 and absence of `.env`/tests were checked
+  inside the running container. `just lint` and `just test` passed (144 backend,
+  12 research tooling, 32 commit tooling tests). Standalone OpenAPI validation passed.
+- CI now builds the container and runs the same HTTP smoke script. Remote CI results
+  remain separate from local validation. Real pipeline integration, SSE, and tiles
+  are future work; no live environmental observations were claimed in this task.
+
+- Browser verification: Chrome rendered all 20 Swagger operations and executed
+  GetDay through Try it out, returning HTTP 200 with 24 mock hourly slots.

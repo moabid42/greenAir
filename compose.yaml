@@ -1,0 +1,21 @@
+name: greenair-demo
+
+services:
+  backend:
+    image: greenair-backend:demo
+    build:
+      context: ./services/backend
+    ports:
+      - "${GREENAIR_BIND_HOST:-127.0.0.1}:${GREENAIR_PORT:-8000}:8000"
+    environment:
+      GREENAIR_CORS_ORIGINS: '${GREENAIR_CORS_ORIGINS:-["http://localhost:3000","http://localhost:5173"]}'
+      GREENAIR_STATION_DATA_MODE: "${GREENAIR_STATION_DATA_MODE:-mock}"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    restart: unless-stopped
