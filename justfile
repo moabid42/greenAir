@@ -40,3 +40,7 @@ lint-workflows:
 # Format backend Python files.
 format:
     uv run --locked --directory services/backend ruff format .
+
+# Print the dynamically generated OpenAPI JSON (no tracked snapshot).
+openapi:
+    uv run --locked --directory services/backend python -c 'import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))'
