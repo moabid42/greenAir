@@ -6,6 +6,11 @@ import test from "node:test";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const cli = fileURLToPath(new URL("../../node_modules/@commitlint/cli/cli.js", import.meta.url));
 
+// Git hooks export GIT_DIR and related variables; keep commitlint on this checkout.
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("GIT_")) delete process.env[name];
+}
+
 function check(message) {
   const result = spawnSync(process.execPath, [cli], {
     cwd: root,
