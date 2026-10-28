@@ -1,6 +1,14 @@
-# EcoMAB Heilbronn
+# Web client
 
-The best time and place in Heilbronn to **run, ride or walk**: heat, air quality (PM2.5 + NO₂), wind, rush hour and daylight in one 0–100 score, on a real map.
+The MapLibre web client for greenAir (EcoMAB Heilbronn): the best time and place to
+**run, ride or walk**, from heat, air quality (PM2.5 + NO₂), wind, rush hour and daylight
+in one 0–100 score. It consumes the backend's REST API, then vector tiles and score update
+SSE once those interfaces exist. Until the backend serves data it runs in demo mode.
+
+The endpoints it expects, with schemas and failure behaviour, are documented in
+[API_ENDPOINTS.md](API_ENDPOINTS.md).
+
+See the [architecture mapping](../../docs/architecture.md).
 
 Built for the Green City Hackathon Heilbronn, Oct 2026. **Mobile first**: it is a phone app (installable PWA). On a big screen it shows as a phone-sized column.
 
