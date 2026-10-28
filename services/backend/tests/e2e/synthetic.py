@@ -65,3 +65,22 @@ def station_records(start: datetime = START, hours: int = HOURS) -> list[RawObse
             records.append(raw(station, "PM25", f"{value}", "µg/m³", at))
             records.append(raw(station, "rel. Luftfeuchte", f"{60 + 100 * noise:.1f}", "%", at))
     return records
+
+
+def model_records(
+    start: datetime = START, hours: int = HOURS + 24, factor: float = 0.5
+) -> list[RawObservation]:
+    """Open-Meteo-like PM2.5 model output that underestimates the level by `factor`,
+    for the history and one day ahead."""
+    return [
+        raw(
+            "open-meteo-grid",
+            "pm2_5",
+            round(factor * pm25_level(start + timedelta(hours=step)), 3),
+            "μg/m³",
+            start + timedelta(hours=step),
+            source="open-meteo:air-quality",
+            kind="model",
+        )
+        for step in range(hours)
+    ]
