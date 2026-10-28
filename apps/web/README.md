@@ -638,8 +638,8 @@ A second frontend for the people who run the platform: it monitors the data endp
 reviews system health. It shares the web client's visual identity (palette, Inter, logo) but is a **separate app**, so its
 code and endpoint settings never ship inside the public phone app.
 
-- **Where it lives:** the `admin/` app in the frontend workspace (Next.js, `npm run dev` serves it on port 3200). It is
-  **not in this repository yet**; its intended place is `apps/admin`.
+- **Where it lives:** `apps/admin` (Next.js, `npm run dev` serves it on port 3200), on the `web/ecomab-frontend` branch
+  until it is merged. Its own README is `apps/admin/README.md`.
 - **Source of truth (in that app):** `src/lib/types.ts` (shapes), `src/lib/defaults.ts` (the endpoint catalogue),
   `src/lib/health.ts` (status rules), `src/lib/validate.ts` (input rules) and `src/lib/sim.ts` (the shape of the simulated
   client data).

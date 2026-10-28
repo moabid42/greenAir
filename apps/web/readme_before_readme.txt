@@ -36,8 +36,8 @@ THIRD - the admin frontend
     nothing today). Please do not build it before we agree (README, A4.6).
 
 Where the code is
-  - Web client: branch web/ecomab-frontend (apps/web).
-  - Admin: not in the repository yet (planned: apps/admin).
+  - Web client: apps/web, on branch web/ecomab-frontend.
+  - Admin: apps/admin, on the same branch.
 
 If anything in the README does not fit how the backend can work, tell us. We will change
 the frontend or the document together. Please keep the README and the code in step with
