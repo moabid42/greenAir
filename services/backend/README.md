@@ -93,3 +93,13 @@ uv run --locked --directory services/backend python -m app.processing.pipeline I
 See [processing](../../docs/processing.md), [scoring](../../docs/scoring.md), and
 [contribution checks](../../CONTRIBUTING.md). Tests are offline; the additional
 `just backend-smoke` exercises every documented route over real container HTTP.
+
+## Optional ingestion storage
+
+The API starts without a database and continues to use the demo serving provider.
+Raw-first storage is available independently; see
+[storage contract and validation](../../docs/integrations/raw-storage.md).
+Run `GREENAIR_DATABASE_URL=... just migrate` from the repository root to migrate
+an explicitly selected PostgreSQL/PostGIS/TimescaleDB database. `just test-storage`
+checks migrations and persistence in a disposable container and removes it afterward.
+No worker, upstream fetch or migration starts as part of API startup.
