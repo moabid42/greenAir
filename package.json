@@ -1,0 +1,18 @@
+{
+  "name": "greenair-dev-tools",
+  "private": true,
+  "description": "Repository hooks and commit-message checks; not the web client",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "commitlint": "commitlint",
+    "test:commits": "node --test scripts/tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.0.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.7"
+  }
+}

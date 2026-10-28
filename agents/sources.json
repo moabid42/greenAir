@@ -1,0 +1,19 @@
+{
+  "reference": "docs/GREENCITY_HEILBRONN_COMPLETE_DATA_REFERENCE_2026-10-28.md",
+  "catalog": "data/GREENCITY_HEILBRONN_ENDPOINT_CATALOG_2026-10-28.csv",
+  "sources": [
+    {"id": "bike", "card": "senseBox:bike", "sections": ["3"]},
+    {"id": "home", "card": "senseBox:home", "sections": ["5", "15"]},
+    {"id": "heat", "card": "Mobile Datalogger", "sections": ["4"]},
+    {"id": "birds", "card": "Smart Birdhouses", "sections": ["6"]},
+    {"id": "hive", "card": "Smart Beehive", "sections": ["7"]},
+    {"id": "city", "card": "And more: Heilbronn OpenData", "sections": ["8"]},
+    {"id": "library", "card": "And more: Smart City Library", "sections": ["9"]},
+    {"id": "mobility", "card": "And more: MobiData BW", "sections": ["10"]},
+    {"id": "brightsky", "card": "And more: Bright Sky", "sections": ["11"]},
+    {"id": "dwd", "card": "And more: DWD Open Data", "sections": ["12"]},
+    {"id": "open-meteo", "card": "And more: Open-Meteo", "sections": ["13"]},
+    {"id": "govdata", "card": "And more: GovData", "sections": ["14"]},
+    {"id": "opensensemap", "card": "Supporting: openSenseMap", "sections": ["15"]}
+  ]
+}
