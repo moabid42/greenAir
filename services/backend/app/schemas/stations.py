@@ -38,7 +38,7 @@ class StationStatus(StationSnapshot):
 
 
 class StationStatusResponse(BaseModel):
-    source: Literal["opensensemap"] = "opensensemap"
+    source: Literal["opensensemap", "mock"] = "opensensemap"
     grouptag: str
     retrieved_at: datetime
     stale_after_minutes: int

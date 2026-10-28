@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -15,6 +16,8 @@ class Settings(BaseSettings):
 
     app_name: str = "greenAir API"
     cors_origins: list[str] = []
+
+    station_data_mode: Literal["mock", "live"] = "mock"
 
     # Green City stationary senseBoxes; `heilbronn` selects the mobile bike boxes instead.
     opensensemap_base_url: str = "https://api.opensensemap.org"
