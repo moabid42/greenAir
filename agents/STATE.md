@@ -69,6 +69,11 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 - User convention: `verb(scope): short message`, a single line of at most 72
   characters with a required lowercase scope. Lowercase verbs remain flexible.
   Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).
+- User-requested merge exception: standard generated Git/GitHub merge messages
+  and their bodies (for example, `Merge pull request #1 ...` followed by `Dev`)
+  are accepted by the shared commitlint config. Regular and squash commits stay
+  strict; revert/fixup/release exemptions remain disabled. Range checks still
+  validate every regular commit brought in by a merge.
 - Local validation: Husky's actual pre-commit and pre-push wrappers passed lint
   and all 36 tests (4 backend, 12 agent-tool, 20 commit-rule cases). Its commit-msg
   wrapper accepted a valid message and rejected an invalid one. `core.hooksPath`

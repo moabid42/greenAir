@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* The EcoMAB identity, identical to the web client: deep green on mint, Inter, one leaf-and-route logo. */
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter);
+
+  --color-ink: #162c29;
+  --color-ground: #eef5f0;
+  --color-wash: #f0f5f2;
+  --color-line: #e1eae6;
+  --color-lime: #a5e6c8;
+  --color-brand: #075b4a;
+  --color-brand-dark: #054538;
+  --color-mute: #5f7a72;
+
+  --color-bad: #bb5250;
+  --color-warn: #e47152;
+  --color-ok: #dbad36;
+  --color-good: #74b68c;
+  --color-great: #14966f;
+
+  --color-great-soft: #e4f4ea;
+  --color-ok-soft: #fdf3da;
+  --color-bad-soft: #fde8dd;
+
+  --color-chart-1: #075b4a;
+  --color-chart-2: #58b68f;
+  --color-chart-3: #b4e3c9;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--color-ground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  letter-spacing: -0.03em;
+}
+
+:focus-visible {
+  outline: 3px solid #40ad8c;
+  outline-offset: 2px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.sheet-up {
+  animation: sheet-up 0.22s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

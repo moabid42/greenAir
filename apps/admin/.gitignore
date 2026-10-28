@@ -1,0 +1,11 @@
+/node_modules
+/.next/
+/out/
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# The repository root ignores lib/ (a Python template rule). This app's source lives in src/lib, so re-include it.
+!/src/lib/

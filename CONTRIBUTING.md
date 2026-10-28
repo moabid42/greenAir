@@ -68,9 +68,11 @@ npm run commitlint -- --edit /path/to/message.txt
 
 These rules follow [commitlint's configurable conventional format](https://commitlint.js.org/reference/configuration.html),
 with a mandatory scope, flexible verb, and single-line restriction. They apply
-to new commits; existing history is not rewritten. There are no automatic
-merge/revert/fixup exemptions. For squash merges, use a conforming final message;
-automatic merge messages need the same format.
+to new commits; existing history is not rewritten. Standard Git/GitHub merge
+messages, including `Merge pull request #1 from owner/dev` and `Merge branch 'dev'`,
+are exempt and may include a generated body such as `Dev`. Regular commits and
+squash commits still require the convention above; revert, fixup, and release
+messages have no automatic exemptions. Local hooks and CI use the same rule.
 
 ## GitHub Actions
 
