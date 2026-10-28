@@ -45,7 +45,7 @@ def main():
         env = os.environ | {"GREENAIR_DATABASE_URL": url, "GREENAIR_TEST_DATABASE_URL": url}
         prefix = ("uv", "run", "--locked", "--directory", "services/backend")
         run(*prefix, "alembic", "upgrade", "head", env=env)
-        run(*prefix, "pytest", "tests/test_ingestion_foundation.py", "-q", env=env)
+        run(*prefix, "pytest", "tests/test_ingestion_foundation.py", "tests/test_scheduler.py", "-q", env=env)
         run(*prefix, "alembic", "downgrade", "base", env=env)
         remaining = run(
             "docker", "exec", name, "psql", "-U", "postgres", "-d", "greenair_test",
@@ -57,7 +57,7 @@ def main():
         if remaining != "0":
             raise RuntimeError("downgrade left ingestion tables behind")
         run(*prefix, "alembic", "upgrade", "head", env=env)
-        run(*prefix, "pytest", "tests/test_ingestion_foundation.py", "-q", env=env)
+        run(*prefix, "pytest", "tests/test_ingestion_foundation.py", "tests/test_scheduler.py", "-q", env=env)
     finally:
         # Only the unique container created by this invocation; its anonymous
         # volume is disposable. Never issue compose down against existing data.
