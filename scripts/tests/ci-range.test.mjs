@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -114,4 +114,66 @@ test("manual runs check the latest commit, including a root commit", (t) => {
   assert.deepEqual(resolveCommitRange("workflow_dispatch", {}, cwd), { base: "", head: base });
   const head = commit("feat(ci): add a change");
   assert.deepEqual(resolveCommitRange("workflow_dispatch", {}, cwd), { base, head });
+});
+
+function whitespace(cwd, { base, head }, eventName = "push") {
+  return spawnSync(process.execPath, [join(root, "scripts/check-whitespace.mjs"), base, head], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, GITHUB_EVENT_NAME: eventName },
+  });
+}
+
+test("committed whitespace fails even with a clean checkout", (t) => {
+  const { cwd, git, commit } = repository(t);
+  const base = commit("chore(ci): initialize history");
+  writeFileSync(join(cwd, "example.txt"), "new content with trailing spaces  \n");
+  git("add", "example.txt");
+  const head = commit("feat(ci): add content");
+  assert.equal(git("status", "--porcelain"), "");
+  assert.equal(git("diff", "--check"), "");
+  const result = whitespace(cwd, { base, head });
+  assert.notEqual(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /trailing whitespace/);
+});
+
+test("clean additions pass without rechecking historical whitespace", (t) => {
+  const { cwd, git, commit } = repository(t);
+  writeFileSync(join(cwd, "historical.txt"), "historical trailing spaces  \n");
+  git("add", "historical.txt");
+  const base = commit("chore(ci): initialize history");
+  writeFileSync(join(cwd, "new.txt"), "clean content\n");
+  git("add", "new.txt");
+  const head = commit("feat(ci): add clean content");
+  const result = whitespace(cwd, { base, head });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+test("pull request whitespace checks exclude changes made only on the base branch", (t) => {
+  const { cwd, git, commit } = repository(t);
+  writeFileSync(join(cwd, "historical.txt"), "historical trailing spaces  \n");
+  git("add", "historical.txt");
+  commit("chore(ci): initialize history");
+  git("checkout", "-b", "feature");
+  writeFileSync(join(cwd, "new.txt"), "clean feature content\n");
+  git("add", "new.txt");
+  const head = commit("feat(ci): add clean feature content");
+  git("checkout", "main");
+  writeFileSync(join(cwd, "historical.txt"), "clean historical content\n");
+  git("add", "historical.txt");
+  const base = commit("fix(ci): clean up base branch content");
+  const result = whitespace(cwd, { base, head }, "pull_request");
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  // Comparing the two tips directly would incorrectly flag historical content.
+  assert.notEqual(whitespace(cwd, { base, head }).status, 0);
+});
+
+test("an initial commit is checked against the empty tree", (t) => {
+  const { cwd, git, commit } = repository(t);
+  writeFileSync(join(cwd, "example.txt"), "root commit trailing spaces  \n");
+  git("add", "example.txt");
+  const head = commit("chore(ci): initialize history");
+  const result = whitespace(cwd, { base: "", head });
+  assert.notEqual(result.status, 0, result.stdout + result.stderr);
+  assert.match(result.stdout, /trailing whitespace/);
 });

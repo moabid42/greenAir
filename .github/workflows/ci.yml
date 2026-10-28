@@ -60,6 +60,12 @@ jobs:
         id: changes
         run: node scripts/ci-range.mjs >> "$GITHUB_OUTPUT"
 
+      - name: Check committed whitespace
+        env:
+          BASE_SHA: ${{ steps.changes.outputs.base }}
+          HEAD_SHA: ${{ steps.changes.outputs.head }}
+        run: node scripts/check-whitespace.mjs "$BASE_SHA" "$HEAD_SHA"
+
       - name: Check commit messages
         env:
           BASE_SHA: ${{ steps.changes.outputs.base }}

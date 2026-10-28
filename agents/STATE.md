@@ -55,6 +55,9 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
   New branches exclude history shared with the default branch; initial/orphan
   branches include root commits. Manual runs check the latest commit. Missing
   previous tips fail explicitly, and deletion events are skipped.
+- CI also [checks committed whitespace](../scripts/check-whitespace.mjs), using
+  PR merge bases, push before/after trees, or the empty tree for initial history.
+  Local lint keeps its staged and unstaged checks.
 - User convention: `verb(scope): short message`, a single line of at most 72
   characters with a required lowercase scope. Lowercase verbs remain flexible.
   Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).

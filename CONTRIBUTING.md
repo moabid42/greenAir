@@ -78,6 +78,11 @@ previous tip fails the check rather than silently checking an incomplete range.
 The same commitlint configuration is used locally and in CI. CI sets `HUSKY=0`
 because it runs checks explicitly.
 
+CI also checks committed whitespace with `git diff --check`: pushes compare the
+before/after trees, pull requests compare their merge base to the head, and
+initial/orphan histories compare the empty tree to the head. This works on a
+clean checkout; local `just lint` retains staged and unstaged whitespace checks.
+
 Workflow files take effect after they are pushed to GitHub. Branch protection
 can require the `Lint, tests, and commit messages` check when enabled in repository
 settings; this setup does not change remote repository settings.

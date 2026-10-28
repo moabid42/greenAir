@@ -23,6 +23,7 @@ lint:
     python3 agents/context.py check
     node --check commitlint.config.cjs
     node --check scripts/ci-range.mjs
+    node --check scripts/check-whitespace.mjs
     node --check scripts/tests/ci-range.test.mjs
     node --check scripts/tests/commitlint.test.mjs
     git diff --check
