@@ -15,3 +15,10 @@ class Settings(BaseSettings):
 
     app_name: str = "greenAir API"
     cors_origins: list[str] = []
+
+    # Green City stationary senseBoxes; `heilbronn` selects the mobile bike boxes instead.
+    opensensemap_base_url: str = "https://api.opensensemap.org"
+    opensensemap_grouptag: str = "GreenCityHN"
+    opensensemap_timeout_seconds: float = 30.0
+    # "Live" threshold from the scoring draft (level L(t)); not a provider upload guarantee.
+    station_stale_after_minutes: int = 30

@@ -1,0 +1,206 @@
+[
+  {
+    "_id": "69bd6c0f867a8a00078bec5b",
+    "grouptag": [
+      "GreenCityHN"
+    ],
+    "model": "custom",
+    "name": "EVGO Umwelt 1",
+    "currentLocation": {
+      "type": "Point",
+      "coordinates": [
+        9.366113,
+        49.133321
+      ],
+      "timestamp": "2026-03-20T15:47:27.690Z"
+    },
+    "exposure": "outdoor",
+    "sensors": [
+      {
+        "_id": "69bd6c0f867a8a00078bec5c",
+        "icon": "osem-thermometer",
+        "title": "Temperatur",
+        "unit": "°C",
+        "sensorType": "HDC1080",
+        "lastMeasurement": {
+          "createdAt": "2026-03-20T17:04:50.957Z",
+          "value": "24.90"
+        }
+      },
+      {
+        "_id": "69bd6c0f867a8a00078bec5d",
+        "icon": "osem-humidity",
+        "title": "rel. Luftfeuchte",
+        "unit": "%",
+        "sensorType": "HDC1080"
+      },
+      {
+        "_id": "69bd6c0f867a8a00078bec5e",
+        "icon": "osem-barometer",
+        "title": "Luftdruck",
+        "unit": "hPa",
+        "sensorType": "DPS310"
+      }
+    ],
+    "updatedAt": "2026-03-20T17:04:50.963Z",
+    "createdAt": "2026-03-20T15:47:27.693Z",
+    "lastMeasurementAt": "2026-03-20T17:04:50.957Z"
+  },
+  {
+    "_id": "69bd6c11867a8a00078beefb",
+    "grouptag": [
+      "GreenCityHN"
+    ],
+    "model": "custom",
+    "name": "Hölderlin-Gymnasium Lauffen",
+    "currentLocation": {
+      "type": "Point",
+      "coordinates": [
+        9.139847,
+        49.070541
+      ],
+      "timestamp": "2026-03-20T15:47:29.083Z"
+    },
+    "exposure": "indoor",
+    "sensors": [
+      {
+        "_id": "69bd6c11867a8a00078beefc",
+        "icon": "osem-humidity",
+        "title": "rel. Luftfeuchte",
+        "unit": "%",
+        "sensorType": "HDC1080"
+      },
+      {
+        "_id": "69bd6c11867a8a00078beefd",
+        "icon": "osem-thermometer",
+        "title": "Temperatur",
+        "unit": "°C",
+        "sensorType": "HDC1080"
+      }
+    ],
+    "updatedAt": "2026-03-20T15:58:52.186Z",
+    "createdAt": "2026-03-20T15:47:29.086Z"
+  },
+  {
+    "_id": "69bd6ceb867a8a00078d3c3f",
+    "grouptag": [
+      "GreenCityHN"
+    ],
+    "model": "custom",
+    "name": "Innenstadt",
+    "currentLocation": {
+      "type": "Point",
+      "coordinates": [
+        9.221977,
+        49.142487,
+        165
+      ],
+      "timestamp": "2026-03-23T08:27:50.256Z"
+    },
+    "exposure": "outdoor",
+    "sensors": [
+      {
+        "_id": "69bd6ceb867a8a00078d3c40",
+        "icon": "osem-thermometer",
+        "title": "Temperatur",
+        "unit": "°C",
+        "sensorType": "HDC1080",
+        "lastMeasurement": {
+          "value": "13.8",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c41",
+        "icon": "osem-humidity",
+        "title": "rel. Luftfeuchte",
+        "unit": "%",
+        "sensorType": "HDC1080",
+        "lastMeasurement": {
+          "value": "73",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c42",
+        "icon": "osem-barometer",
+        "title": "Luftdruck",
+        "unit": "hPa",
+        "sensorType": "DPS310",
+        "lastMeasurement": {
+          "value": "1008.9",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c43",
+        "icon": "osem-brightness",
+        "title": "Beleuchtungsstärke",
+        "unit": "lx",
+        "sensorType": "TSL45315",
+        "lastMeasurement": {
+          "value": "0",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c44",
+        "icon": "osem-brightness",
+        "title": "UV-Intensität",
+        "unit": "μW/cm²",
+        "sensorType": "VEML6070",
+        "lastMeasurement": {
+          "value": "0",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c45",
+        "icon": "osem-cloud",
+        "title": "PM1",
+        "unit": "µg/m³",
+        "sensorType": "SPS30",
+        "lastMeasurement": {
+          "value": "10.55",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c46",
+        "icon": "osem-cloud",
+        "title": "PM25",
+        "unit": "µg/m³",
+        "sensorType": "SPS30",
+        "lastMeasurement": {
+          "value": "11.55",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c47",
+        "icon": "osem-cloud",
+        "title": "PM4",
+        "unit": "µg/m³",
+        "sensorType": "SPS30",
+        "lastMeasurement": {
+          "value": "11.89",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      },
+      {
+        "_id": "69bd6ceb867a8a00078d3c48",
+        "icon": "osem-cloud",
+        "title": "PM10",
+        "unit": "µg/m³",
+        "sensorType": "SPS30",
+        "lastMeasurement": {
+          "value": "12.05",
+          "createdAt": "2026-10-28T17:06:04.501Z"
+        }
+      }
+    ],
+    "updatedAt": "2026-10-28T17:06:04.515Z",
+    "createdAt": "2026-03-20T15:51:07.469Z",
+    "lastMeasurementAt": "2026-10-28T17:06:04.501Z"
+  }
+]
