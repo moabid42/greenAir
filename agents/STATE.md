@@ -61,6 +61,10 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
   is `.husky/_` in this clone; workflow YAML parsed locally.
 - Remote CI has not been executed from this workspace; pushing the workflow
   enables it. Repository branch-protection settings are unchanged.
+- CI action resolution: `astral-sh/setup-uv@v9` returned 404 when checked on
+  2026-10-28; use the published [v9.0.0 release](https://github.com/astral-sh/setup-uv/releases/tag/v9.0.0).
+  Its action metadata supports the existing inputs; the separate uv tool pin
+  remains 0.13.6. The other three workflow action references were verified.
 
 ### Team handoff configuration — 2026-10-28
 
