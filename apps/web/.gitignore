@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# The repository root ignores lib/ (a Python template rule). This app's source lives in src/lib, so re-include it.
+!/src/lib/
