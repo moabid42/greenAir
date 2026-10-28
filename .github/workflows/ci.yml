@@ -95,3 +95,34 @@ jobs:
       - name: Stop demo backend
         if: always()
         run: docker compose down
+
+  frontends:
+    name: Frontend checks (${{ matrix.app }})
+    if: github.event_name != 'push' || !github.event.deleted
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web, admin]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
+      - name: Set up just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: "1.46.0"
+      - name: Install locked frontend dependencies
+        run: just setup-${{ matrix.app }}
+      - name: Lint, test and build frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_ECOMAB_API_BASE_URL: ""
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: just check-${{ matrix.app }}

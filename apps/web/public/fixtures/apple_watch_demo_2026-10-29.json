@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "demo-1",
+  "deviceId": "applewatch-demo-01",
+  "displayName": "Apple Watch (Demo)",
+  "kind": "mock_apple_watch",
+  "isDemo": true,
+  "source": "mock",
+  "connectionState": "disconnected",
+  "recordRetentionPolicy": "disconnect_retains_history; forget_deletes_history",
+  "syncConsent": false,
+  "scenarioDate": "2026-10-29",
+  "timeZone": "Europe/Berlin",
+  "startedAt": "2026-10-29T14:00:00+01:00",
+  "lastObservedAt": "2026-10-29T16:00:00+01:00",
+  "description": "Entire dataset is synthetic; not actual readings or official access to this brand.",
+  "samples": [
+    {
+      "timestamp": "2026-10-29T14:00:00+01:00",
+      "heartRateBpm": 94,
+      "cumulativeSteps": 0,
+      "cumulativeDistanceKm": 0.0,
+      "cadenceStepsPerMin": 0,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T14:30:00+01:00",
+      "heartRateBpm": 131,
+      "cumulativeSteps": 1800,
+      "cumulativeDistanceKm": 1.45,
+      "cadenceStepsPerMin": 162,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T15:00:00+01:00",
+      "heartRateBpm": 140,
+      "cumulativeSteps": 3650,
+      "cumulativeDistanceKm": 2.92,
+      "cadenceStepsPerMin": 166,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T15:30:00+01:00",
+      "heartRateBpm": 125,
+      "cumulativeSteps": 5400,
+      "cumulativeDistanceKm": 4.31,
+      "cadenceStepsPerMin": 158,
+      "mode": "demo",
+      "source": "mock"
+    },
+    {
+      "timestamp": "2026-10-29T16:00:00+01:00",
+      "heartRateBpm": 96,
+      "cumulativeSteps": 6900,
+      "cumulativeDistanceKm": 5.35,
+      "cadenceStepsPerMin": 0,
+      "mode": "demo",
+      "source": "mock"
+    }
+  ],
+  "summary": {
+    "recordedActivity": "walking_or_running_demo",
+    "sessionDurationMin": 120,
+    "distanceKmDemo": 5.35,
+    "stepsDemo": 6900,
+    "averageHeartRateBpmDemo": 117,
+    "notes": "Simulated workout sample; not a real Apple Health/HealthKit export."
+  }
+}

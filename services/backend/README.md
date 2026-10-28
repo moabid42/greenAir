@@ -57,7 +57,7 @@ just openapi
 To customize local settings, copy `.env.example` to `.env` here. Environment
 variables take precedence. `GREENAIR_CORS_ORIGINS` is a JSON array, for example
 `["http://localhost:3000"]`. Local Python defaults to no cross-origin permissions;
-Compose defaults to localhost:3000 and :5173. Configure the frontend with
+Compose defaults to localhost:3000, :3200 and :5173. Configure the frontend with
 `NEXT_PUBLIC_API_URL=http://localhost:8000` before starting/building it.
 
 `GREENAIR_STATION_DATA_MODE=mock` is the default. Explicit `live` mode enables only

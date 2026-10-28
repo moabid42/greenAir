@@ -1,7 +1,8 @@
 # greenAir
 
 Green City Heilbronn hackathon: environmental context and street-level activity
-scoring, starting with a Python/FastAPI backend scaffold.
+scoring with a Python/FastAPI demo backend, a Next.js mobile client and a separate
+Next.js admin frontend. Backend serving data defaults to explicitly labelled mock values.
 
 ## Development
 
@@ -25,7 +26,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the convention and CI details.
 
 ```text
 services/backend/   FastAPI app, domain module boundaries, tests, dependency lock
-apps/web/           Reserved MapLibre client
+apps/web/           Next.js mobile frontend with MapLibre
+apps/admin/         Separate Next.js endpoint-monitoring frontend
 infrastructure/     Planned database, event bus, cache, tile-server configuration
 docs/               Architecture and source research
 agents/             Focused research lookup and development context
@@ -34,6 +36,32 @@ data/               Source endpoint catalog
 
 See [the architecture mapping](docs/architecture.md) for implemented versus
 reserved components, based on [the research](docs/research.md).
+
+## Run the integrated demo
+
+```sh
+just backend-up
+just setup-web
+NEXT_PUBLIC_API_URL=http://localhost:8000 just dev-web
+```
+
+Open the mobile client at <http://localhost:3000> and Swagger at
+<http://localhost:8000/docs>. Keep `NEXT_PUBLIC_ECOMAB_API_BASE_URL` empty while
+vector tiles are deferred. Day/grid scores, street geometry and sensor readings
+are synthetic and labelled as such. See [the API contract](docs/backend-api.md).
+
+The optional admin app runs separately:
+
+```sh
+just setup-admin
+NEXT_PUBLIC_API_URL=http://localhost:8000 just dev-admin
+```
+
+Open <http://localhost:3200>. Admin endpoint probes are real HTTP checks; its
+traffic/client-data charts are simulated and its settings are local to the browser.
+Use `just check-web` and `just check-admin` for frontend lint/build checks and admin
+tests. CI runs these alongside the backend and container checks. Node.js 24 is pinned
+in `.nvmrc`. `just backend-down` stops the demo backend.
 
 ## Research and agent workflow
 

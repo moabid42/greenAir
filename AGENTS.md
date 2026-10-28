@@ -12,8 +12,10 @@ The backend uses Python/FastAPI in `services/backend`. Read
 to install locked dependencies, `just dev` to serve locally, and `just test` /
 `just lint` for checks. Use the root `justfile` for development tasks.
 Domain modules are reserved boundaries; implement only
-the scope requested for the current task. The web client and infrastructure
-have reserved folders; no frontend framework, broker, or database is wired up.
+the scope requested for the current task. The public Next.js/MapLibre client lives in `apps/web`; the separate Next.js admin
+client lives in `apps/admin`. Use `just setup-web` / `setup-admin`, `dev-web` /
+`dev-admin`, and `check-web` / `check-admin` for these apps. The demo backend runs
+without a broker or database; real pipeline integration is deferred.
 
 ## Quality checks and commits
 
@@ -26,7 +28,8 @@ When a commit is requested, use `verb(scope): short message`: one nonempty line,
 at most 72 characters, with lowercase verb and required lowercase service/target
 scope. Example: `fix(backend): handle missing sensor values`. Bodies and footers
 are rejected. Verbs are flexible; prefer established conventional verbs or a
-clear action. Follow the same convention for squash/merge messages.
+clear action. Follow the same convention for squash messages. Standard generated
+Git/GitHub merge messages are exempt, including their generated bodies.
 
 ## Start with focused context
 

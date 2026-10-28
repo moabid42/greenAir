@@ -56,6 +56,22 @@ test("a push rejects an invalid earlier commit even when the tip is valid", (t) 
   assert.doesNotMatch(result.stdout, /Historical message/);
 });
 
+for (const [message, expected] of [["feat(ci): add a change", 0], ["invalid branch commit", 1]]) {
+  test(`a generated merge allows its body and checks branch message ${JSON.stringify(message)}`, (t) => {
+    const { cwd, git, commit } = repository(t);
+    commit("chore(ci): initialize history");
+    git("checkout", "-b", "dev");
+    commit(message);
+    git("checkout", "main");
+    const base = commit("chore(ci): advance main");
+    git("-c", "commit.gpgsign=false", "merge", "--no-ff", "dev", "-m", "Merge pull request #1 from moabid42/dev\n\nDev");
+    const head = git("rev-parse", "HEAD");
+    const result = lint(cwd, resolveCommitRange("push", push(base, head, "refs/heads/main"), cwd));
+    assert.equal(result.status, expected, result.stdout + result.stderr);
+    if (expected !== 0) assert.match(result.stdout, /invalid branch commit/);
+  });
+}
+
 test("a new branch excludes shared history even when the default branch has advanced", (t) => {
   const { cwd, git, commit } = repository(t);
   const base = commit("Historical message outside the new branch");

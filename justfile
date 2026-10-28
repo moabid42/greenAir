@@ -60,3 +60,30 @@ backend-logs:
 # Smoke-test all documented routes through the running container's published port.
 backend-smoke:
     python3 scripts/smoke-backend.py
+
+# Install the mobile frontend's locked dependencies.
+setup-web:
+    npm ci --prefix apps/web
+
+# Install the admin frontend's locked dependencies.
+setup-admin:
+    npm ci --prefix apps/admin
+
+# Start the mobile frontend (set NEXT_PUBLIC_API_URL to use the backend).
+dev-web:
+    npm run dev --prefix apps/web
+
+# Start the separate admin frontend on port 3200.
+dev-admin:
+    npm run dev --prefix apps/admin
+
+# Lint, type-check, and build the mobile frontend.
+check-web:
+    npm run lint --prefix apps/web
+    npm run build --prefix apps/web
+
+# Lint, test, type-check, and build the admin frontend.
+check-admin:
+    npm run lint --prefix apps/admin
+    npm test --prefix apps/admin
+    npm run build --prefix apps/admin

@@ -69,6 +69,11 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
 - User convention: `verb(scope): short message`, a single line of at most 72
   characters with a required lowercase scope. Lowercase verbs remain flexible.
   Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).
+- User-requested merge exception: standard generated Git/GitHub merge messages
+  and their bodies (for example, `Merge pull request #1 ...` followed by `Dev`)
+  are accepted by the shared commitlint config. Regular and squash commits stay
+  strict; revert/fixup/release exemptions remain disabled. Range checks still
+  validate every regular commit brought in by a merge.
 - Local validation: Husky's actual pre-commit and pre-push wrappers passed lint
   and all 36 tests (4 backend, 12 agent-tool, 20 commit-rule cases). Its commit-msg
   wrapper accepted a valid message and rejected an invalid one. `core.hooksPath`
@@ -192,3 +197,31 @@ offline. Record a later successful check alongside the earlier failure.
 
 - Browser verification: Chrome rendered all 20 Swagger operations and executed
   GetDay through Try it out, returning HTTP 200 with 24 mock hourly slots.
+
+### Actual frontend compatibility — 2026-10-28
+
+- Fetched and tested frontend `17fd270` in a detached temporary worktree against
+  containerized dev `9dd12b4`. [Review](../docs/integrations/frontend-compatibility.md).
+  Production build passed; browser flows covered Today/week/history/Explore/place/
+  Analytics/Coach, with 21 successful backend responses and no runtime exceptions.
+- Actual frontend scoring/ranking code accepted core responses across all sports
+  and DST dates. Optional street JSON validates, but its overlay still needs vector
+  tiles and mock-aware provenance. Small frontend copy changes are needed for the
+  deliberate dummy mode. No application code was changed or pushed in this review.
+- The published dev tree/history contains no `playground/`. Preserve the user's
+  existing local `.gitignore` exclusions; do not stage or push personal playground data.
+
+### Frontend integration prepared for user merge — 2026-10-28
+
+- Branch `feat/frontend-backend-integration` contains the frontend/admin merge,
+  preserved playground/runtime exclusions, explicit mock labels, frontend CI jobs,
+  root just recipes and admin CORS on localhost:3200. User will merge it into dev;
+  remote dev remains at the previously pushed backend integration `9dd12b4`.
+- Local checks: root lint/test (144 backend, 12 research, 45 commit tests), both
+  Node 24 production builds/lints and 11 admin unit tests passed. Container smoke
+  passed all 20 routes. Browser checks covered mock onboarding/sensor/Coach labels,
+  core mobile flows (21 successful backend responses) and all four admin pages with
+  a successful cross-origin health fetch from port 3200.
+- User chose local checks only because GitHub CLI is not authenticated for private
+  Actions logs. Remote CI success has not been asserted. No ingestion branches or
+  personal playground content are included. Optional tiles/SSE remain deferred.

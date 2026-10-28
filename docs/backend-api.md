@@ -65,9 +65,8 @@ The core factor contract does not apply sport weights. Optional street-score que
 use the merged sport engine and are a different scoring contract. Their components
 are goodness scores on a 0–100 scale, not original physical measurements. The street
 `kind: forecast` field is the temporal category required by the optional consumer;
-`source: mock` is the authoritative provenance. The current optional frontend badge
-only reads `kind`, so leave its street-overlay integration disabled until it supports
-mock provenance and GeoJSON, or until real data and vector tiles are connected.
+`source: mock` is the authoritative provenance. The frontend labels this source as simulated. Keep its street-overlay integration
+disabled until vector tiles are connected or the overlay accepts the backend GeoJSON.
 
 The grid spans [9.15, 49.105, 9.275, 49.178], using nominal 250 m cells, stable IDs,
 and deliberately generic demo place names. Sensor marker identities and all street
@@ -102,7 +101,7 @@ validation returns 400, unknown resources/coverage 404, and live upstream failur
 
 For the core UI, set `NEXT_PUBLIC_API_URL=http://localhost:8000` before starting or
 building the frontend. Set `GREENAIR_CORS_ORIGINS` to a JSON list of frontend origins
-for local non-container runs. Compose defaults to localhost:3000 and :5173.
+for local non-container runs. Compose defaults to localhost:3000, :3200 and :5173.
 Day/grid use a five-minute cache policy (including mock history), sensors one minute;
 large JSON responses support gzip. `X-Data-Source` and `X-Build-Id` accompany the core
 responses. The mock build is versioned; it is not a timestamp of measured data.
