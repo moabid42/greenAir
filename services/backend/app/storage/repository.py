@@ -25,7 +25,12 @@ APPROVED_BBOX = (9.05, 49.05, 9.35, 49.25)
 
 
 def observation_id(item: Observation) -> str:
-    """Hash exactly the task's natural key, including a distinct null issue time."""
+    """Stable identity including sensor/sample and model build, when available.
+
+    Keep legacy stationary measurement hashes stable for existing stored data.
+    Unknown model issue time uses the landed capture as an application build,
+    never pretending retrieval is provider issuance.
+    """
     key = [
         item.source,
         item.station_id,
@@ -33,6 +38,10 @@ def observation_id(item: Observation) -> str:
         item.ts_utc.isoformat(),
         item.issued_at.isoformat() if item.issued_at else None,
     ]
+    if item.provenance and (item.provenance.sensor_id or item.provenance.sample_id):
+        key.extend([item.provenance.sensor_id, item.provenance.sample_id])
+    if item.kind == "forecast" and item.issued_at is None:
+        key.append(item.raw_ref)
     return hashlib.sha256(json.dumps(key, separators=(",", ":")).encode()).hexdigest()
 
 

@@ -90,6 +90,9 @@ class RawObservation(BaseModel):
     retrieved_at: AwareDatetime | None = None
     # Distinguishes several mobile samples of one device at the same timestamp.
     sample_id: str | None = None
+    sensor_id: str | None = None
+    raw_ref: int | None = Field(default=None, gt=0)
+    issued_at: AwareDatetime | None = None
 
 
 class Observation(BaseModel):
@@ -112,9 +115,12 @@ class Observation(BaseModel):
     raw_unit: str | None
     retrieved_at: AwareDatetime | None = None
     sample_id: str | None = None
+    sensor_id: str | None = None
+    raw_ref: int | None = Field(default=None, gt=0)
+    issued_at: AwareDatetime | None = None
     qc_flags: tuple[QcFlag, ...] = ()
 
-    @field_validator("observed_at", "retrieved_at")
+    @field_validator("observed_at", "retrieved_at", "issued_at")
     @classmethod
     def _to_utc(cls, value: datetime | None) -> datetime | None:
         return value.astimezone(UTC) if value is not None else None
@@ -127,9 +133,17 @@ class Observation(BaseModel):
         return self
 
     @property
-    def key(self) -> tuple[str, str, Phenomenon, datetime, str | None]:
+    def key(self) -> tuple:
         """Idempotent upsert identity; includes the source, unlike station/time alone."""
-        return (self.source, self.station_id, self.phenomenon, self.observed_at, self.sample_id)
+        return (
+            self.source,
+            self.station_id,
+            self.phenomenon,
+            self.observed_at,
+            self.sample_id,
+            self.sensor_id,
+            (self.issued_at or self.raw_ref) if self.kind == "model" else self.issued_at,
+        )
 
     @property
     def usable(self) -> bool:

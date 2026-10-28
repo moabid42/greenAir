@@ -99,6 +99,19 @@ class Geometry(BaseModel):
         return inside(self.coordinates)
 
 
+class ProviderValue(BaseModel):
+    """Per-value originals supplied by an adapter, never inferred from units."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    platform: Literal["stationary", "mobile"]
+    sensor_id: str | None = None
+    sample_id: str | None = None
+    raw_key: str = Field(min_length=1)
+    raw_value: str | float | int | None
+    raw_unit: str | None
+    interval_seconds: int | None = Field(default=None, gt=0)
+
+
 class Observation(BaseModel):
     """Canonical ingest value. Source originals remain in the referenced raw body."""
 
@@ -107,13 +120,14 @@ class Observation(BaseModel):
     station_id: str = Field(min_length=1)
     geom: Geometry
     phenomenon: str
-    value: float
+    value: float | None
     unit: str = Field(min_length=1)
     ts_utc: datetime
     kind: Literal["observation", "forecast", "derived"] = "observation"
     issued_at: datetime | None = None
     qc_flags: list[str] = Field(default_factory=list)
     raw_ref: int = Field(gt=0)
+    provenance: ProviderValue | None = None
 
     @field_validator("ts_utc", "issued_at")
     @classmethod
@@ -131,6 +145,7 @@ class Observation(BaseModel):
         expected = UNITS.get(self.phenomenon)
         if expected and self.unit != expected:
             raise ValueError(f"canonical {self.phenomenon} unit is {expected}")
-        if self.kind == "forecast" and self.issued_at is None:
-            raise ValueError("forecast requires issued_at")
+        if self.provenance and self.provenance.platform == "mobile":
+            if not self.provenance.sample_id:
+                raise ValueError("mobile values require a stable sample_id")
         return self

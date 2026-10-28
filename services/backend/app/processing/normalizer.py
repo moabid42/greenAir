@@ -184,6 +184,9 @@ def normalize(raw: RawObservation) -> Observation | None:
         raw_unit=raw.raw_unit,
         retrieved_at=raw.retrieved_at,
         sample_id=raw.sample_id,
+        sensor_id=raw.sensor_id,
+        raw_ref=raw.raw_ref,
+        issued_at=raw.issued_at,
         qc_flags=tuple(flags),
     )
 

@@ -20,7 +20,7 @@ from app.ingestion.contracts import (
     Watermark,
 )
 from app.messaging.bus import MemoryBus
-from app.schemas.observation import Geometry, Observation
+from app.schemas.observation import Geometry, Observation, ProviderValue
 from app.storage import models as db
 from app.storage.repository import Repository, observation_id
 
@@ -356,7 +356,6 @@ def test_http_failure_raw_and_manifest_preserve_evidence(repository):
     "changes",
     [
         {"ts_utc": datetime(2026, 10, 28)},
-        {"kind": "forecast"},
         {"value": float("nan")},
         {"value": float("inf")},
         {"phenomenon": "invented_channel"},
@@ -384,11 +383,12 @@ def test_ingest_rejects_downstream_qc_flags(repository):
         repository.ingest_page(raw_ref, [observation(raw_ref, qc_flags=["synthetic"])])
 
 
-def test_postgresql_schema_declares_postgis_and_null_safe_natural_identity():
+def test_postgresql_schema_declares_postgis_and_time_partition_identity():
     # DDL compilation is a contract check, not a server/extension integration test.
     ddl = str(CreateTable(db.observations).compile(dialect=postgresql.dialect()))
     assert "geometry(Geometry,4326)" in ddl
-    assert "UNIQUE NULLS NOT DISTINCT" in ddl
+    assert "PRIMARY KEY (id, ts_utc)" in ddl
+    assert "provenance JSONB" in ddl
     assert "TIMESTAMP WITH TIME ZONE" in ddl
     road_ddl = str(CreateTable(db.segment).compile(dialect=postgresql.dialect()))
     assert "geometry(LineString,4326)" in road_ddl
@@ -511,6 +511,47 @@ def test_real_postgresql_extensions_raw_idempotency_history_and_recovery():
                 .all()
             )
         assert len(history) == 2 and all(row == layer.properties for row in history)
+        # Exercise the new identity and nullable contract on the actual hypertable.
+        mobile = [
+            observation(
+                raw_ref,
+                source=source,
+                provenance=ProviderValue(
+                    platform="mobile",
+                    sample_id=sample,
+                    sensor_id="sensor",
+                    raw_key="Temperatur",
+                    raw_value="15.5",
+                    raw_unit="°C",
+                ),
+            )
+            for sample in ("sample-a", "sample-b")
+        ]
+        unknown_issue = observation(raw_ref, source=source, kind="forecast", value=None)
+        extended = [*mobile, unknown_issue]
+        keys.extend(observation_id(value) for value in extended)
+        assert repository.ingest_page(raw_ref, extended)["observations"] == 3
+        assert repository.ingest_page(raw_ref, extended)["observations"] == 0
+        with engine.connect() as conn:
+            stored = (
+                conn.execute(
+                    select(db.observations).where(db.observations.c.id == observation_id(mobile[0]))
+                )
+                .mappings()
+                .one()
+            )
+            assert stored["provenance"] == mobile[0].provenance.model_dump()
+            missing = (
+                conn.execute(
+                    select(db.observations).where(
+                        db.observations.c.id == observation_id(unknown_issue)
+                    )
+                )
+                .mappings()
+                .one()
+            )
+            assert missing["value"] is None and missing["issued_at"] is None
+
     finally:
         with engine.begin() as conn:
             conn.execute(delete(db.feature_receipt).where(db.feature_receipt.c.source_id == source))
