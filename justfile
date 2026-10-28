@@ -44,3 +44,19 @@ format:
 # Print the dynamically generated OpenAPI JSON (no tracked snapshot).
 openapi:
     uv run --locked --directory services/backend python -c 'import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))'
+
+# Build and start the standalone demo backend; wait for its health check.
+backend-up:
+    docker compose up --build --detach --wait backend
+
+# Stop only this demo backend (does not remove unrelated ingestion infrastructure).
+backend-down:
+    docker compose down
+
+# Follow API container logs.
+backend-logs:
+    docker compose logs --follow backend
+
+# Smoke-test all documented routes through the running container's published port.
+backend-smoke:
+    python3 scripts/smoke-backend.py

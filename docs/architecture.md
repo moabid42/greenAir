@@ -1,30 +1,45 @@
-# Initial implementation layout
+# Implementation layout
 
 [research.md](research.md) describes the target pipeline. This document records
-how the repository accommodates it at the scaffold stage. FastAPI/Python is the
-selected backend stack. The research remains a proposal for data access details
-and unimplemented components.
+how the repository maps it to a Python/FastAPI backend. The serving API currently
+uses explicitly synthetic data; real pipeline integration remains deferred. See
+[the API contract](backend-api.md) for implemented endpoints and limitations.
 
 ## Starting boundary
 
 Use one backend service in `services/backend`, with modules matching the diagram's
-responsibilities. Only the HTTP shell is runnable today. Worker entrypoints can
+responsibilities. The offline demo API and the processing CLI are runnable today. Worker entrypoints can
 share these modules later without introducing a separate deployment for every
 box in the diagram. Keep polling and heavy jobs outside API startup/reload.
 
 | Architecture component | Repository location | Current state |
 |---|---|---|
-| REST API, future SSE | `services/backend/app/api/` | Health route and OpenAPI available; feature endpoints/SSE reserved |
+| REST API, future SSE | `services/backend/app/api/` | Health, mock serving APIs, dynamic OpenAPI/Swagger; SSE deferred |
 | Application configuration | `services/backend/app/core/` | Environment-backed settings |
-| Canonical observation/event contracts | `services/backend/app/schemas/` | Health response only; source contracts pending inspection |
-| Scheduler, adapters, raw landing | `services/backend/app/ingestion/` | Reserved module and adapters package |
-| Normalizer/QC, spatial and temporal builders | `services/backend/app/processing/` | Reserved module |
-| Forecaster | `services/backend/app/forecasting/` | Reserved module |
-| Sport/segment/hour scoring | `services/backend/app/scoring/` | Reserved module |
+| Canonical observation/event contracts | `services/backend/app/schemas/` | Raw/normalized observations, processing results, serving responses |
+| Scheduler, adapters, raw landing | `services/backend/app/ingestion/` | Optional live openSenseMap station adapter; scheduler/raw landing deferred |
+| Normalizer/QC, spatial and temporal builders | `services/backend/app/processing/` | Implemented; input supplied by caller |
+| Forecaster | `services/backend/app/processing/forecaster.py` | Bias correction and climatology fallback; provider fetching deferred |
+| Sport/segment/hour scoring | `services/backend/app/scoring/` | Formulas, engine, best-time queries; API runs on dummy inputs |
 | PostgreSQL + PostGIS + TimescaleDB | `services/backend/app/storage/`, `services/backend/migrations/` | Planned; no driver, schema, extensions, or server provisioned |
 | Event bus and cache | `services/backend/app/messaging/`, `infrastructure/` | Transport/cache choice deferred; no broker provisioned |
 | Vector tiles | `infrastructure/` | Martin/pg_tileserv choice deferred |
 | MapLibre web client | `apps/web/` | Reserved directory; frontend framework undecided |
+
+## Serving and containers — 2026-10-28
+
+`app/serving/repository.py` separates API queries from the eventual pipeline/storage
+provider. Its demo implementation generates synthetic day/grid/sensor resources and
+invented street geometry. All serving data is labelled mock, with zero street-score
+confidence. No processing worker or network fetch starts with the API.
+
+`services/backend/Dockerfile` and root `compose.yaml` run the backend independently
+with locked production dependencies and a process health check. `just backend-up`
+starts it; `just backend-smoke` checks the documented routes through HTTP.
+
+Existing frontend core aliases coexist with versioned resource routes. SSE, vector
+tiles, persistence and refresh workers remain future additions. The collected
+research snapshots are unchanged and do not establish current source availability.
 
 ## Decisions for the next data slice
 
