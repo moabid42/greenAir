@@ -22,6 +22,8 @@ lint:
     uv run --locked --directory services/backend ruff format --check .
     python3 agents/context.py check
     node --check commitlint.config.cjs
+    node --check scripts/ci-range.mjs
+    node --check scripts/tests/ci-range.test.mjs
     node --check scripts/tests/commitlint.test.mjs
     git diff --check
     git diff --cached --check

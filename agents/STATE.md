@@ -51,7 +51,10 @@ Dates describe when evidence was obtained; recheck time-sensitive assumptions.
   it does not choose or scaffold a web framework. `just setup` activates hooks.
 - Hooks: lint before commits, validate commit messages, and test before pushes.
   GitHub [CI](../.github/workflows/ci.yml) runs the same lint/tests plus commitlint
-  on the latest push commit or all pull-request commits.
+  over push/PR commit ranges selected by [ci-range.mjs](../scripts/ci-range.mjs).
+  New branches exclude history shared with the default branch; initial/orphan
+  branches include root commits. Manual runs check the latest commit. Missing
+  previous tips fail explicitly, and deletion events are skipped.
 - User convention: `verb(scope): short message`, a single line of at most 72
   characters with a required lowercase scope. Lowercase verbs remain flexible.
   Details and examples: [CONTRIBUTING.md](../CONTRIBUTING.md).

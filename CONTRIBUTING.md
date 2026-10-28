@@ -69,9 +69,14 @@ automatic merge messages need the same format.
 
 [CI](.github/workflows/ci.yml) runs on pushes, pull requests, and manual dispatch.
 It installs locked dependencies, then runs `just lint` and `just test` on Python
-3.12 and Node.js 24. It checks the latest commit on pushes and all commits in a
-pull request's base-to-head range. The same commitlint configuration is used
-locally and in CI. CI sets `HUSKY=0` because it runs checks explicitly.
+3.12 and Node.js 24. Commitlint checks every commit in a push's before-to-after
+range and all commits in a pull request's base-to-head range. For a new branch,
+the range starts at its common ancestor with the default branch; initial
+default-branch pushes and orphan branches include the root commit. Manual runs
+check the latest commit. Branch/tag deletion events are skipped. An unavailable
+previous tip fails the check rather than silently checking an incomplete range.
+The same commitlint configuration is used locally and in CI. CI sets `HUSKY=0`
+because it runs checks explicitly.
 
 Workflow files take effect after they are pushed to GitHub. Branch protection
 can require the `Lint, tests, and commit messages` check when enabled in repository

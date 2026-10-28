@@ -8,7 +8,7 @@
   "scripts": {
     "prepare": "husky",
     "commitlint": "commitlint",
-    "test:commits": "node --test scripts/tests/commitlint.test.mjs"
+    "test:commits": "node --test scripts/tests/*.test.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.0.0",

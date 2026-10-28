@@ -18,6 +18,7 @@ env:
 jobs:
   checks:
     name: Lint, tests, and commit messages
+    if: github.event_name != 'push' || !github.event.deleted
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -55,13 +56,17 @@ jobs:
       - name: Test
         run: just test
 
-      - name: Check latest push commit message
-        if: github.event_name == 'push'
-        run: npm exec --no -- commitlint --last --verbose
+      - name: Select commits to check
+        id: changes
+        run: node scripts/ci-range.mjs >> "$GITHUB_OUTPUT"
 
-      - name: Check all pull request commit messages
-        if: github.event_name == 'pull_request'
+      - name: Check commit messages
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: npm exec --no -- commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose
+          BASE_SHA: ${{ steps.changes.outputs.base }}
+          HEAD_SHA: ${{ steps.changes.outputs.head }}
+        run: |
+          args=(--to "$HEAD_SHA" --verbose)
+          if [[ -n "$BASE_SHA" ]]; then
+            args+=(--from "$BASE_SHA")
+          fi
+          npm exec --no -- commitlint "${args[@]}"
