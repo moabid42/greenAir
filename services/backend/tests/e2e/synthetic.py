@@ -144,3 +144,35 @@ def mobile_records(start: datetime = START + timedelta(days=1)) -> list[RawObser
                 records.append(raw("synthetic-bike", key, value, None, naive, **common))
             step += 1
     return records
+
+
+RAIN_HOUR = datetime(2026, 10, 26, 12, tzinfo=UTC)
+
+
+def weather_model_records(start: datetime = START, hours: int = HOURS + 24) -> list[RawObservation]:
+    """Open-Meteo-like weather model: 15 °C, 60 %, 10 km/h, UV 2 by day, dry except
+    4 mm at `RAIN_HOUR`."""
+    records = []
+    for step in range(hours):
+        at = start + timedelta(hours=step)
+        local_hour = at.astimezone(LOCAL_TZ).hour
+        values = [
+            ("temperature_2m", 15.0, "°C"),
+            ("relative_humidity_2m", 60.0, "%"),
+            ("wind_speed_10m", 10.0, "km/h"),
+            ("precipitation", 4.0 if at == RAIN_HOUR else 0.0, "mm"),
+            ("uv_index", 2.0 if 9 <= local_hour <= 15 else 0.0, ""),
+        ]
+        for key, value, unit in values:
+            records.append(
+                raw(
+                    "open-meteo-grid",
+                    key,
+                    value,
+                    unit,
+                    at,
+                    source="open-meteo:forecast",
+                    kind="model",
+                )
+            )
+    return records
