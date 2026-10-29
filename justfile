@@ -108,3 +108,19 @@ process-results *args:
 # Run one ingestion pass and build snapshots even when upstream coverage is partial.
 refresh-once *args:
     uv run --locked --directory services/backend python -m app.ingestion.refresh {{args}}
+
+# Serve the built mobile frontend (PORT can select an isolated preview port).
+preview-web:
+    npm run start --prefix apps/web
+
+# Create a NEW isolated replay store from the dated test captures (never live data).
+replay-real-slice output="data/runtime/real-slice.sqlite":
+    uv run --locked --directory services/backend python ../../scripts/replay-real-slice.py '{{output}}'
+
+# Build the backend image without starting a service.
+backend-build:
+    docker compose build backend
+
+# Browser smoke against a separately started stored-data API and production web preview.
+smoke-real-browser *args:
+    uv run --no-project --with playwright==1.61.0 python scripts/smoke-real-browser.py {{args}}

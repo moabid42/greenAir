@@ -1,0 +1,99 @@
+{
+  "label": "Historical captured replay fixture, not current observations",
+  "captured_on_utc": "2026-10-28",
+  "entries": [
+    {
+      "name": "weather",
+      "filename": "weather.json",
+      "source_id": "openmeteo_fcst",
+      "url": "https://api.open-meteo.com/v1/forecast",
+      "method": "GET",
+      "request_params": {
+        "latitude": 49.1427,
+        "longitude": 9.2109,
+        "timezone": "UTC",
+        "timeformat": "unixtime",
+        "forecast_days": 2,
+        "hourly": "temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m,precipitation,cloud_cover,uv_index"
+      },
+      "retrieved_at_utc": "2026-10-28T22:56:54.931303+00:00",
+      "http_status": 200,
+      "response_headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "original_response_sha256": "0332565cbc0298be7f0a5926b713c4e527be4b5f76e0f35fcb14d08a3438af45",
+      "fixture_sha256": "0332565cbc0298be7f0a5926b713c4e527be4b5f76e0f35fcb14d08a3438af45",
+      "selection": null
+    },
+    {
+      "name": "air",
+      "filename": "air.json",
+      "source_id": "openmeteo_aq",
+      "url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+      "method": "GET",
+      "request_params": {
+        "latitude": 49.1427,
+        "longitude": 9.2109,
+        "timezone": "UTC",
+        "timeformat": "unixtime",
+        "forecast_days": 2,
+        "hourly": "pm10,pm2_5,nitrogen_dioxide,ozone,european_aqi,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen"
+      },
+      "retrieved_at_utc": "2026-10-28T22:56:55.052139+00:00",
+      "http_status": 200,
+      "response_headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "original_response_sha256": "166667d43421c19b8d730c43b58d048fe6caba2c27f30bd5cd7b90ff3c9bbe4b",
+      "fixture_sha256": "166667d43421c19b8d730c43b58d048fe6caba2c27f30bd5cd7b90ff3c9bbe4b",
+      "selection": null
+    },
+    {
+      "name": "stationary",
+      "filename": "stationary.json",
+      "source_id": "osem",
+      "url": "https://api.opensensemap.org/boxes",
+      "method": "GET",
+      "request_params": {
+        "bbox": "9.05,49.05,9.35,49.25",
+        "limit": 20,
+        "full": "true"
+      },
+      "retrieved_at_utc": "2026-10-28T22:58:42.160857+00:00",
+      "http_status": 200,
+      "response_headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "original_response_sha256": "fa314a255af1f9f276cc5a996adc37fe395893f1da1912d1df1449369b47e162",
+      "fixture_sha256": "939e1089821c1d525b26c4af3aa4f6fbfbadde20e873190a96a749475546b60f",
+      "selection": {
+        "box_id": "69b99dd4deee28000952cea8",
+        "method": "one unmodified outdoor box object selected from captured bbox array"
+      }
+    },
+    {
+      "name": "uba-no2",
+      "filename": "uba-no2.json",
+      "source_id": "uba_226_5",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "method": "GET",
+      "request_params": {
+        "station": "226",
+        "component": "5",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "retrieved_at_utc": "2026-10-28T22:58:43.384487+00:00",
+      "http_status": 200,
+      "response_headers": {
+        "content-type": "application/json"
+      },
+      "original_response_sha256": "c0fdb350cb92f79b0d0c81e96d6d4f86c679751f0b8c2fa702ce195b4c195039",
+      "fixture_sha256": "c0fdb350cb92f79b0d0c81e96d6d4f86c679751f0b8c2fa702ce195b4c195039",
+      "selection": null
+    }
+  ]
+}
