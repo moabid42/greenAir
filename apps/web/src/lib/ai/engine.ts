@@ -301,14 +301,14 @@ export async function generate(messages: ChatMessage[], onText: (text: string) =
       messages,
       stream: true,
       abortSignal: abort.signal,
-      max_tokens: 70, // brief on purpose
+      max_tokens: 200, // enough room for data, provenance and limitations
       temperature: 0.3, // low and a fixed seed keep the tone consistent from one answer to the next
       seed: 7,
       top_k: 20,
       top_p: 0.8,
       penalty_repeat: 1.1,
       chat_template_kwargs: { enable_thinking: false },
-      cache_prompt: true, // reuses the pre-read fixed start; chat prompts hold no weather or location data
+      cache_prompt: true, // fixed system prefix; reference records refresh on every turn
     });
     for await (const chunk of stream) {
       const piece = chunk.choices[0]?.delta?.content;

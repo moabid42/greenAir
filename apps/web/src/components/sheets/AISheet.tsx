@@ -71,7 +71,7 @@ export default function AISheet() {
         <div className="flex items-start gap-3 rounded-2xl bg-great-soft p-3.5">
           <Lock className="mt-0.5 size-5 shrink-0 text-[#14653e]" aria-hidden />
           <div className="text-[13px] leading-snug text-[#14653e]">
-            <b>{MODEL_NAME} runs on your device.</b> Your questions and chats never leave your phone, and nothing is sent to a cloud AI. It’s optional: Coach works without it.
+            <b>{MODEL_NAME} runs on your device.</b> Typed questions, local device samples and AI answers are processed here. Enable the AI to chat with Coach. Browser voice recognition may use your browser provider’s speech service.
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export default function AISheet() {
           <div className="rounded-2xl bg-bad-soft p-3.5 text-[13px] leading-snug text-[#9a3a12]">
             <p className="font-extrabold">This device can’t run the on-device AI.</p>
             <p className="mt-1">{ai.unsupportedReason}</p>
-            <p className="mt-1.5 font-semibold">Coach still answers every question from your live data without it.</p>
+            <p className="mt-1.5 font-semibold">You can still explore conditions and device readings in the other tabs.</p>
           </div>
         )}
 
@@ -201,7 +201,7 @@ export default function AISheet() {
                 hint="Saved in the browser, which is not encrypted. The native app will use encrypted storage."
               />
             </div>
-            <p className="mt-1.5 px-1 text-[11px] font-semibold text-mute">Today’s weather and air readings are never remembered. Only what you choose here.</p>
+            <p className="mt-1.5 px-1 text-[11px] font-semibold text-mute">Raw weather and device records are not saved in chat history. If you save conversations, answers may contain readings you discussed.</p>
             <button type="button" onClick={deleteMemories} className="mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-wash text-[13px] font-extrabold">
               <Trash2 className="size-4" aria-hidden />
               Delete everything the Coach remembers

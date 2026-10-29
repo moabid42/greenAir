@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Cpu, Mic, Sparkles, SquarePen, Square } from "lucide-react";
+import { contextRecords } from "@/lib/ai/records";
+import { startDictation, type Recognizer } from "@/lib/ai/speech";
+import { useWearables } from "@/lib/wearables/useWearables";
 import { buildMessages } from "@/lib/ai/context";
 import { generate, getState as getAIState, stopGenerating } from "@/lib/ai/engine";
 import { clearHistory, HISTORY_CLEARED_EVENT, loadHistory, saveHistory, type StoredMessage } from "@/lib/ai/history";
 import { useAI } from "@/lib/ai/useAI";
-import { buildFacts, answer, intentOf, type CoachAction, type CoachCard, type CoachCtx, type CoachReply } from "@/lib/coach/engine";
+import { type CoachAction, type CoachCard } from "@/lib/coach/engine";
 import { cn } from "@/lib/cn";
 import SourceNotice from "./SourceNotice";
 import { useApp } from "@/state/app";
@@ -18,15 +21,6 @@ interface Message extends StoredMessage {
 }
 
 /** The browser's speech recognition, where it exists (Chrome, Safari). */
-interface Recognizer {
-  lang: string;
-  interimResults: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-}
 type RecognizerCtor = new () => Recognizer;
 function speechCtor(): RecognizerCtor | null {
   if (typeof window === "undefined") return null;
@@ -49,17 +43,18 @@ function CardTile({ c }: { c: CoachCard }) {
   );
 }
 
-/** Ask anything about your sport. Answers come from the live data; the on-device AI (Qwen3-0.6B) adds natural wording when it is on. */
+/** Every answer is generated on-device from fresh backend and local wearable context. */
 export default function CoachScreen({ active }: { active: boolean }) {
   const app = useApp();
-  const { day, grid, today, date, activity, tune, home, prefs, setTab, setDate, openPlace, setHour, focusMap, addReminder, openSheet, showToast } = app;
+  const { day, grid, today, date, activity, prefs, setTab, setDate, openPlace, setHour, focusMap, addReminder, openSheet, showToast } = app;
   const ai = useAI();
+  const wearables = useWearables();
   const verb = VERB[activity];
   const greeting = useMemo<Message>(
     () => ({
       id: 0,
       role: "coach",
-      text: `Hi${prefs.name ? `, ${prefs.name}` : ""}! I know today's heat, air, wind and traffic in Heilbronn. Ask me when and where to ${verb}.`,
+      text: `Hi${prefs.name ? `, ${prefs.name}` : ""}! Ask me about available Heilbronn conditions or local device readings for your ${verb}.`,
     }),
     [prefs.name, verb],
   );
@@ -69,7 +64,9 @@ export default function CoachScreen({ active }: { active: boolean }) {
   const [listening, setListening] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const idRef = useRef(Math.max(0, ...messages.map((m) => m.id)) + 1);
-  const recRef = useRef<Recognizer | null>(null);
+  const dictation = useRef<ReturnType<typeof startDictation> | null>(null);
+  const sending = useRef(false);
+  const sendRef = useRef<(q: string) => void>(() => undefined);
   const canSpeak = useMemo(() => speechCtor() != null, []);
 
   const shown = messages.length ? messages : [greeting];
@@ -89,73 +86,68 @@ export default function CoachScreen({ active }: { active: boolean }) {
     return () => window.removeEventListener(HISTORY_CLEARED_EVENT, onCleared);
   }, []);
 
-  const ctx = useMemo<CoachCtx | null>(() => {
-    if (!day || !grid) return null;
-    return {
-      today,
-      date,
-      hourNow: new Date().getHours(),
-      activity,
-      tune,
-      home,
-      homeLabel: prefs.home ? (prefs.home.label === "My location" ? "near you" : prefs.home.label) : null,
-      radiusKm: prefs.radiusKm,
-      day,
-      grid,
-      airSensitive: prefs.airSensitive,
-    };
-  }, [day, grid, today, date, activity, tune, home, prefs.home, prefs.radiusKm, prefs.airSensitive]);
-
   const send = useCallback(
     async (raw: string) => {
       const q = raw.trim();
-      if (!q || busy) return;
-      setText("");
-      const past = messages;
-      setMessages((m) => [...(m.length ? m : [greeting]), { id: idRef.current++, role: "user", text: q }]);
-      if (!ctx) {
-        setMessages((m) => [...m, { id: idRef.current++, role: "coach", text: "I'm still loading today's data. Ask me again in a moment." }]);
+      if (!q || sending.current || dictation.current) return;
+      if (getAIState().status !== "ready") {
+        showToast("Enable the private AI in AI settings before sending a message.");
         return;
       }
+      sending.current = true;
       setBusy(true);
-      let reply: CoachReply;
-      try {
-        reply = await answer(q, ctx);
-      } catch {
-        reply = { text: "I couldn't read the data just now. Check your connection and try again." };
-      }
+      setText("");
       const id = idRef.current++;
-      const base: Message = { id, role: "coach", text: reply.text, cards: reply.cards, actions: reply.actions, note: reply.note };
-
-      // Data questions get the analyst's exact, instant answer. The on-device model handles conversation,
-      // because a 0.6B model repeats numbers instead of reasoning about them.
-      const chat = ["general", "greeting"].includes(intentOf(q));
-      if (getAIState().status === "ready" && chat) {
-        base.cards = undefined;
-        base.actions = undefined;
-        base.note = undefined;
-        setMessages((m) => [...m, { ...base, text: "", streaming: true }]);
-        try {
-          const history = past.filter((m) => !m.cards?.length).slice(-2).map((m) => ({ role: m.role === "coach" ? ("assistant" as const) : ("user" as const), text: m.text }));
-          const prompt = buildMessages({ question: q, facts: buildFacts(ctx, reply), memory: prefs.memory, history, mode: "chat" });
-          const { text: out } = await generate(prompt, (t) => setMessages((m) => m.map((x) => (x.id === id ? { ...x, text: t } : x))));
-          // A tiny model sometimes returns just an emoji or a question mark. Never show that.
-          const usable = out.replace(/[^\p{L}\p{N}]/gu, "").length >= 8;
-          const fallback = "I'm not sure I got that. Try “best time today?”, “how's the air?” or “where's the coolest spot?”.";
-          setMessages((m) => m.map((x) => (x.id === id ? { ...x, text: usable ? out : fallback, streaming: false } : x)));
-        } catch {
-          setMessages((m) => m.map((x) => (x.id === id ? { ...x, text: reply.text, streaming: false } : x)));
-          showToast("The AI had a problem, so here's the built-in answer.");
-        }
-      } else {
-        setMessages((m) => [...m, base]);
+      const history = messages.map((m) => ({ role: m.role === "coach" ? ("assistant" as const) : ("user" as const), text: m.text }));
+      setMessages((m) => [...m, { id: idRef.current++, role: "user", text: q }, { id, role: "coach", text: "", streaming: true }]);
+      try {
+        const records = contextRecords({
+          day, grid, sensors: app.sensors, segments: app.segments,
+          segmentDetail: app.segmentView?.state === "ready" ? app.segmentView.detail : null,
+          devices: wearables.demos?.list().filter((d) => d.samples.length > 0) ?? [],
+          readings: wearables.readings, recent: wearables.recent,
+          ble: { connected: wearables.ble?.connected ?? false, battery: wearables.ble?.battery ?? null, last: wearables.ble?.last ?? null },
+          error: app.error,
+        });
+        records.push({ category: "activity_metadata", data: {
+          source: "derived from loaded application data", date, today, selectedHour: app.hour,
+          currentHour: app.nowHour, activity, tune: app.tune,
+          hourlyScores: app.focusScores, recommendedWindows: app.windows, bestSpot: app.bestSpot,
+          ride: app.ride,
+        } });
+        const facts = {
+          date, sport: activity, area: grid?.status === "unavailable" ? "Heilbronn city model (no street coverage)" : prefs.home?.label ?? "Heilbronn",
+          reachKm: prefs.radiusKm, sensitiveToAir: prefs.airSensitive,
+        };
+        const prompt = buildMessages({ question: q, facts, memory: prefs.memory, history, records });
+        const result = await generate(prompt, (t) => setMessages((m) => m.map((x) => x.id === id ? { ...x, text: t } : x)));
+        setMessages((m) => result.text ? m.map((x) => x.id === id ? { ...x, text: result.text, streaming: false } : x) : m.filter((x) => x.id !== id));
+        if (!result.text && !result.stopped) showToast("The AI returned no answer. Please try again.");
+      } catch {
+        setMessages((m) => m.filter((x) => x.id !== id));
+        showToast("The AI could not finish its answer. Please try again.");
+      } finally {
+        sending.current = false;
+        setBusy(false);
       }
-      setBusy(false);
     },
-    [busy, ctx, greeting, messages, prefs.memory, showToast],
+    [messages, prefs.home?.label, prefs.memory, prefs.radiusKm, prefs.airSensitive, showToast, day, grid, app.sensors, app.segments, app.segmentView, app.error, app.hour, app.nowHour, app.tune, app.focusScores, app.windows, app.bestSpot, app.ride, wearables, date, today, activity],
   );
+  useEffect(() => { sendRef.current = (q) => { void send(q); }; }, [send]);
+  useEffect(() => {
+    if (!active) {
+      dictation.current?.cancel();
+      dictation.current = null;
+      setListening(false);
+    }
+    return () => { dictation.current?.cancel(); dictation.current = null; };
+  }, [active]);
 
   const newChat = () => {
+    dictation.current?.cancel();
+    dictation.current = null;
+    setListening(false);
+    setText("");
     if (ai.status === "generating") void stopGenerating();
     setMessages([]);
     if (prefs.saveChat) clearHistory();
@@ -187,27 +179,35 @@ export default function CoachScreen({ active }: { active: boolean }) {
   };
 
   const toggleMic = () => {
-    const Ctor = speechCtor();
-    if (!Ctor) return showToast("Voice input isn't available in this browser.");
-    if (listening) {
-      recRef.current?.stop();
+    if (dictation.current) {
+      dictation.current.finish();
       return;
     }
-    const rec = new Ctor();
-    rec.lang = "en-GB";
-    rec.interimResults = false;
-    rec.onresult = (e) => {
-      const heard = e.results[0]?.[0]?.transcript;
-      if (heard) void send(heard);
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => {
-      setListening(false);
-      showToast("I couldn't hear you. Check the microphone permission.");
-    };
-    recRef.current = rec;
+    if (busy) return;
+    if (getAIState().status !== "ready") {
+      showToast("Enable the private AI in AI settings before recording.");
+      return;
+    }
+    const Ctor = speechCtor();
+    if (!Ctor) return showToast("Voice input isn't available in this browser.");
     setListening(true);
-    rec.start();
+    let failed = false;
+    const session = startDictation(new Ctor(), {
+      draft: setText,
+      finish: (heard) => {
+        dictation.current = null;
+        setListening(false);
+        if (heard) sendRef.current(heard);
+        else showToast("No speech was recorded. Please try again.");
+      },
+      error: () => {
+        failed = true;
+        dictation.current = null;
+        setListening(false);
+        showToast("Speech recognition stopped. Check microphone permission or type your message.");
+      },
+    });
+    if (!failed) dictation.current = session;
   };
 
   const chips = [`Best time today?`, `Can I ${verb} after work?`, `Where's the coolest spot?`, `How's the air for me?`, `Best day this week?`];
@@ -296,11 +296,12 @@ export default function CoachScreen({ active }: { active: boolean }) {
 
       {ai.status === "paused" && (
         <button type="button" onClick={() => openSheet("ai")} className="relative mx-4 mb-2 rounded-2xl bg-ok-soft px-3.5 py-2.5 text-left text-xs font-bold text-[#7a5200]">
-          The private AI went to sleep to save battery. Tap to wake it. Coach still answers meanwhile.
+          The private AI went to sleep to save battery. Tap to wake it before sending a message.
         </button>
       )}
 
       <div className="relative flex flex-col gap-2.5 px-4 pt-1">
+        {listening && <p role="status" className="text-xs text-mute">Listening… tap Finish speaking when you are done.</p>}
         <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
           {ai.status === "not_installed" && (
             <button type="button" onClick={() => openSheet("ai")} className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-extrabold text-lime">
@@ -308,7 +309,7 @@ export default function CoachScreen({ active }: { active: boolean }) {
             </button>
           )}
           {chips.map((c) => (
-            <button key={c} type="button" onClick={() => send(c)} disabled={busy} className="h-9 shrink-0 rounded-full border border-line bg-white px-3.5 text-[13px] font-bold disabled:opacity-50">
+            <button key={c} type="button" onClick={() => send(c)} disabled={busy || listening} className="h-9 shrink-0 rounded-full border border-line bg-white px-3.5 text-[13px] font-bold disabled:opacity-50">
               {c}
             </button>
           ))}
@@ -322,13 +323,13 @@ export default function CoachScreen({ active }: { active: boolean }) {
         >
           <label className="flex h-[54px] min-w-0 flex-1 items-center rounded-[27px] border border-line bg-white px-[18px]">
             <span className="sr-only">Message Coach</span>
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask anything about your run…" maxLength={300} className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-mute/70" />
+            <input readOnly={listening} value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask anything about your run…" maxLength={300} className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-mute/70" />
           </label>
           {generating ? (
             <button type="button" onClick={() => void stopGenerating()} disabled={ai.status === "stopping"} aria-label="Stop generating" className="grid size-[54px] shrink-0 place-items-center rounded-full bg-bad text-white disabled:opacity-60">
               <Square className="size-[18px] fill-white" aria-hidden />
             </button>
-          ) : text.trim() ? (
+          ) : text.trim() && !listening ? (
             <button type="submit" disabled={busy} aria-label="Send" className="grid size-[54px] shrink-0 place-items-center rounded-full bg-ink text-lime disabled:opacity-50">
               <ArrowUp className="size-[22px]" aria-hidden />
             </button>
@@ -336,15 +337,15 @@ export default function CoachScreen({ active }: { active: boolean }) {
             <button
               type="button"
               onClick={toggleMic}
-              disabled={!canSpeak}
-              aria-label={listening ? "Stop listening" : "Talk to Coach"}
+              disabled={!canSpeak || busy}
+              aria-label={listening ? "Finish speaking" : "Talk to Coach"}
               aria-pressed={listening}
               className={cn(
                 "grid size-[54px] shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#e6fbf1,#a5e6c8_45%,#14966f)] shadow-[0_6px_20px_rgb(125_179_60/0.45)] disabled:opacity-40",
                 listening && "animate-pulse ring-4 ring-lime/60",
               )}
             >
-              <Mic className="size-[22px]" aria-hidden />
+              {listening ? <Square className="size-[20px]" aria-hidden /> : <Mic className="size-[22px]" aria-hidden />}
             </button>
           )}
         </form>

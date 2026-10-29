@@ -603,3 +603,17 @@ offline. Record a later successful check alongside the earlier failure.
 - User layout correction: environmental content lives only in its own sidebar tab;
   Overview keeps its compact endpoint workspace and Source data keeps pipeline
   monitoring. Mobile navigation includes the new tab as Environment.
+
+### AI companion data context and microphone — 2026-10-29
+
+- Every Coach question now uses the on-device model; deterministic/canned replies
+  and generation-error fallback answers are removed. Enable AI before chatting.
+- All loaded backend day/grid/station/segment records and saved local fixture/BLE
+  samples are context candidates. Full-day columnar values plus question-relevant
+  complete records fit the 4,096-token budget; included/total counts disclose
+  omissions. Synthetic fixtures and observed BLE readings stay distinct.
+- Voice dictation accumulates across pauses and submits only after explicit
+  Finish speaking plus final recognition results. Cancellation/errors never send.
+- [Contract, local HTTP probe and limitations](../docs/integrations/ai-companion-context.md).
+  Web lint/types/build and 10 offline tests passed on Node24.22.2. No new upstream
+  source verification, real-mic check or downloaded-model quality claim.

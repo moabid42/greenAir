@@ -54,23 +54,21 @@ Optional street-by-street scores (vector tiles + `/scores`, `/score`): set `NEXT
 | **Explore** | Flat city map. Scrub or play through the day; heat alert; best places for the chosen layer |
 | **Place** | One spot up close: dial, best time, 6 factors, save, navigate, remind |
 | **Ride** | Real measured road roughness and overtaking distance from senseBox:bike, inside your reach |
-| **Coach** | Ask anything. Answers come from the live data, with cards and action buttons. Voice input where the browser supports it |
+| **Coach** | On-device AI answers grounded in loaded backend and local device data. Voice input waits for Finish speaking |
 | **Analytics** | Available environmental results and real local Bluetooth readings (export / delete); missing dates stay unavailable |
 | **Devices** | Real Bluetooth heart-rate sensor (Web Bluetooth), privacy and sync controls; synthetic sessions are disabled by default |
 | **Me** | Preferences that change the scores, saved places, reminders, data and privacy |
 
 ## The Coach
 
-Works with **no key**: a built-in analyst (`src/lib/coach/engine.ts`) understands the question (time, day, topic) and answers from the data.
+Coach requires the on-device AI to answer. Tap **AI**, then **Download Qwen3-0.6B** (about 0.45 GB, once). Typed and spoken questions use the same model path; there are no canned analyst replies or fallback answers. Errors are shown as status messages.
 
-**Private on-device AI (optional).** In the Coach tap **AI**, then **Download Qwen3-0.6B** (about 0.45 GB, once). After that the model chats in the browser and nothing is sent to any server.
-
-- Model: Qwen3-0.6B, **GGUF Q5_K_M** (`unsloth/Qwen3-0.6B-GGUF`; the official `Qwen/Qwen3-0.6B-GGUF` repo only ships Q8_0).
-- Runtime: `@wllama/wllama` (llama.cpp compiled to WebAssembly). The `.wasm` is served from `public/wllama/`, not a CDN. WebGPU is used when available, otherwise the CPU (4 threads, which needs the COOP/COEP headers in `next.config.ts`).
-- **Thinking mode is off** (`reasoning: false` plus `enable_thinking: false`). Answers are capped at 70 tokens, low temperature and a fixed seed keep them brief and consistent.
-- **Division of labour:** data questions (best time, heat, air, wind, where, week, routes) are answered instantly and exactly by the built-in analyst (`src/lib/coach/engine.ts`). The model handles conversation, because a 0.6B model repeats numbers instead of reasoning about them.
-- The fixed start of the prompt (`src/lib/ai/prompt.ts`) is pre-processed once at load and reused, which is what keeps replies quick on a CPU.
-- It sleeps 45 s after the app goes to the background. Preferences and optional chat history live in `localStorage` (not encrypted).
+- Model: Qwen3-0.6B, GGUF Q5_K_M (`unsloth/Qwen3-0.6B-GGUF`), through `@wllama/wllama` with local WASM assets.
+- Thinking mode is off. Answers allow up to 200 tokens. The fixed system prompt is cached; data context refreshes for every question.
+- Context candidates include all loaded day hours and provenance, grid cells, stations/channels, segment scores/details, recorded/recent BLE samples and locally retained demo device sessions. All-hour columnar data helps compare the full selected day. No new device fixtures are connected automatically.
+- The 4,096-token model context uses question-based record selection and explicit included/total counts. Large records or unrelated rows can be omitted; this is not proof of missing source data. Context covers loaded data for the selected date, not the entire backend archive. Forecast, measurement, derived and synthetic labels, units and timestamps remain distinct.
+- Voice input shows a live transcript, survives browser recognition pauses, and submits only after **Finish speaking** and final recognition results. Leaving Coach or starting a new chat cancels recording. Browser recognition may use a provider speech service; model inference remains on-device.
+- The AI sleeps after 45 seconds in the background. Optional chat history lives in browser localStorage and may contain readings mentioned in answers; raw context records are not saved as chat history.
 
 ## Honest limits
 

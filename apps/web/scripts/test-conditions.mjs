@@ -79,3 +79,95 @@ test('missing spatial inputs stay blank and cannot become static-only recommenda
   cell.recommendable = true;
   assert.equal(rank.rankSpots(grid, 12, 'ride', {}, 3, null, null).length, 1);
 });
+
+const { startDictation } = load('ai/speech');
+function recognizer() {
+  return { starts: 0, stops: 0, aborts: 0,
+    start() { this.starts++; }, stop() { this.stops++; }, abort() { this.aborts++; },
+    result(...parts) {
+      this.onresult?.({ results: parts.map(([transcript, isFinal]) => Object.assign([{ transcript }], { isFinal })) });
+    },
+  };
+}
+test('dictation waits through interim results, final phrases and pauses until Finish', () => {
+  const rec = recognizer();
+  const submitted = []; const drafts = [];
+  const session = startDictation(rec, { draft: (s) => drafts.push(s), finish: (s) => submitted.push(s), error: assert.fail });
+  rec.result(['Can I', false]);
+  rec.result(['Can I run', true], ['after', false]);
+  assert.deepEqual(submitted, []);
+  rec.onend(); // browser ends on a pause, but the user has not finished
+  assert.equal(rec.starts, 2);
+  rec.result(['after work', true]);
+  session.finish();
+  assert.deepEqual(submitted, []); // wait for recognition to drain after stop
+  rec.result(['after work today', true]);
+  rec.onend();
+  rec.onend();
+  assert.deepEqual(submitted, ['Can I run after work today']);
+  assert.equal(drafts.at(-1), 'Can I run after work today');
+});
+test('cancel, recognition error and denied permission never submit a question', () => {
+  for (const mode of ['cancel', 'error', 'throw']) {
+    const rec = recognizer(); let errors = 0;
+    if (mode === 'throw') rec.start = () => { throw new Error('permission'); };
+    const session = startDictation(rec, { draft() {}, finish: assert.fail, error() { errors++; } });
+    if (mode === 'cancel') session.cancel();
+    if (mode === 'error') rec.onerror();
+    rec.onend?.();
+    session.finish();
+    assert.equal(errors, mode === 'cancel' ? 0 : 1);
+    assert.ok(rec.aborts >= 1);
+  }
+});
+
+const { contextRecords } = load('ai/records');
+const { buildMessages, estimateTokens, selectRecords } = load('ai/context');
+const { CONTEXT_TOKENS } = load('ai/engine');
+const facts = { date: '2026-10-29', sport: 'run', area: 'Heilbronn', reachKm: null, sensitiveToAir: false };
+test('fresh AI context preserves backend fields, zero, null, provenance and device source distinctions', () => {
+  const observed = { sample_id: 'real', timestamp_utc: '2026-10-29T12:00:00Z', value: 82, unit: 'bpm', source_type: 'ble_gatt' };
+  const records = contextRecords({
+    day: { date: facts.date, source: 'forecast', hours: [{ hour: 12, tempC: 0, no2: null, provenance: { tempC: { kind: 'model', unit: '°C', observedAt: ['2026-10-29T12:00:00Z'] } } }] },
+    grid: { source: 'mixed', cells: { features: [{ properties: { id: 'cell', recommendable: false, confidence: 0 } }] } },
+    sensors: [{ id: 'station', latest: { ozone: 32 }, stale: true }],
+    segments: { source: 'mixed', scores: { 123: [70, 0.4, 0] } }, segmentDetail: { segment_id: 123, missing: ['air'] },
+    devices: [{ id: 'demo', name: 'WHOOP', connected: false, samples: [{ timestamp: '2026-10-29T11:00:00Z', heartRateBpm: 120 }], summary: { recoveryScoreDemo: 65 } }],
+    readings: [observed], recent: [observed], ble: { connected: true, battery: 0, last: observed }, error: null,
+  });
+  assert.equal(records.filter((r) => r.category === 'ble_sample').length, 1);
+  const messages = buildMessages({ question: 'Compare WHOOP heart rate with air and ozone at the station', facts, memory: {}, history: [], records });
+  const body = messages.at(-1).content;
+  for (const field of ['synthetic local fixture', 'observed BLE', 'ozone', 'provenance', 'recommendable', 'segment_id', 'tempC":0', 'no2":null', 'recoveryScoreDemo']) assert.ok(body.includes(field), field);
+  assert.doesNotMatch(messages[0].content, /no live weather/);
+});
+test('large references stay bounded, select relevant records and count omissions truthfully', () => {
+  const records = Array.from({ length: 1000 }, (_, n) => ({ category: 'sensor', data: { id: `station-${n}`, payload: 'x'.repeat(500) } }));
+  records.push({ category: 'device_sample', data: { name: 'WHOOP', source: 'synthetic', heartRateBpm: 123 } });
+  const messages = buildMessages({ question: 'WHOOP heart rate?', facts, memory: {}, history: [{ role: 'user', text: 'x'.repeat(2000) }], records });
+  assert.ok(messages.at(-1).content.includes('heartRateBpm":123'));
+  assert.ok(messages.at(-1).content.includes('"total":1000'));
+  assert.ok(estimateTokens(JSON.stringify(messages)) + 200 < CONTEXT_TOKENS);
+  const none = selectRecords('air', [{ category: 'sensor', data: 'x'.repeat(10000) }], 150);
+  assert.ok(none.includes('"included":0'));
+  const refreshed = buildMessages({ question: 'WHOOP heart rate?', facts, memory: {}, history: [], records: [{ category: 'device_sample', data: { heartRateBpm: 99 } }] });
+  assert.ok(refreshed.at(-1).content.includes('heartRateBpm":99'));
+  assert.ok(!refreshed.at(-1).content.includes('heartRateBpm":123'));
+});
+
+test('all-hour overview keeps every value available when repeated provenance exceeds the context', () => {
+  const records = contextRecords({
+    day: { date: facts.date, timezone: 'Europe/Berlin', source: 'forecast', hours: Array.from({ length: 24 }, (_, hour) => ({
+      hour, tempC: hour, humidity: null, no2: 0, factors: { air: hour + 50 }, missing: ['humidity'],
+      provenance: { tempC: { kind: 'model', rawRefs: Array(100).fill(123), observedAt: ['2026-10-29T12:00:00Z'] } },
+    })) },
+    grid: null, sensors: [], segments: null, segmentDetail: null, devices: [], readings: [], recent: [],
+    ble: { connected: false, battery: null, last: null }, error: null,
+  });
+  const messages = buildMessages({ question: 'When is the best time today?', facts, memory: {}, history: [], records });
+  const body = messages.at(-1).content;
+  assert.ok(body.includes('"tempC":[' + Array.from({ length: 24 }, (_, n) => n).join(',') + ']'));
+  assert.ok(body.includes('"no2":[' + Array(24).fill(0).join(',') + ']'));
+  assert.ok(body.includes('"source":"forecast"'));
+  assert.ok(estimateTokens(JSON.stringify(messages)) + 200 < CONTEXT_TOKENS);
+});
