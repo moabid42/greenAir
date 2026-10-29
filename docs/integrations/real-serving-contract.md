@@ -6,7 +6,7 @@ traffic and safety do not become invented defaults. Sport weights stay in the cl
 Each hour can carry actual UTC instants, missing-channel names and per-channel
 source kind, valid times, retrieval/issue times, raw references, units and QC flags.
 The public day retains 24 Berlin wall-clock slots; exact source instants make DST
-gaps/repeated hours traceable. Provider selection is implemented in the next commit.
+gaps/repeated hours traceable. Provider selection is explicit, as described below.
 
 Day/grid/sensor provenance accepts mock, forecast (model output), measured, mixed or
 unavailable. Day metadata includes build/retrieval times, partial/stale status and
@@ -27,8 +27,8 @@ invented air values. Backend-provided grids are never replaced by synthetic ones
 Validation: backend nullable/OpenAPI tests plus existing API checks; frontend core
 tests check that daylight-only missing hours cannot produce recommendations, zero
 stays numeric, and partial windows exclude gaps. `just check-web` includes these
-checks plus lint/type-check/build; CI already calls the same recipe. Real provider
-projection and browser verification remain subsequent requirements.
+checks plus lint/type-check/build; CI already calls the same recipe. Captured replay and production browser verification are recorded in the serving
+and spatial validation notes.
 
 ## Stored provider
 
@@ -61,8 +61,8 @@ actual observation times remain available. Parallel sensors get distinct channel
 labels. Stale flags consider every channel (30 minutes for community sensors,
 three hours for hourly UBA); these thresholds are application choices, not provider
 cadence guarantees. DWD weather inputs remain stored without being mislabelled as
-senseBox markers. Until spatial integration, the real grid is an explicitly disabled
-empty collection and street queries return no verified data. No synthetic spatial
+senseBox markers. Without a usable spatial snapshot, the real grid is an explicitly
+disabled empty collection and street queries return no verified data. No synthetic spatial
 scores are mixed with real day/sensor results.
 
 Compose passes the explicit mode/database variables while retaining the separate
@@ -83,8 +83,13 @@ never labelled as an official station observation. City-wide recommendations can
 open a fabricated street/place. Coach declines park/street ranking without spatial
 coverage, and its facts retain source/coverage metadata.
 
-Direct cycling overlays and statistics are disabled in stored mode until verified
-spatial integration. Mock mode remains clearly separate. Berlin calendar/hour
+Stored mode uses the verified backend's historical surface/close-pass/flow lenses
+and never fetches the old direct ATRAI overlays/statistics. Grids expose nullable
+arrays/greenery, road counts and IDs, per-layer provenance, zero area confidence and
+recommendable=false. Place rankings stay withheld; map cells remain inspectable.
+Street detail scores are nullable, component methods explain city models versus
+static inputs, PM confidence stays zero without evidence, and best-time results
+exclude stale/zero-confidence hours. See [spatial evidence](atrai-spatial.md). Mock mode remains clearly separate. Berlin calendar/hour
 selection is explicit even when the browser timezone is UTC. Reminder conversion
 rejects nonexistent spring hours and selects the earliest repeated autumn instant.
 Missing/out-of-horizon days display the typed no-coverage error and offer a date

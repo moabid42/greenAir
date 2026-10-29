@@ -62,16 +62,25 @@ def project(rows):
     ], issues
 
 
-def persist(repository: ResultRepository, key: str, payload, status: str, now: datetime):
+def persist(
+    repository: ResultRepository,
+    key: str,
+    payload,
+    status: str,
+    now: datetime,
+    *,
+    version: str = VERSION,
+):
     data = payload.model_dump(mode="json")
     fingerprint = hashlib.sha256(
         json.dumps(data, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     ).hexdigest()
-    build_id = hashlib.sha256(f"{VERSION}:{key}:{fingerprint}".encode()).hexdigest()
+    build_id = hashlib.sha256(f"{version}:{key}:{fingerprint}".encode()).hexdigest()
     return repository.save(
         ResultSnapshot(
             build_id=build_id,
             resource_key=key,
+            schema_version=version,
             input_sha256=fingerprint,
             built_at=utc(now),
             status=status,

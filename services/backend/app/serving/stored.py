@@ -16,12 +16,21 @@ from app.schemas.serving import (
     GridCells,
     GridResponse,
     HourConditions,
+    ScoreSnapshot,
     Sensor,
     ServiceStatus,
 )
 from app.schemas.snapshots import DayResult, SensorResult
+from app.schemas.spatial import SPATIAL_VERSION, SpatialResult
 from app.scoring.engine import solar_elevation_deg
 from app.serving.errors import ServingDataError
+from app.serving.spatial import (
+    project_best,
+    project_detail,
+    project_grid,
+    project_scores,
+    segment_features,
+)
 from app.storage import models as db
 from app.storage.results import ResultRepository
 
@@ -81,7 +90,6 @@ def factors(values):
 
 class StoredRepository:
     source = "forecast"
-    spatial_source = "unavailable"
     build_id = "stored-results-v1"
 
     def __init__(
@@ -93,6 +101,40 @@ class StoredRepository:
     ):
         self.results, self.clock, self.stale_after = results, clock, stale_after
         self.generated_at = clock()
+        self._spatial_cache = None
+
+    def _spatial(self):
+        try:
+            with self.results.engine.connect() as conn:
+                identifier = conn.execute(
+                    select(db.result_snapshot.c.build_id)
+                    .where(
+                        db.result_snapshot.c.resource_key == "spatial",
+                        db.result_snapshot.c.schema_version == SPATIAL_VERSION,
+                        db.result_snapshot.c.status != "UNAVAILABLE",
+                    )
+                    .order_by(
+                        db.result_snapshot.c.built_at.desc(), db.result_snapshot.c.build_id.desc()
+                    )
+                    .limit(1)
+                ).scalar_one_or_none()
+            if identifier is None:
+                return None
+            cached = self._spatial_cache
+            if cached is not None and cached[0].build_id == identifier:
+                return cached
+            snapshot = self.results.latest("spatial", version=SPATIAL_VERSION)
+            cached = (snapshot, SpatialResult.model_validate(snapshot.payload))
+            self._spatial_cache = cached
+            return cached
+        except SQLAlchemyError as exc:
+            raise ServingDataError(
+                "Stored spatial conditions are temporarily unavailable."
+            ) from exc
+
+    @property
+    def spatial_source(self):
+        return "mixed" if self._spatial() else "unavailable"
 
     def _load(self, key):
         try:
@@ -190,6 +232,16 @@ class StoredRepository:
         )
 
     def grid(self, selected: date) -> GridResponse:
+        spatial = self._spatial()
+        if spatial:
+            snapshot, result = spatial
+            return project_grid(
+                result,
+                self.day(selected),
+                snapshot.build_id,
+                snapshot.built_at,
+                factor_function=factors,
+            )
         return GridResponse(
             name=f"grids/{selected}",
             date=selected,
@@ -255,14 +307,58 @@ class StoredRepository:
             )
         return sensors
 
+    def segment_collection(self):
+        spatial = self._spatial()
+        return (
+            (segment_features(spatial[1]), spatial[0].build_id, "mixed")
+            if spatial
+            else ([], self.build_id, "unavailable")
+        )
+
     def segments(self):
-        return []
+        return self.segment_collection()[0]
 
-    def detail(self, *args):
-        raise ServingDataError("Verified street conditions are not available yet.", 404)
+    def _street(self, segment_id):
+        spatial = self._spatial()
+        street = (
+            next((s for s in spatial[1].streets if s.segment.segment_id == str(segment_id)), None)
+            if spatial
+            else None
+        )
+        if street is None:
+            raise ServingDataError("No verified road geometry covers this segment.", 404)
+        return spatial[0], street
 
-    def best_times(self, *args):
-        raise ServingDataError("Verified street recommendations are not available yet.", 404)
+    def detail(self, segment_id, profile, moment):
+        snapshot, street = self._street(segment_id)
+        day = self.day(moment.astimezone(BERLIN).date())
+        if not any(moment in h.instants for h in day.hours):
+            raise ServingDataError("No conditions cover this UTC hour.", 404)
+        return project_detail(street, profile, moment, day, snapshot.build_id, clock=self.clock())
+
+    def score_snapshot(self, profile, moment):
+        spatial = self._spatial()
+        if spatial is None:
+            return ScoreSnapshot(
+                profile=profile,
+                t=moment.strftime("%Y-%m-%dT%H:00:00Z"),
+                source="unavailable",
+                version="unavailable",
+                build_id=self.build_id,
+                scores={},
+            )
+        day = self.day(moment.astimezone(BERLIN).date())
+        if not any(moment in h.instants for h in day.hours):
+            raise ServingDataError("No conditions cover this UTC hour.", 404)
+        return project_scores(
+            spatial[1], profile, moment, day, spatial[0].build_id, clock=self.clock()
+        )
+
+    def best_times(self, segment_id, profile, selected):
+        snapshot, street = self._street(segment_id)
+        return project_best(
+            street, profile, selected, self.day(selected), snapshot.build_id, clock=self.clock()
+        )
 
     def status(self) -> ServiceStatus:
         try:
@@ -287,7 +383,7 @@ class StoredRepository:
             build_id=self.build_id,
             generated_at=self.clock(),
             pipeline_connected=True,
-            spatial_source="unavailable",
+            spatial_source=self.spatial_source,
             available_dates=sorted(date.fromisoformat(d[5:]) for d in dates),
             sources=[
                 {

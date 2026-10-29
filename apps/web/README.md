@@ -2,7 +2,15 @@
 
 The MapLibre web client for greenAir (EcoMAB Heilbronn), built with Next.js. It consumes the
 backend's REST API, then vector tiles and score update SSE once those interfaces exist.
-Until the backend serves data it runs in demo mode.
+Without a configured backend it runs in synthetic demo mode. The backend's explicit
+stored mode serves nullable model day conditions, measured stations and optional
+verified historical street attributes. [Current contract](../../docs/integrations/real-serving-contract.md)
+and [spatial evidence](../../docs/integrations/atrai-spatial.md) override the older
+synthetic payload examples below: spatial arrays/greenery can be null, cells retain
+provenance/counts/zero confidence, and place rankings remain withheld without
+validated spatial confidence. Stored mode does not fetch direct ATRAI overlays.
+The map can inspect surface, close-pass histograms and historical flow proxies;
+these are distinct from modelled city air and current traffic.
 
 See the [architecture mapping](../../docs/architecture.md).
 

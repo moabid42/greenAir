@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime
+from typing import Literal
 
 from sqlalchemy import func, select
 
@@ -23,6 +24,7 @@ class ResultRepository:
         retrieved_before: datetime,
         since: datetime | None = None,
         measurements_only: bool = False,
+        kind: Literal["observation"] | None = None,
         max_rows: int = 50_000,
     ) -> list[tuple[Observation, datetime]]:
         if not 1 <= max_rows <= 100_000:
@@ -43,6 +45,8 @@ class ResultRepository:
         )
         if since is not None:
             query = query.where(db.observations.c.ts_utc >= utc(since))
+        if kind is not None:
+            query = query.where(db.observations.c.kind == kind)
         if measurements_only:
             query = query.where(db.observations.c.kind == "observation")
             # Latest per sensor/phenomenon, not an unbounded history transfer.
@@ -95,11 +99,11 @@ class ResultRepository:
         return ResultSnapshot.model_validate(dict(row))
 
     def latest(
-        self, resource_key: str, *, include_unavailable: bool = False
+        self, resource_key: str, *, include_unavailable: bool = False, version: str = VERSION
     ) -> ResultSnapshot | None:
         query = select(db.result_snapshot).where(
             db.result_snapshot.c.resource_key == resource_key,
-            db.result_snapshot.c.schema_version == VERSION,
+            db.result_snapshot.c.schema_version == version,
         )
         if not include_unavailable:
             query = query.where(db.result_snapshot.c.status != "UNAVAILABLE")

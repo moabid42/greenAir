@@ -124,3 +124,7 @@ backend-build:
 # Browser smoke against a separately started stored-data API and production web preview.
 smoke-real-browser *args:
     uv run --no-project --with playwright==1.61.0 python scripts/smoke-real-browser.py {{args}}
+
+# Manual bounded city-layer import; repeat to resume persisted offsets.
+ingest-spatial *args:
+    uv run --locked --directory services/backend python -m app.ingestion.worker --once --backfill --registry app.ingestion.registry:get_spatial_jobs {{args}}

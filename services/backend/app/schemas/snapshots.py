@@ -36,7 +36,7 @@ class SensorResult(BaseModel):
 class ResultSnapshot(BaseModel):
     build_id: str
     resource_key: str
-    schema_version: Literal["conditions-v1"] = VERSION
+    schema_version: Literal["conditions-v1", "spatial-v1"] = VERSION
     input_sha256: str
     built_at: AwareDatetime
     status: Literal["SUCCESS", "PARTIAL", "UNAVAILABLE"]

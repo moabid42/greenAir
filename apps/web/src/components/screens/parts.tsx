@@ -67,7 +67,8 @@ export function Stat({ icon, value, label, className }: { icon: React.ReactNode;
 
 /** The measured cycling layers you can switch on. */
 export function BikeChips() {
-  const { bikeLayers, toggleBike, grid } = useApp();
+  const { bikeLayers, toggleBike, grid, day } = useApp();
+  if (day && day.source !== "mock" && grid?.status !== "unavailable") return <LensChips />;
   const items = [
     { id: "surface", label: "Road surface" },
     { id: "danger", label: "Close passes" },

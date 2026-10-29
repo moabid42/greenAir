@@ -48,6 +48,7 @@ export function rankSpots(
 ): Spot[] {
   const seen = new Set<string>();
   return grid.cells.features
+    .filter((f) => f.properties.recommendable !== false)
     .map((f) => {
       const lngLat = centroid(f);
       return {
@@ -58,6 +59,7 @@ export function rankSpots(
         distanceKm: origin ? distKm(origin, lngLat) : undefined,
       };
     })
+    .filter((s) => Number.isFinite(s.score))
     .filter((s) => s.distanceKm == null || radiusKm == null || s.distanceKm <= radiusKm)
     // Same score → closer wins.
     .sort((a, b) => b.score - a.score || (a.distanceKm ?? 0) - (b.distanceKm ?? 0))

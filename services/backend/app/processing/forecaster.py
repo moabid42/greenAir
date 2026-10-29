@@ -32,7 +32,7 @@ class ForecastPoint:
 @dataclass(frozen=True)
 class Forecast:
     phenomenon: Phenomenon
-    issued_at: datetime
+    issued_at: datetime | None
     method: Method
     correction: float | None
     points: tuple[ForecastPoint, ...]

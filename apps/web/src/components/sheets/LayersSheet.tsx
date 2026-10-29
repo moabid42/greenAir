@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { type Lens, lensesFor } from "@/lib/lens";
 import { useApp } from "@/state/app";
 
-const ICON: Record<Lens, LucideIcon> = { index: CircleDot, heat: Sun, air: Wind, traffic: Car, wind: Cloud, safety: ShieldCheck };
+const ICON: Record<Lens, LucideIcon> = { index: CircleDot, heat: Sun, air: Wind, traffic: Car, wind: Cloud, safety: ShieldCheck, surface: ShieldCheck };
 
 /** Choose what the map colours show, switch sensor markers on or off, and read the legend. */
 export default function LayersSheet() {
@@ -16,7 +16,7 @@ export default function LayersSheet() {
 
   return (
     <Sheet open={open} onClose={closeSheet} title="Map layers">
-      <p className="mb-3 text-xs leading-relaxed text-mute">{grid?.status === "unavailable" ? "Verified street layers are not connected. City-wide model conditions and measured sensor markers are separate layers." : grid?.source === "mock" || day?.source === "mock" ? "Spatial grid and place rankings are simulated." : "Select a layer and inspect its coverage and provenance."}</p>
+      <p className="mb-3 text-xs leading-relaxed text-mute">{grid?.status === "unavailable" ? "Verified street layers are not connected. City-wide model conditions and measured sensor markers are separate layers." : grid?.source === "mock" || day?.source === "mock" ? "Spatial grid and place rankings are simulated." : "Weather and air show city models. Street flow, close passes and surface summarize historical rider data; survey age is unknown. Missing coverage stays blank."}</p>
       <div className="flex flex-col gap-1.5">
         {lensesFor(activity).map((l) => {
           const Icon = ICON[l.value];

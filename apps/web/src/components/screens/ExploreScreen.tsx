@@ -30,7 +30,7 @@ export default function ExploreScreen() {
     if (!day) return Array<number>(24).fill(Number.NaN);
     return day.hours.map((h) => {
       if (lens === "index") return hourScore(h, activity, tune);
-      if (lens === "safety") return h.factors.safety ?? Number.NaN;
+      if ((lens === "safety" || lens === "surface")) return h.factors.safety ?? Number.NaN;
       return h.factors[lens] ?? Number.NaN;
     });
   }, [day, lens, activity, tune]);
@@ -54,7 +54,7 @@ export default function ExploreScreen() {
             : "Quiet roads"
           : lens === "wind"
             ? `${displayNumber(cond.windKmh)} km/h wind`
-            : lens === "safety"
+            : (lens === "safety" || lens === "surface")
               ? "Surface & overtaking safety"
               : VERDICT_TEXT[verdict(series[hour])];
 
@@ -104,7 +104,7 @@ export default function ExploreScreen() {
         <div>
           <p className="mb-1.5 text-[10px] font-extrabold tracking-[0.12em] text-mute">BEST FOR {lensInfo?.label.toUpperCase()} AT {fmtHour(hour)}</p>
           <div className="grid grid-cols-3 gap-1.5">
-            {top.length === 0 && <p className="col-span-3 py-2 text-xs text-mute">{grid?.status === "unavailable" ? "Verified street rankings are unavailable. The chart shows city-wide conditions." : "No places within reach. Try a bigger distance."}</p>}
+            {top.length === 0 && <p className="col-span-3 py-2 text-xs text-mute">{grid?.status === "unavailable" ? "Verified street rankings are unavailable. The chart shows city-wide conditions." : grid?.source === "mixed" ? "Place rankings require verified spatial confidence. Historical street attributes remain inspectable on the map." : "No places within reach. Try a bigger distance."}</p>}
             {top.map((s) => (
               <button key={s.cellId} type="button" onClick={() => openPlace(s.cellId)} className="flex min-w-0 flex-col rounded-[14px] bg-wash px-2.5 py-2 text-left leading-tight">
                 <span className="font-display text-sm font-extrabold" style={{ color: s.score >= 60 ? "#14653e" : "#9a3a12" }}>

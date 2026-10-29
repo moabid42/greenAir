@@ -3,7 +3,7 @@
  * Off unless NEXT_PUBLIC_ECOMAB_API_BASE_URL is set. Nothing here has been verified against a deployed service.
  * Responses are checked before use; anything that does not match is rejected and the app keeps its normal map.
  */
-import type { Activity } from "./types";
+import type { Activity, DataSource } from "./types";
 
 export const CONSUMER_BASE = (process.env.NEXT_PUBLIC_ECOMAB_API_BASE_URL ?? "").replace(/\/$/, "");
 
@@ -16,7 +16,7 @@ const HOUR = /^\d{4}-\d\d-\d\dT\d\d:00:00Z$/;
 export type SegmentTuple = [number, number, number];
 
 export interface SegmentSnapshot {
-  source?: "mock" | "measured" | "forecast";
+  source?: DataSource;
   profile: Profile;
   t: string;
   kind: "observed" | "forecast";
@@ -26,12 +26,14 @@ export interface SegmentSnapshot {
 }
 
 export interface SegmentDetail {
-  source?: "mock" | "measured" | "forecast";
+  source?: DataSource;
   segment_id: number;
   name?: string;
   t: string;
   kind: "observed" | "forecast";
-  score: number;
+  score: number | null;
+  stale?: boolean;
+  message?: string | null;
   confidence: number;
   components: { key: string; label: string; value: number | string | null; unit: string; weight: number; source: string }[];
   gates: string[];
@@ -51,7 +53,7 @@ export function validateSnapshot(x: unknown): SegmentSnapshot {
 }
 
 export function validateDetail(x: unknown): SegmentDetail {
-  if (!isObj(x) || !Number.isInteger(x.segment_id) || !isNum(x.score, 0, 100) || !isNum(x.confidence, 0, 1) || !Array.isArray(x.components) || !Array.isArray(x.gates) || !Array.isArray(x.missing)) throw new Error("Unsupported detail");
+  if (!isObj(x) || !Number.isInteger(x.segment_id) || (x.score !== null && !isNum(x.score, 0, 100)) || !isNum(x.confidence, 0, 1) || !Array.isArray(x.components) || !Array.isArray(x.gates) || !Array.isArray(x.missing)) throw new Error("Unsupported detail");
   return x as unknown as SegmentDetail;
 }
 

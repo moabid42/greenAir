@@ -117,3 +117,38 @@ def test_station_ratios_and_idw_fill():
     near_b = StationRatio("b", (9.2200, 49.1420), 1.2, 30)
     both = fill_uncovered(build_layers([EAST_WEST], [], {}), [EAST_WEST], [near_a, near_b])
     assert both.layers["ew"].pm_ratio == pytest.approx(1.0)
+
+
+def test_unique_mobile_match_rejects_equally_near_directed_edges():
+    reverse = Segment(segment_id="reverse", coordinates=EAST_WEST.coordinates[::-1])
+    report = build_layers(
+        [EAST_WEST, reverse],
+        [obs(P.PM2_5, 15, 9.217, 49.142)],
+        {HOUR: 10},
+        require_unique_match=True,
+    )
+    assert report.unmatched == 1 and report.matched == 0
+    assert all(layer.pm_source == "none" for layer in report.layers.values())
+
+
+def test_station_provider_identity_and_interpolation_radius_are_preserved():
+    hours = [HOUR + timedelta(hours=i) for i in range(24)]
+    samples = [
+        obs(
+            P.PM2_5,
+            value,
+            lon,
+            49.142,
+            at=hour,
+            source=source,
+            station_id="shared",
+            platform="stationary",
+        )
+        for source, value, lon in [("a", 8, 9.215), ("b", 12, 9.220)]
+        for hour in hours
+    ]
+    ratios = station_ratios(samples, {hour: 10 for hour in hours})
+    assert len(ratios) == 2 and {r.ratio for r in ratios} == {0.8, 1.2}
+    report = build_layers([EAST_WEST], [], {})
+    fill_uncovered(report, [EAST_WEST], ratios, max_distance_m=1)
+    assert report.layers["ew"].pm_source == "none"

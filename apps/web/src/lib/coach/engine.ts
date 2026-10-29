@@ -103,7 +103,7 @@ async function dayInfo(ctx: CoachCtx, date: string): Promise<DayInfo> {
     grid = await getGrid(date, day);
   }
   const near = ctx.home ? nearestCell(grid, ctx.home) : null;
-  const homeCell = near && near.km <= MAX_OUTSIDE_KM ? near.cell : null;
+  const homeCell = near && near.km <= MAX_OUTSIDE_KM && near.cell.properties.recommendable !== false ? near.cell : null;
   const scores = homeCell ? Array.from({ length: 24 }, (_, h) => cellScore(homeCell.properties, h, ctx.activity, ctx.tune)) : day.hours.map((h) => hourScore(h, ctx.activity, ctx.tune));
   // Today only looks forward: hours that are over are not recommended.
   return { date, day, grid, homeCell, scores, windows: bestWindows(maskPast(scores, date === ctx.today ? ctx.hourNow : null)) };
@@ -260,7 +260,7 @@ async function answerFromInputs(question: string, ctx: CoachCtx): Promise<CoachR
   if (has("where", "which park", "which place", "best place", "best spot", "spot", "park", "coolest", "cleanest", "quietest", "area", "neighbourhood")) {
     const h = hour ?? best?.start ?? ctx.hourNow;
     const spots = spotsAt(i, h, ctx, 3);
-    if (spots.length === 0) return { text: i.grid.status === "unavailable" ? "Verified street layers are not connected. I can compare available city-wide hours, but cannot rank parks or streets." : "Nothing within your reach yet. Try a bigger distance in your location settings." };
+    if (spots.length === 0) return { text: i.grid.status === "unavailable" ? "Verified street layers are not connected. I can compare available city-wide hours, but cannot rank parks or streets." : i.grid.source === "mixed" ? "Street attributes are available, but spatial confidence is insufficient to rank parks or streets. I can compare city-wide hours." : "Nothing within your reach yet. Try a bigger distance in your location settings." };
     return {
       text: `For ${pad(h)}:00 ${when}, ${spots[0].place} is your best bet (score ${spots[0].score})${spots[0].distanceKm != null ? `, ${fmtKm(spots[0].distanceKm)} away` : ""}.`,
       cards: spots.map((s) => ({ score: s.score, title: s.place, sub: s.distanceKm != null ? `${fmtKm(s.distanceKm)} away` : "In Heilbronn" })),

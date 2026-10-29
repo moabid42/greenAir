@@ -59,3 +59,23 @@ test('reminders reject nonexistent Berlin hours and choose first repeated instan
   assert.equal(time.berlinInstant('2026-03-29',2), null);
   assert.equal(time.berlinInstant('2026-10-25',2).toISOString(), '2026-10-25T00:00:00.000Z');
 });
+
+const lens = load('lens');
+const rank = load('rank');
+test('missing spatial inputs stay blank and cannot become static-only recommendations', () => {
+  const empty = Array(24).fill(null);
+  const cell = { id: 'partial', place: 'Captured road', heat: empty, air: empty, wind: empty,
+    traffic: Array(24).fill(80), light: Array(24).fill(100), safety: null, green: null,
+    surface: null, confidence: 0, recommendable: false };
+  assert.ok(Number.isNaN(score.cellScore(cell, 12, 'ride')));
+  assert.ok(Number.isNaN(lens.lensValue(cell, 12, 'safety', 'ride', {})));
+  assert.ok(Number.isNaN(lens.lensValue(cell, 12, 'surface', 'ride', {})));
+  const feature = { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[9.2,49.1],[9.21,49.1],[9.21,49.11],[9.2,49.11],[9.2,49.1]]] }, properties: cell };
+  const grid = { cells: { features: [feature] } };
+  assert.deepEqual(rank.rankSpots(grid, 12, 'ride', {}, 3, null, null), []);
+  cell.heat = cell.air = cell.wind = Array(24).fill(90);
+  assert.ok(Number.isFinite(score.cellScore(cell, 12, 'ride')));
+  assert.deepEqual(rank.rankSpots(grid, 12, 'ride', {}, 3, null, null), []);
+  cell.recommendable = true;
+  assert.equal(rank.rankSpots(grid, 12, 'ride', {}, 3, null, null).length, 1);
+});

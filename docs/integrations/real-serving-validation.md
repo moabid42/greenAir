@@ -11,7 +11,8 @@ sources and foundation. User merge order, each into `dev`:
 
 Nothing was pushed or merged. Original draft worktrees and handoff edits remain
 preserved. This slice serves real captured/modelled weather and air plus stationary
-measurements; verified spatial grids/street scores are still pending NEXT.md 13–15.
+measurements. This records the first-deliverable checkpoint; subsequent spatial
+stages 13–15 are documented in [spatial evidence](atrai-spatial.md).
 
 ## Evidence and limits
 
