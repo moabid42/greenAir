@@ -1,0 +1,179 @@
+{
+  "checked_at_utc": "2026-10-28T23:05:45.483577+00:00",
+  "runs": [
+    {
+      "exit_code": 2,
+      "results": [
+        {
+          "source_id": "openmeteo_fcst",
+          "status": "SUCCESS",
+          "pages": 1,
+          "counts": {
+            "observations": 384,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "openmeteo_aq",
+          "status": "SUCCESS",
+          "pages": 1,
+          "counts": {
+            "observations": 528,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "osem",
+          "status": "PARTIAL",
+          "pages": 1,
+          "counts": {
+            "observations": 91,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "brightsky",
+          "status": "PARTIAL",
+          "pages": 1,
+          "counts": {
+            "observations": 2,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "uba_226_1",
+          "status": "PARTIAL",
+          "pages": 2,
+          "counts": {
+            "observations": 22,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "uba_226_3",
+          "status": "PARTIAL",
+          "pages": 2,
+          "counts": {
+            "observations": 22,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "uba_226_5",
+          "status": "PARTIAL",
+          "pages": 2,
+          "counts": {
+            "observations": 22,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "uba_226_9",
+          "status": "PARTIAL",
+          "pages": 2,
+          "counts": {
+            "observations": 22,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        },
+        {
+          "source_id": "uba_353_5",
+          "status": "PARTIAL",
+          "pages": 2,
+          "counts": {
+            "observations": 22,
+            "layers": 0,
+            "segments": 0
+          },
+          "error": null
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "exit_code": 0,
+      "results": [
+        {
+          "source_id": "openmeteo_fcst",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "openmeteo_aq",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "osem",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "brightsky",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "uba_226_1",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "uba_226_3",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "uba_226_5",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "uba_226_9",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        },
+        {
+          "source_id": "uba_353_5",
+          "status": "NOT_DUE",
+          "pages": 0,
+          "counts": {},
+          "error": null
+        }
+      ],
+      "stderr": ""
+    }
+  ]
+}

@@ -103,3 +103,15 @@ Run `GREENAIR_DATABASE_URL=... just migrate` from the repository root to migrate
 an explicitly selected PostgreSQL/PostGIS/TimescaleDB database. `just test-storage`
 checks migrations and persistence in a disposable container and removes it afterward.
 No worker, upstream fetch or migration starts as part of API startup.
+
+## Explicit refresh and processing
+
+After selecting `GREENAIR_DATABASE_URL` and running `just migrate`, use
+`just ingest-once` for one bounded registered-source pass or `just process-results`
+for stored-input day/sensor snapshots. `just refresh-once` performs both steps and
+still processes available inputs when some upstream jobs are partial. Optional
+`--source ID`, `--max-pages N` and processing `--date YYYY-MM-DD` flags are documented
+in [worker behavior](../../docs/integrations/refresh-worker.md) and
+[snapshot semantics](../../docs/integrations/processed-snapshots.md).
+No Redis service is required. The API still defaults to its demo provider until
+the real serving integration is explicitly selected in a later change.

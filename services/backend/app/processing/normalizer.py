@@ -225,27 +225,58 @@ def normalize_batch(
             seen.add(observation.key)
             report.observations.append(observation)
 
+    report.observations = quality_control(
+        report.observations,
+        stuck_run=stuck_run,
+        humid_threshold=humid_threshold,
+        humid_window=humid_window,
+    )
+    return report
+
+
+def quality_control(
+    observations: Iterable[Observation],
+    *,
+    stuck_run: int = 10,
+    humid_threshold: float = 75.0,
+    humid_window: timedelta = timedelta(minutes=5),
+    sensor_sources: set[str] | None = None,
+) -> list[Observation]:
+    """QC already-canonical values without converting original provider values again.
+
+    Source-specific sensor checks can be restricted to community measurements;
+    range checks apply to all canonical inputs, including modelled values.
+    """
+    observations = list(observations)
     extra: dict[tuple, set[QcFlag]] = defaultdict(set)
-    measurements = [obs for obs in report.observations if obs.kind == "observation"]
+    for obs in observations:
+        if obs.value is not None:
+            low, high = PLAUSIBLE[obs.phenomenon]
+            if not math.isfinite(obs.value) or not low <= obs.value <= high:
+                extra[obs.key].add(QcFlag.OUT_OF_RANGE)
+    measurements = [
+        obs
+        for obs in observations
+        if obs.kind == "observation" and (sensor_sources is None or obs.source in sensor_sources)
+    ]
     _flag_stuck(measurements, stuck_run, extra)
     _flag_humid_pm(measurements, humid_threshold, humid_window, extra)
-    report.observations = sorted(
+    return sorted(
         (
-            obs.model_copy(update={"qc_flags": obs.qc_flags + tuple(sorted(extra[obs.key]))})
+            obs.model_copy(update={"qc_flags": tuple(sorted(set(obs.qc_flags) | extra[obs.key]))})
             if extra.get(obs.key)
             else obs
-            for obs in report.observations
+            for obs in observations
         ),
         key=lambda obs: (obs.observed_at, obs.source, obs.station_id, obs.phenomenon),
     )
-    return report
 
 
 def _series(observations: list[Observation], phenomena: frozenset[Phenomenon]):
     series: dict[tuple, list[Observation]] = defaultdict(list)
     for obs in observations:
         if obs.phenomenon in phenomena:
-            series[(obs.source, obs.station_id, obs.phenomenon)].append(obs)
+            series[(obs.source, obs.station_id, obs.phenomenon, obs.sensor_id)].append(obs)
     for values in series.values():
         values.sort(key=lambda obs: obs.observed_at)
     return series

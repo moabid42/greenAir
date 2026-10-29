@@ -198,3 +198,18 @@ feature_receipt = Table(
     CheckConstraint("canonical_count >= 0"),
     Index("ix_ingestion_feature_raw", "raw_ref"),
 )
+
+result_snapshot = Table(
+    "result_snapshot",
+    metadata,
+    Column("build_id", String(64), primary_key=True),
+    Column("resource_key", Text, nullable=False),
+    Column("schema_version", Text, nullable=False),
+    Column("input_sha256", String(64), nullable=False),
+    Column("built_at", UTCDateTime(), nullable=False),
+    Column("status", String(16), nullable=False),
+    Column("payload", document, nullable=False),
+    CheckConstraint("status IN ('SUCCESS', 'PARTIAL', 'UNAVAILABLE')"),
+    UniqueConstraint("resource_key", "schema_version", "input_sha256", name="uq_snapshot_input"),
+    Index("ix_snapshot_resource_build", "resource_key", "built_at"),
+)
