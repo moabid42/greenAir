@@ -47,7 +47,8 @@ def main():
         run(*prefix, "alembic", "upgrade", "head", env=env)
         run(*prefix, "pytest", "tests/test_ingestion_foundation.py",
             "tests/test_scheduler.py", "tests/test_result_snapshots.py",
-            "tests/test_real_slice_replay.py", "-q", env=env)
+            "tests/test_real_slice_replay.py", "tests/test_atrai_segments.py",
+            "tests/test_stored_spatial.py", "-q", env=env)
         run(*prefix, "alembic", "downgrade", "base", env=env)
         remaining = run(
             "docker", "exec", name, "psql", "-U", "postgres", "-d", "greenair_test",
@@ -61,7 +62,8 @@ def main():
         run(*prefix, "alembic", "upgrade", "head", env=env)
         run(*prefix, "pytest", "tests/test_ingestion_foundation.py",
             "tests/test_scheduler.py", "tests/test_result_snapshots.py",
-            "tests/test_real_slice_replay.py", "-q", env=env)
+            "tests/test_real_slice_replay.py", "tests/test_atrai_segments.py",
+            "tests/test_stored_spatial.py", "-q", env=env)
     finally:
         # Only the unique container created by this invocation; its anonymous
         # volume is disposable. Never issue compose down against existing data.

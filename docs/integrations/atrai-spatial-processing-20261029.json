@@ -1,0 +1,26 @@
+{
+  "build_id": "142224db7c0c6232b22437a60bfe774d12ef7177a0cbdf94235757334a334341",
+  "resource_key": "spatial",
+  "schema_version": "spatial-v1",
+  "input_sha256": "7efe621211436a6433c5f892bb220f85c0448d280793d17a875eedd5f0bdbbb8",
+  "built_at": "2026-10-29T08:04:29.753642Z",
+  "status": "PARTIAL",
+  "scope": "Full live-captured 2026-10-29 static layers plus explicitly historical first-slice fixture observations; no raw mobile pollutant observations.",
+  "streets": 34241,
+  "static_coverage": {
+    "roughness": 9600,
+    "overtaking_share": 1389,
+    "flow": 7154
+  },
+  "pm_coverage": {
+    "none": 34241
+  },
+  "reference_hours": {
+    "pm2_5": 0,
+    "temperature": 1
+  },
+  "issues": {
+    "mobile_without_reference": 0,
+    "mobile_unmatched": 0
+  }
+}

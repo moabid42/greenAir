@@ -103,14 +103,24 @@ class SegmentIndex:
     def _cell(self, degrees: float) -> int:
         return math.floor(degrees / self.cell_deg)
 
-    def nearest(self, point: Point) -> tuple[Segment, float] | None:
+    def nearest(
+        self, point: Point, *, require_unique: bool = False
+    ) -> tuple[Segment, float] | None:
         candidates = self.cells.get((self._cell(point[0]), self._cell(point[1])), [])
         best = min(
             ((segment, point_to_line_m(point, segment.coordinates)) for segment in candidates),
             key=lambda pair: pair[1],
             default=None,
         )
-        return best if best is not None and best[1] <= self.max_distance_m else None
+        if best is None or best[1] > self.max_distance_m:
+            return None
+        if require_unique and any(
+            segment.segment_id != best[0].segment_id
+            and abs(point_to_line_m(point, segment.coordinates) - best[1]) <= 0.01
+            for segment in candidates
+        ):
+            return None
+        return best
 
 
 @dataclass(frozen=True)
@@ -142,6 +152,8 @@ def build_layers(
     temperature_reference: Mapping[datetime, float] | None = None,
     max_distance_m: float = MATCH_DISTANCE_M,
     kappa: float = KAPPA,
+    *,
+    require_unique_match: bool = False,
 ) -> SpatialReport:
     """§3.1 PM ratio r_i = x_i / L(t_i) and §3.2 anomaly T_i - T_ref(t_i) per segment,
     median and shrinkage. Uses usable mobile PM2.5 and temperature measurements;
@@ -165,7 +177,7 @@ def build_layers(
         if level is None or (bucket is ratios and level <= 0):
             report.without_level += 1
             continue
-        match = index.nearest((obs.longitude, obs.latitude))
+        match = index.nearest((obs.longitude, obs.latitude), require_unique=require_unique_match)
         if match is None:
             report.unmatched += 1
             continue
@@ -207,8 +219,10 @@ def station_ratios(
     min_hours: int = 24,
 ) -> list[StationRatio]:
     """§3.4 R_j = mean of the box's hourly PM2.5 / mean city level over the same hours."""
-    hourly: dict[str, dict[datetime, list[float]]] = defaultdict(lambda: defaultdict(list))
-    locations: dict[str, Point] = {}
+    hourly: dict[tuple[str, str], dict[datetime, list[float]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    locations: dict[tuple[str, str], Point] = {}
     for obs in observations:
         if (
             obs.phenomenon == Phenomenon.PM2_5
@@ -216,8 +230,9 @@ def station_ratios(
             and obs.kind == "observation"
             and obs.usable
         ):
-            hourly[obs.station_id][floor_hour(obs.observed_at)].append(obs.value)
-            locations[obs.station_id] = (obs.longitude, obs.latitude)
+            identity = (obs.source, obs.station_id)
+            hourly[identity][floor_hour(obs.observed_at)].append(obs.value)
+            locations[identity] = (obs.longitude, obs.latitude)
     result = []
     for station, hours in sorted(hourly.items()):
         shared = [hour for hour in hours if hour in pm_levels]
@@ -226,22 +241,31 @@ def station_ratios(
             continue
         mean_station = fmean(fmean(hours[hour]) for hour in shared)
         result.append(
-            StationRatio(station, locations[station], mean_station / mean_level, len(shared))
+            StationRatio(station[1], locations[station], mean_station / mean_level, len(shared))
         )
     return result
 
 
 def fill_uncovered(
-    report: SpatialReport, segments: Sequence[Segment], stations: Sequence[StationRatio]
+    report: SpatialReport,
+    segments: Sequence[Segment],
+    stations: Sequence[StationRatio],
+    *,
+    max_distance_m: float = math.inf,
 ) -> SpatialReport:
     """Give segments without PM samples an IDW ratio from the station ratios."""
     for segment in segments:
         layer = report.layers[segment.segment_id]
         if layer.pm_samples > 0 or not stations:
             continue
-        ratio = idw_ratio(
-            (distance_m(segment.center, station.location), station.ratio) for station in stations
-        )
+        nearby = [
+            (distance_m(segment.center, s.location), s.ratio)
+            for s in stations
+            if distance_m(segment.center, s.location) <= max_distance_m
+        ]
+        if not nearby:
+            continue
+        ratio = idw_ratio(nearby)
         report.layers[segment.segment_id] = SegmentLayer(
             **{**layer.__dict__, "pm_ratio": ratio, "pm_source": "idw"}
         )

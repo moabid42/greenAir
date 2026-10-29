@@ -93,3 +93,47 @@ continuity, changed totals, replay, retained raw properties, outside-bbox geomet
 duplicate identities across pages and last-success fallback. SQLite validates
 portable logic only; production PostGIS verification is recorded separately when
 run. Captured totals are historical and are not availability guarantees.
+
+## Versioned spatial processing
+
+`just process-results --spatial --reference-days 7` builds `spatial-v1` independently
+of day/sensor results. Optional `--as-of` accepts an explicit aware cutoff for
+repeatable replays. The input window is at most 31 days and reads at most 50,000
+canonical measurements; exceeding the budget fails instead of silently truncating.
+Missing/failed road captures cannot publish a spatial result; interrupted new
+captures preserve the last usable result. Result/input hashes retain raw refs,
+capture summaries, canonical values, reference times, joins and processing issues.
+
+Original static values remain raw. Normalization validates percentage/fraction
+ranges, contributing boxes/points, five histogram bins and matching totals. It
+never guesses scales, clamps invalid values, parses Python expressions, joins by
+page position, or lets conflicting contributions silently win.
+
+Canonical mobile PM2.5/temperature samples match a uniquely nearest road within
+20 m (ties within 1 cm are excluded). The existing median/shrinkage builder compares
+samples only to contemporaneous usable outdoor stationary UTC hourly levels.
+Station interpolation requires at least 24 shared hours and stays within 2 km;
+no model values enter spatial calibration. Provider and station identity remain
+separate. No qualifying samples/stations means `pm_source=none`, zero samples and
+no heat anomaly. Internal neutral ratio1 is **not** a measured street pollutant.
+
+[Full-capture processing evidence](atrai-spatial-processing-20261029.json) combines
+the live-captured static layers with **historical selected first-slice fixtures**,
+not a fresh stationary history: 34,241 roads retain the exact expected static
+coverage; PM coverage is none on all streets, temperature has one reference hour,
+PM has no usable reference hours. No raw mobile pollutant values were fetched or
+assumed from the global API. This is a valid partial spatial result, not a street
+pollution survey. Unknown provider survey age remains visible.
+
+`tests/fixtures/atrai-selected.json` contains two road features and one feature per
+static collection selected from these captures, with original page hashes/URL/
+parameters/retrieval times. Only the test replay rewrites envelope totals to model
+a complete small capture; the selection is explicitly not a complete live export.
+Separate **synthetic** canonical mobile/station tests prove temporal matching,
+indoor exclusion and shrinkage without passing invented values off as observations.
+
+Disposable PostgreSQL17/PostGIS/Timescale validation ran the migration upgrade →
+61 tests → downgrade to empty application schema → upgrade → 61 tests again.
+This exercised selected real layer JSONB/geometry/receipts, complete-capture reads,
+versioned spatial snapshot persistence/restart and idempotency. The disposable
+container was removed; the existing evidence database was not used.

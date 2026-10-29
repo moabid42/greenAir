@@ -1,0 +1,295 @@
+{
+  "scope": "Selected real features from 2026-10-29 captures, not complete collections. Tests rewrite envelope counts to simulate a small complete capture.",
+  "captures": {
+    "road_network_heilbronn": [
+      {
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                9.2213487,
+                49.1495941
+              ],
+              [
+                9.2212358,
+                49.1495259
+              ],
+              [
+                9.2209862,
+                49.1494116
+              ],
+              [
+                9.2206692,
+                49.1492912
+              ]
+            ]
+          },
+          "properties": {
+            "osmid": "83738619",
+            "name": "Schaeuffelenstraße",
+            "surface": "asphalt",
+            "oneway": true,
+            "junction": null,
+            "cycleway": null,
+            "index": "(21509851, 12657432415, 0)"
+          }
+        },
+        "original_page_sha256": "3097ac311a0f5a8f19c78d904256fd2b956e5b27f80ce7ced71d9bc3177beae2",
+        "retrieved_at": "2026-10-29T07:56:16.178245+00:00",
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        }
+      },
+      {
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                9.2021067,
+                49.1521243
+              ],
+              [
+                9.2022287,
+                49.1521142
+              ],
+              [
+                9.2026443,
+                49.1520654
+              ],
+              [
+                9.2063735,
+                49.1517122
+              ],
+              [
+                9.2064894,
+                49.1516945
+              ],
+              [
+                9.2066214,
+                49.1516608
+              ],
+              [
+                9.2068051,
+                49.1515977
+              ],
+              [
+                9.2068724,
+                49.1515757
+              ],
+              [
+                9.2071421,
+                49.1514895
+              ],
+              [
+                9.2072652,
+                49.1514576
+              ],
+              [
+                9.207329,
+                49.1514411
+              ]
+            ]
+          },
+          "properties": {
+            "osmid": "[140265089, 380103337, 13796573, 235593869]",
+            "name": "['Saarlandstraße', 'Peter-Bruckmann-Brücke']",
+            "surface": "asphalt",
+            "oneway": false,
+            "junction": null,
+            "cycleway": null,
+            "index": "(21509915, 3834511300, 0)"
+          }
+        },
+        "original_page_sha256": "3097ac311a0f5a8f19c78d904256fd2b956e5b27f80ce7ced71d9bc3177beae2",
+        "retrieved_at": "2026-10-29T07:56:16.178245+00:00",
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        }
+      }
+    ],
+    "bumpy_roads_heilbronn": [
+      {
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                9.2213487,
+                49.1495941
+              ],
+              [
+                9.2212358,
+                49.1495259
+              ],
+              [
+                9.2209862,
+                49.1494116
+              ],
+              [
+                9.2206692,
+                49.1492912
+              ]
+            ]
+          },
+          "properties": {
+            "Roughness": 2.2142857142857144,
+            "Normalized Roughness": 22.142857142857142,
+            "Distance to Road": 6.652638420734078,
+            "streetid": 14,
+            "Number of Boxes": 2,
+            "osmid": "83738619",
+            "name": "Schaeuffelenstraße",
+            "oneway": true,
+            "junction": null,
+            "cycleway": null,
+            "id": 6
+          }
+        },
+        "original_page_sha256": "d9cb04fd11b61a95123d5594a06cc918104790d4e57c73d0f89335bbf45626c0",
+        "retrieved_at": "2026-10-29T07:56:38.842922+00:00",
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        }
+      }
+    ],
+    "overtaking_distance_heilbronn": [
+      {
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                9.2021067,
+                49.1521243
+              ],
+              [
+                9.2022287,
+                49.1521142
+              ],
+              [
+                9.2026443,
+                49.1520654
+              ],
+              [
+                9.2063735,
+                49.1517122
+              ],
+              [
+                9.2064894,
+                49.1516945
+              ],
+              [
+                9.2066214,
+                49.1516608
+              ],
+              [
+                9.2068051,
+                49.1515977
+              ],
+              [
+                9.2068724,
+                49.1515757
+              ],
+              [
+                9.2071421,
+                49.1514895
+              ],
+              [
+                9.2072652,
+                49.1514576
+              ],
+              [
+                9.207329,
+                49.1514411
+              ]
+            ]
+          },
+          "properties": {
+            "Average Overtaking Distance cm": 108.45454545454545,
+            "Overtaking Distance Counts": "0, 4, 7, 0, 0",
+            "Average Overtaking Manoeuvre pct": 1,
+            "Average Distance to Road m": 0.16708291373393205,
+            "Number of Points": 11,
+            "Number of Boxes": 1,
+            "osmid": "[140265089, 380103337, 13796573, 235593869]",
+            "name": "['Saarlandstraße', 'Peter-Bruckmann-Brücke']",
+            "oneway": false,
+            "junction": null,
+            "cycleway": null,
+            "id": 18
+          }
+        },
+        "original_page_sha256": "f37b33bc9a68044f1cb66783d98ce9072a68d5de5d01d7e6cb56c034b87c4601",
+        "retrieved_at": "2026-10-29T07:56:45.304339+00:00",
+        "url": "https://api.atrai.bike/collections/overtaking_distance_heilbronn/items",
+        "params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        }
+      }
+    ],
+    "traffic_flow_heilbronn": [
+      {
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                9.2213487,
+                49.1495941
+              ],
+              [
+                9.2212358,
+                49.1495259
+              ],
+              [
+                9.2209862,
+                49.1494116
+              ],
+              [
+                9.2206692,
+                49.1492912
+              ]
+            ]
+          },
+          "properties": {
+            "id": 0,
+            "road_segment": 6,
+            "avg_traffic_flow": 0.3390459363957597,
+            "points_in_segment": 10,
+            "osmid": "83738619",
+            "name": "Schaeuffelenstraße",
+            "oneway": true,
+            "junction": null,
+            "cycleway": null
+          }
+        },
+        "original_page_sha256": "950745da320da62fae0fecb3d1177a120ecb5e16da9136f4e5013f9b576f11b3",
+        "retrieved_at": "2026-10-29T07:56:46.189517+00:00",
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        }
+      }
+    ]
+  }
+}
