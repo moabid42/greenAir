@@ -116,6 +116,8 @@ export default function AdminProvider({ children }: { children: ReactNode }) {
   }, [settings]);
   const resolved = useCallback((ep: Endpoint) => resolveUrl(ep, settings).url, [settings]);
 
+  const probeVersions = useRef(new Map<string, number>());
+
   const record = useCallback((id: string, p: Probe) => {
     setProbes((m) => ({ ...m, [id]: [...(m[id] ?? []), p].slice(-MAX_PROBES) }));
   }, []);
@@ -125,9 +127,13 @@ export default function AdminProvider({ children }: { children: ReactNode }) {
       const { settings: s } = live.current;
       const r = resolveUrl(ep, s);
       if (!r.url) return;
+      const version = (probeVersions.current.get(ep.id) ?? 0) + 1;
+      probeVersions.current.set(ep.id, version);
       setChecking((c) => new Set(c).add(ep.id));
       const p = await probeUrl(r.url, s.timeoutMs);
-      record(ep.id, p);
+      if (probeVersions.current.get(ep.id) !== version) return;
+      const current = live.current.endpoints.find((e) => e.id === ep.id);
+      if (current && resolveUrl(current, live.current.settings).url === r.url) record(ep.id, p);
       setChecking((c) => {
         const n = new Set(c);
         n.delete(ep.id);
@@ -189,7 +195,16 @@ export default function AdminProvider({ children }: { children: ReactNode }) {
       setSettings(clean);
       live.current.settings = clean;
       notify("Settings saved in this browser.");
-      if (backendChanged) void checkAllRef.current();
+      if (backendChanged) {
+        const keep = Object.fromEntries(Object.entries(live.current.probes).filter(([id]) => {
+          const ep = live.current.endpoints.find((e) => e.id === id);
+          return ep && !ep.url.includes("{base}");
+        }));
+        live.current.probes = keep;
+        setProbes(keep);
+        setPreviousCounts(null);
+        void checkAllRef.current();
+      }
       return errors;
     },
     [notify],

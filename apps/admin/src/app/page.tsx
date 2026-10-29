@@ -19,7 +19,7 @@ import type { Health } from "@/lib/types";
 
 /** The reference design shows four endpoints; in the one-screen layout the ones that need attention come first. */
 const FIT_ROWS = 4;
-const SEVERITY: Record<Health, number> = { offline: 0, degraded: 1, checking: 2, healthy: 3, unconfigured: 4 };
+const SEVERITY: Record<Health, number> = { offline: 0, unverified: 1, degraded: 2, checking: 3, healthy: 4, unconfigured: 5 };
 
 export default function Overview() {
   const a = useAdmin();
@@ -37,6 +37,7 @@ export default function Overview() {
   const healthy = states.filter((s) => s === "healthy").length;
   const degraded = states.filter((s) => s === "degraded").length;
   const offline = states.filter((s) => s === "offline").length;
+  const unverified = states.filter((s) => s === "unverified").length;
   const waiting = states.filter((s) => s === "checking").length;
   const unconfigured = a.endpoints.length - checkable.length;
   const prev = a.previousCounts;
@@ -148,7 +149,7 @@ export default function Overview() {
           Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[104px] rounded-[20px]" />)
         ) : (
           <>
-            <StatCard dense={fit} icon={Leaf} tint="bg-great-soft text-great" label="Healthy endpoints" value={String(healthy)} outOf={String(checkable.length)} delta={{ value: prev ? healthy - prev.healthy : null, unit: "", versus: versusCheck, upIsGood: true }} note={[waiting ? `${waiting} being checked` : "", unconfigured ? `${unconfigured} not configured` : ""].filter(Boolean).join(" · ") || undefined} />
+            <StatCard dense={fit} icon={Leaf} tint="bg-great-soft text-great" label="Healthy endpoints" value={String(healthy)} outOf={String(checkable.length)} delta={{ value: prev ? healthy - prev.healthy : null, unit: "", versus: versusCheck, upIsGood: true }} note={[unverified ? `${unverified} unverified (CORS)` : "", waiting ? `${waiting} being checked` : "", unconfigured ? `${unconfigured} not configured` : ""].filter(Boolean).join(" · ") || undefined} />
             <StatCard dense={fit} icon={TriangleAlert} tint="bg-ok-soft text-ok" label="Degraded endpoints" value={String(degraded)} outOf={String(checkable.length)} delta={{ value: prev ? degraded - prev.degraded : null, unit: "", versus: versusCheck, upIsGood: false }} note={offline ? `${offline} offline` : undefined} />
             <StatCard dense={fit} icon={RotateCw} tint="bg-great-soft text-great" label="Total requests" value={fmtInt(current.requests)} delta={{ value: trend(current.requests, previous?.requests), unit: "%", versus: versusRange, upIsGood: true }} simulated />
             <StatCard dense={fit} icon={Users} tint="bg-great-soft text-great" label="Client data received" value={fmtInt(current.records)} delta={{ value: trend(current.records, previous?.records), unit: "%", versus: versusRange, upIsGood: true }} simulated />

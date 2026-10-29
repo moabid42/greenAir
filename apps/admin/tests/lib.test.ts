@@ -24,7 +24,7 @@ test("resolveUrl fills placeholders and reports why it cannot", () => {
   assert.equal(resolveUrl({ url: "" }, { backendUrl: "x" }, day).url, null);
 });
 
-test("probeUrl: success, HTTP error, CORS-hidden success, timeout, unreachable", async () => {
+test("probeUrl: success, HTTP error, CORS-hidden response, timeout, unreachable", async () => {
   const resp = (status: number) => ({ status, body: { cancel: async () => undefined } }) as unknown as Response;
   const good = await probeUrl("https://x", 500, (async () => resp(200)) as typeof fetch);
   assert.deepEqual([good.ok, good.status, good.opaque], [true, 200, undefined]);
@@ -39,7 +39,7 @@ test("probeUrl: success, HTTP error, CORS-hidden success, timeout, unreachable",
     return resp(0);
   }) as unknown as typeof fetch);
   assert.deepEqual(modes, ["cors", "no-cors"]);
-  assert.deepEqual([cors.ok, cors.opaque, cors.status], [true, true, null]);
+  assert.deepEqual([cors.ok, cors.opaque, cors.status], [false, true, null]);
 
   const slow = await probeUrl("https://x", 30, ((_u: string, init: RequestInit) => new Promise((_, rej) => init.signal?.addEventListener("abort", () => rej(new DOMException("aborted", "AbortError"))))) as unknown as typeof fetch);
   assert.deepEqual([slow.ok, slow.error], [false, "Timed out"]);
@@ -148,4 +148,29 @@ test("parseConfig accepts exports and rejects anything else", () => {
   assert.throws(() => parseConfig("{"), /JSON/);
   assert.throws(() => parseConfig('{"kind":"other"}'), /not an EcoMAB/);
   assert.throws(() => parseConfig(JSON.stringify({ kind: "ecomab-admin-config", endpoints: [{ bad: 1 }] })), /no usable/);
+});
+
+
+test("opaque responses, including persisted old successes, never become healthy or inflate uptime", () => {
+  const oldOpaque: Probe = { at: 10, ok: true, ms: 70, status: null, opaque: true };
+  const opaque: Probe = { ...oldOpaque, ok: false };
+  assert.equal(deriveHealth([oldOpaque], S, true), "unverified");
+  assert.equal(deriveHealth([opaque], S, true), "unverified");
+  assert.equal(endpointStats([oldOpaque]).uptimePct, null);
+  assert.equal(endpointStats([oldOpaque]).avgMs, null);
+  assert.equal(endpointStats([ok(100), bad(), oldOpaque]).uptimePct, 50);
+  assert.equal(deriveHealth([opaque, ok(100)], S, true), "healthy");
+});
+
+test("breaking the backend base only changes backend URL templates", () => {
+  const settings = { backendUrl: "http://localhost:1/broken" };
+  for (const ep of DEFAULT_ENDPOINTS) {
+    const result = resolveUrl(ep, settings);
+    if (ep.origin === "backend") assert.ok(result.url?.startsWith(settings.backendUrl));
+    if (ep.origin === "third-party") {
+      assert.equal(result.url, ep.url);
+      assert.ok(!result.url?.includes("localhost"));
+    }
+    if (ep.origin === "planned") assert.equal(result.url, null);
+  }
 });

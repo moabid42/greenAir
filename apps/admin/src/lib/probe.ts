@@ -14,7 +14,7 @@ type Fetcher = typeof fetch;
 
 /**
  * One health check from this browser: time until the response headers arrive (the body is never downloaded, so large
- * endpoints cost nothing). If CORS hides the response we retry in "no-cors" mode: that proves the server is reachable but
+ * endpoints transfer no body). If CORS hides the response we retry in "no-cors" mode: this can indicate reachability but
  * the status code cannot be read, which is reported honestly as `opaque`.
  */
 export async function probeUrl(url: string, timeoutMs: number, fetcher: Fetcher = fetch, now: () => number = () => performance.now()): Promise<Probe> {
@@ -41,7 +41,7 @@ export async function probeUrl(url: string, timeoutMs: number, fetcher: Fetcher 
     if (first instanceof DOMException && first.name === "AbortError") return { at, ok: false, ms: null, status: null, error: "Timed out" };
     try {
       const { ms } = await attempt("no-cors");
-      return { at, ok: true, ms, status: null, opaque: true };
+      return { at, ok: false, ms, status: null, opaque: true, error: "HTTP status hidden by CORS" };
     } catch (second) {
       if (second instanceof DOMException && second.name === "AbortError") return { at, ok: false, ms: null, status: null, error: "Timed out" };
       return { at, ok: false, ms: null, status: null, error: "Unreachable" };
