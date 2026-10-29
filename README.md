@@ -1,8 +1,8 @@
 # greenAir
 
 Green City Heilbronn hackathon: environmental context and street-level activity
-scoring with a Python/FastAPI demo backend, a Next.js mobile client and a separate
-Next.js admin frontend. Backend serving data defaults to explicitly labelled mock values.
+scoring with Python/FastAPI, a Next.js mobile client and a separate
+Next.js admin frontend. The local stack uses persisted real provider data.
 
 ## Development
 
@@ -39,7 +39,7 @@ reserved components, based on [the research](docs/research.md).
 
 ## Run everything with Docker
 
-With Docker running, build and start the API, mobile web client and admin together:
+With Docker running, start storage, migrations, automatic provider refresh, API, web and admin:
 
 ```sh
 just up
@@ -49,13 +49,21 @@ just up
 - Admin: <http://localhost:3200>
 - API / Swagger: <http://localhost:8000/docs>
 
-The command builds production images, starts them in the background and waits for
-all three health checks. Node/npm/Python do not need to be installed on the host
-for this path; Docker and `just` are enough. The first build downloads dependencies
-and Google Fonts. The API defaults to mock data with synthetic labels. No database
-or broker is required in that mode. Existing stored-data configuration still works
-with an explicitly selected, migrated database and snapshots; `just up` does not
-start ingestion, migrate databases or replace existing data.
+The command builds production images and starts a dedicated PostgreSQL17 database
+with PostGIS/TimescaleDB, applies migrations, and starts the refresh worker and both
+clients. Docker and `just` are enough. Initial builds download dependencies/fonts.
+The API serves **stored real data**; station status uses live openSenseMap. Initial
+weather/sensor results arrive after the first bounded refresh; the road capture
+resumes in small pages over several cycles. Until then the UI shows unavailable
+coverage. No fixtures or synthetic fallback are loaded.
+
+The worker checks due weather/modelled air, stationary openSenseMap, Bright Sky and
+UBA jobs, processes today/tomorrow and sensors, and bootstraps the four verified
+Heilbronn road layers. It resumes checkpoints after restarts and checks for a new
+static capture weekly (an application policy, not a survey cadence). Failed or
+partial sources retain last-success results and visible gaps. Sources, UTC times,
+counts and latest processing attempts are available in Admin → Source data and
+`/api/v1/data-status`. See [runtime details](docs/integrations/real-data-runtime.md).
 
 Stop and remove this application's containers and Compose network:
 
@@ -66,7 +74,8 @@ just down
 This does not delete volumes, images or containers from other Compose projects,
 including the existing ingestion PostgreSQL/Redis services. The Compose project
 remains `greenair-demo`. Use `docker compose logs --follow` for all application logs.
-`just backend-up` / `backend-down` start/stop only the API; `just down` tears down
+`just backend-up` starts the API and its storage/migration dependencies;
+`backend-down` stops only the API; `just down` tears down
 the full application stack.
 
 Ports can be changed with `GREENAIR_PORT`, `GREENAIR_WEB_PORT` and
@@ -94,8 +103,14 @@ from their Docker contexts.
 For source editing with hot reload, the existing host recipes remain available:
 `just setup-web` / `setup-admin`, then run `just dev-web` or `just dev-admin`
 with `NEXT_PUBLIC_API_URL=http://localhost:8000`. Run `just check-web` and `just check-admin` for checks.
-Admin probes are real HTTP requests; traffic/client-data charts stay explicitly
-simulated and configuration stays in the browser.
+Admin probes are real HTTP requests and pipeline status comes from stored records.
+Client upload/request analytics remain unavailable; configuration stays in the browser.
+Wearables wait for an actual Bluetooth heart-rate device. Development `just dev`
+uses stored/live mode and the Compose database at localhost:55433 (override with
+GREENAIR_DATABASE_URL); stop the container API first to free port8000.
+Offline synthetic web data and sample wearables require explicit
+`NEXT_PUBLIC_DEMO_MODE=true`; Compose does not enable this. Backend defaults also select stored/live; offline test/demo providers require explicit
+`GREENAIR_SERVING_DATA_MODE=mock` and `GREENAIR_STATION_DATA_MODE=mock`.
 
 ## Research and agent workflow
 

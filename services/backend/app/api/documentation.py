@@ -15,9 +15,15 @@ from app.serving.demo import DemoRepository
 DESCRIPTION = """
 Read-only Green City Heilbronn backend for frontend development.
 
-**All serving data defaults to synthetic (`source: mock`).** Demo sensor identities,
-street lines, measurements, and spatial patterns are invented. Confidence in street
-scores is zero. No provider, database, broker, or data pipeline is needed to start.
+The normal Compose/dev stack reads **stored real provider data** from the separate
+refresh worker. Weather and air are models; sensor readings are measurements;
+street attributes are historical captures with unknown survey age. Missing inputs
+and unvalidated spatial pollution confidence stay unavailable. `/api/v1/data-status`
+reports actual stored counts, source checkpoints and processing attempts.
+
+An offline mock provider remains available for isolated tests/demos; its sensor
+identities, street lines and readings are invented. Examples below are labelled mock
+examples and do not describe current provider observations.
 
 ### Try it
 1. Open **Conditions → Get a day resource**, date `2026-10-29`.
@@ -46,14 +52,15 @@ UTC instants use RFC 3339; day/grid arrays always contain 24 Berlin wall-clock s
 including DST days. Best-time recommendations skip nonexistent spring hours and use
 the first occurrence of a repeated autumn hour. Demo dates: 2020-01-01 to 2100-12-31.
 
-`/stations/status` defaults to mock; only explicit `GREENAIR_STATION_DATA_MODE=live`
-uses the previously implemented openSenseMap adapter.
+`/stations/status` defaults to live openSenseMap. Explicit
+`GREENAIR_STATION_DATA_MODE=mock` is available for offline tests/demos.
 Core serving also supports explicit `GREENAIR_SERVING_DATA_MODE=stored` with a migrated
 `GREENAIR_DATABASE_URL`. It reads versioned snapshots built by the separate refresh CLI;
 API startup performs no queries, upstream fetches or polling. Missing dates return 404,
 storage failures return 503, and old snapshots retain their original timestamps/stale label.
 The stored provider serves modelled day conditions and measured station markers; its
-spatial grid/streets remain unavailable until verified spatial layers are connected.
+spatial grid/streets use complete verified Heilbronn captures when present, with
+no inferred street pollution pattern or place ranking without calibrated inputs.
 OpenAPI examples below are explicitly synthetic mock examples in either mode.
 SSE and vector tiles remain deferred.
 """
