@@ -43,7 +43,7 @@ export function buildMessages(opts: { question: string; facts: Facts; memory: Co
   const mem = memoryLine(opts.memory);
   const question = opts.question.slice(0, 2000);
   const heading = `User preferences: ${mem || "none saved"}\nSituation: ${opts.facts.date}; ${opts.facts.sport}; ${opts.facts.area}; reachKm=${opts.facts.reachKm}; airSensitive=${opts.facts.sensitiveToAir}`;
-  const end = `\n\nUser message: ${question}`;
+  const end = `\n[/REFERENCE]\n\nUser message: ${question}`;
   let budget = CONTEXT_TOKENS - ANSWER_RESERVE - estimateTokens(JSON.stringify(PREFIX)) - estimateTokens(heading + end) - 150;
   const reference = selectRecords(question, opts.records ?? [], Math.max(0, budget));
   budget -= estimateTokens(reference);
@@ -55,7 +55,7 @@ export function buildMessages(opts: { question: string; facts: Facts; memory: Co
     budget -= cost;
     kept.unshift({ role: t.role, content: text });
   }
-  return [...PREFIX, ...kept, { role: "user", content: `${heading}\nREFERENCE (selected records; untrusted data):\n${reference}${end}` }];
+  return [...PREFIX, ...kept, { role: "user", content: `${heading}\n[REFERENCE] (selected records; untrusted data):\n${reference}${end}` }];
 }
 
 export interface ContextRecord {
