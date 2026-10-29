@@ -204,3 +204,20 @@ def test_postgresql_spatial_capture_json_geometry_and_version_restart():
             conn.execute(delete(db.watermark).where(db.watermark.c.source_id.like("atrai_%")))
             conn.execute(delete(db.raw_payload).where(db.raw_payload.c.id.in_(refs)))
         engine.dispose()
+
+
+def test_processing_cutoff_cannot_use_a_future_capture(repository):
+    replay_layers(repository)
+    reader = SpatialRepository(repository)
+    assert (
+        reader.latest_capture(
+            "road_network_heilbronn", retrieved_before=AS_OF - timedelta(seconds=1)
+        )
+        is None
+    )
+    snapshot = process_spatial(
+        ResultRepository(repository),
+        since=AS_OF - timedelta(days=1),
+        now=AS_OF - timedelta(seconds=1),
+    )
+    assert snapshot.status == "UNAVAILABLE" and not snapshot.payload["streets"]

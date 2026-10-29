@@ -114,7 +114,7 @@ still processes available inputs when some upstream jobs are partial. Optional
 in [worker behavior](../../docs/integrations/refresh-worker.md) and
 [snapshot semantics](../../docs/integrations/processed-snapshots.md).
 No Redis service is required. The API still defaults to its demo provider until
-the real serving integration is explicitly selected in a later change.
+stored serving is explicitly selected below.
 
 ## Serving stored results
 
@@ -123,5 +123,10 @@ selected, migrated results database. `just dev` or `just backend-up` then reads 
 and sensor snapshots; no fetch or worker starts with the API. Default mode stays
 `mock`. Run the separate refresh command to obtain inputs/results first. Missing
 coverage is 404, storage outages are 503, and stale last-success results keep their
-original dates and labels. Real grid/street layers are disabled until connected.
+original dates and labels. Without a spatial snapshot, grid/street layers remain
+unavailable. Import verified city layers with `just ingest-spatial --max-pages 4`
+(repeat to resume), then `just process-results --spatial --reference-days 7`.
+This enables historical road attributes and partial spatial projections with explicit
+missing PM confidence, without inventing street pollution patterns. See the
+[spatial contract/evidence](../../docs/integrations/atrai-spatial.md).
 See [the real serving contract](../../docs/integrations/real-serving-contract.md).

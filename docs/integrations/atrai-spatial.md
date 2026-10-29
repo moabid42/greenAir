@@ -137,3 +137,62 @@ Disposable PostgreSQL17/PostGIS/Timescale validation ran the migration upgrade â
 This exercised selected real layer JSONB/geometry/receipts, complete-capture reads,
 versioned spatial snapshot persistence/restart and idempotency. The disposable
 container was removed; the existing evidence database was not used.
+
+## Serving and frontend projection
+
+Stored mode reads the latest usable `spatial-v1` result without fetching providers.
+Capture selection respects the processing cutoff. Failed/incomplete new inputs
+cannot replace last success. The cached immutable artifact is keyed by build ID;
+API startup still performs no query or import. Segment pagination binds its build
+and bbox, rejecting a cursor after either changes rather than mixing pages.
+
+Core 250 m cells use a fixed local lattice within the ingestion bbox. Each road
+belongs to one cell by its vertex-mean center; boundary polygons are clipped to the
+bbox. Available road attributes use arithmetic means, with contributing counts and
+road IDs retained. These are summaries of roads, **not area surveys or park data**.
+Roughness becomes surface goodness, close-pass share becomes the existing overtaking
+goodness ramp, and flow remains the historical normalized speed proxy. Missing
+attributes and greenery are null. No roads means no generated cell.
+
+Heat/air/wind/light follow the same nullable 24-slot day projection. Without verified
+spatial samples, heat and air remain exactly city model values; no road/park/noise
+pattern is invented. Only identified measured PM ratios/heat anomalies can adjust
+those channels. Spring gaps remain null; a repeated hour follows the day's actual-
+instant aggregation. Static traffic/safety stay absent from the **city day**, which
+must not inherit the grid's undated rider statistics.
+
+`/segments`, `/scores`, `/score` and `/best-time` use real road IDs/geometries and
+the existing separate backend sport engine. Scores are derived diagnostics and
+component values are goodness/100, with methods explaining static inputs versus
+model fields. Missing core model channels produce a null detail score and omit the
+score tuple. PM coverage none yields confidence0. Best times omit zero-confidence
+and stale values. Provider model issue time remains unknown; the heuristic horizon
+uses retrieval time and does not manufacture issuance. The grid has no validated
+area confidence model, so confidence0/recommendable=false withholds place rankings.
+
+Stored frontend mode displays these historical street lenses directly from the
+backend: surface, close passes and flow. Missing map values stay transparent;
+inspection shows model provenance, unknown survey age, missing greenery and zero
+spatial confidence. Rider-derived summaries replace the old direct cycling stats;
+no browser ATRAI requests occur. City-hour recommendations remain separate from
+withheld place recommendations. Vector tiles/SSE remain deferred.
+
+Final [HTTP/browser/restart evidence](atrai-spatial-validation-20261029.json): the
+hardened nonroot stored-mode image served all 34,241 roads through 1,562 grid cells,
+with each road counted exactly once and all grid vertices inside the approved bbox.
+All three sport score maps contain the same real road IDs; absent PM evidence stays
+confidence0 and best-times empty. City model air matches day factors in every cell.
+Sixteen response fingerprints stayed identical after restart (status's current
+clock excluded). Production Chrome verified source/age labels, sensor sheets,
+all sports, street-cell inspection, Explore, Analytics, Coach, partial/no-data dates
+and recovery, with no JS errors or direct environmental provider requests.
+
+Final local checks: root lint; 277 backend tests passed/5 PostgreSQL tests skipped
+offline, research12, commit45; disposable production migration cycle66 tests twice;
+web lint/five meaningful unit checks/type-check/build. The production mock image
+also passed all 20 documented GET routes. These are local results, not remote CI.
+
+A second production browser regression with **no** spatial artifact also passed:
+the grid stays unavailable, direct cycling buttons stay disabled, all sports and
+partial/no-data recovery still work. Verification servers/containers were stopped;
+original DB/Redis and all 21 inventoried draft-file hashes remain unchanged.

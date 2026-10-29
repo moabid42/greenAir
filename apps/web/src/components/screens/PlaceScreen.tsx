@@ -26,7 +26,7 @@ export default function PlaceScreen() {
 
   const cell = placeCell;
   const scores = useMemo(() => (cell ? Array.from({ length: 24 }, (_, h) => cellScore(cell.properties, h, activity, tune)) : []), [cell, activity, tune]);
-  const windows = useMemo(() => bestWindows(maskPast(scores, nowHour)), [scores, nowHour]);
+  const windows = useMemo(() => cell?.properties.recommendable === false ? [] : bestWindows(maskPast(scores, nowHour)), [scores, nowHour, cell]);
 
   if (!cell || !day) return null;
   const p = cell.properties;
@@ -42,9 +42,9 @@ export default function PlaceScreen() {
     { f: "heat", raw: `${displayNumber(city.tempC)} °C`, v: factors.heat },
     { f: "air", raw: `PM2.5 ${displayNumber(city.pm25)} · NO₂ ${displayNumber(city.no2)}`, v: factors.air },
     { f: "wind", raw: `${displayNumber(city.windKmh)} km/h`, v: factors.wind },
-    { f: "traffic", raw: city.rush == null ? "No traffic data" : city.rush > 0.45 ? "Rush hour" : "Quiet", v: factors.traffic },
-    activity === "ride" ? { f: "safety", raw: "measured", v: factors.safety } : { f: "light", raw: city.daylight == null ? "No light data" : city.daylight > 0.9 ? "Daylight" : city.daylight > 0.1 ? "Twilight" : "Dark", v: factors.light },
-    { f: "green", raw: `${Math.round(p.green * 100)}%`, v: Math.round(p.green * 100) },
+    { f: "traffic", raw: p.provenance?.traffic ? "Historic speed proxy" : (city.rush == null ? "No traffic data" : city.rush > 0.45 ? "Rush hour" : "Quiet"), v: factors.traffic },
+    activity === "ride" ? { f: "safety", raw: p.provenance?.safety ? "Historic <1.5 m passes" : "Simulated", v: factors.safety } : { f: "light", raw: city.daylight == null ? "No light data" : city.daylight > 0.9 ? "Daylight" : city.daylight > 0.1 ? "Twilight" : "Dark", v: factors.light },
+    { f: "green", raw: p.green == null ? "No greenery data" : `${Math.round(p.green * 100)}%`, v: p.green == null ? null : Math.round(p.green * 100) },
   ];
 
   const remind = () => {
@@ -85,7 +85,7 @@ export default function PlaceScreen() {
             </p>
           </div>
           <span className="shrink-0 rounded-full px-3 py-1.5 text-xs font-extrabold" style={{ backgroundColor: scoreColor(scores[hour]), color: scores[hour] >= 60 ? "#162c29" : "#fff" }}>
-            {VERDICT_TEXT[verdict(scores[hour])]}
+            {p.recommendable === false ? "Partial street coverage" : VERDICT_TEXT[verdict(scores[hour])]}
           </span>
         </div>
 
@@ -101,12 +101,13 @@ export default function PlaceScreen() {
           </div>
         </div>
 
+        {p.provenance && <p className="text-xs text-mute">Air: {p.provenance.air}. Survey age unknown · spatial confidence {Math.round((p.confidence ?? 0) * 100)}%. Surface goodness: {displayNumber(p.surface)} /100.</p>}
         <div className="grid grid-cols-2 gap-x-3.5 gap-y-2">
           {rows.map((r) => (
             <div key={r.f} className="flex flex-col gap-1">
-              <div className="flex items-baseline justify-between">
-                <span className="text-xs font-extrabold">{r.f === "green" ? "Green" : FACTOR_NAME[r.f]}</span>
-                <span className="text-[11px] font-bold text-mute">{r.raw}</span>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-extrabold">{r.f === "green" ? "Green" : p.provenance && r.f === "traffic" ? "Flow" : p.provenance && r.f === "safety" ? "Close passes" : FACTOR_NAME[r.f]}</span>
+                <span className="text-right text-[10px] font-bold text-mute">{r.raw}</span>
               </div>
               <span className="block h-1.5 overflow-hidden rounded-full bg-wash">
                 <span className="block h-full rounded-full transition-[width] duration-300" style={{ width: `${r.v ?? 0}%`, backgroundColor: scoreColor(r.v ?? 0) }} />

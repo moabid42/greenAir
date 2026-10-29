@@ -75,15 +75,21 @@ export interface CellProperties {
   /** Nearest named place, e.g. "Pfühlpark" */
   place: string;
   /** Per-hour factor scores for this cell, 0–100. */
-  heat: Hourly;
-  air: Hourly;
-  wind: Hourly;
-  traffic: Hourly;
-  light: Hourly;
+  heat: Hourly<number | null>;
+  air: Hourly<number | null>;
+  wind: Hourly<number | null>;
+  traffic: Hourly<number | null>;
+  light: Hourly<number | null>;
   /** Static: surface + overtaking risk, 0–100. null if no bike data nearby. */
   safety: number | null;
   /** Static: 0–1 share of green / water around the cell. */
-  green: number;
+  green: number | null;
+  surface?: number | null;
+  confidence?: number;
+  recommendable?: boolean;
+  segment_ids?: number[];
+  coverage?: Record<string, number>;
+  provenance?: Record<string, string>;
 }
 
 export interface GridFeature {
@@ -100,6 +106,12 @@ export interface GridResponse {
   message?: string | null;
   date: string;
   cellSizeM: number;
+  buildId?: string | null;
+  capturedAt?: string | null;
+  spatialObservedAt?: string | null;
+  stale?: boolean;
+  attribution?: string[];
+  coverage?: Record<string, number>;
   cells: { type: "FeatureCollection"; features: GridFeature[] };
 }
 

@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--api-base-url", default="http://localhost:8010")
     parser.add_argument("--date", type=date.fromisoformat, default=date(2026, 10, 29))
     parser.add_argument("--output", type=Path, default=Path("data/runtime/real-browser-smoke"))
+    parser.add_argument("--spatial", action="store_true", help="expect verified stored street inputs")
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -53,14 +54,17 @@ def main():
             )
             assert any(f"date={args.date}" in r["url"] and r["status"] == 200 for r in responses)
             page.locator("summary").filter(has_text="Modelled city conditions").click()
-            page.get_by_text(
-                "Street grid and place rankings unavailable; no street-level pollution differences are inferred.",
-                exact=True,
-            ).wait_for()
+            if args.spatial:
+                page.get_by_text(re.compile("Street attributes: historical rider-derived data")).wait_for()
+                page.get_by_text(re.compile("Flow is a speed proxy, not current traffic")).wait_for()
+                checks.append("Historical street capture, unknown survey age and model air are explicit")
+            else:
+                page.get_by_text(
+                    "Street grid and place rankings unavailable; no street-level pollution differences are inferred.",
+                    exact=True,
+                ).wait_for()
             page.get_by_text("No data", exact=True).first.wait_for()
-            checks.append(
-                "UTC browser chooses Berlin date; partial model provenance, traffic gap and disabled spatial grid are visible"
-            )
+            checks.append("UTC browser chooses Berlin date; model provenance and traffic gap are visible")
             page.locator(".maplibregl-marker").first.wait_for(timeout=45000)
             page.screenshot(path=str(root / "today.png"))
             markers = page.get_by_role("button", name=re.compile("tap for details"))
@@ -85,14 +89,29 @@ def main():
                     "button", name="Close", exact=True
                 ).last.click()
             page.get_by_role("radio", name="Ride", exact=True).click()
-            assert page.get_by_role("button", name="Road surface", exact=True).is_disabled()
+            if args.spatial:
+                surface = page.get_by_role("radio", name="Road surface", exact=True)
+                assert surface.is_enabled()
+                surface.click()
+                page.get_by_role("heading", name="Rider-derived street data").wait_for()
+                page.screenshot(path=str(root / "ride-surface.png"))
+                page.locator(".maplibregl-canvas").click(position={"x":250, "y":300})
+                page.get_by_text("Partial street coverage", exact=True).wait_for()
+                page.get_by_text(re.compile("Survey age unknown · spatial confidence 0%")).wait_for()
+                page.screenshot(path=str(root / "street-cell.png"))
+                page.get_by_role("button", name="Back", exact=True).click()
+                checks.append("Stored surface/close-pass lenses and tapped road-cell details expose zero confidence")
+            else:
+                assert page.get_by_role("button", name="Road surface", exact=True).is_disabled()
             page.get_by_role("radio", name="Walk", exact=True).click()
             page.get_by_role("radio", name="Run", exact=True).click()
-            checks.append("All sports work; unconnected cycling overlays remain disabled")
+            checks.append("All sports work without direct environmental provider requests")
             page.get_by_role("navigation", name="Main").get_by_role(
                 "button", name="Explore", exact=True
             ).click()
             page.get_by_text(
+                "Place rankings require verified spatial confidence. Historical street attributes remain inspectable on the map."
+                if args.spatial else
                 "Verified street rankings are unavailable. The chart shows city-wide conditions.",
                 exact=True,
             ).wait_for()
@@ -115,10 +134,10 @@ def main():
             page.get_by_text("Answers from modelled city data", exact=True).wait_for()
             page.get_by_label("Message Coach").fill("Which park should I choose?")
             page.get_by_role("button", name="Send", exact=True).click()
-            page.wait_for_function(
-                "document.body.innerText.includes('Verified street layers are not connected.')",
-                timeout=30000,
-            )
+            page.get_by_text(re.compile(
+                "spatial confidence is insufficient" if args.spatial
+                else "Verified street layers are not connected"
+            )).wait_for(timeout=30000)
             checks.append("Coach declines street/park ranking without spatial coverage")
             page.screenshot(path=str(root / "coach.png"))
             page.get_by_role("navigation", name="Main").get_by_role(

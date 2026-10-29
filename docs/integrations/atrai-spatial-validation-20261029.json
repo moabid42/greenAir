@@ -1,0 +1,380 @@
+{
+  "checked_at_utc": "2026-10-29T08:31:20.375013+00:00",
+  "scope": "Live-captured 2026-10-29 static layers plus explicitly historical weather/station replay; not a current mobile pollutant survey.",
+  "full_capture_http": {
+    "scope": "Full 2026-10-29 live-captured static inputs plus explicitly historical weather/station replay; no raw mobile pollution observations.",
+    "cells": 1562,
+    "checks": [
+      {
+        "path": "/health",
+        "status": 200,
+        "elapsed_seconds": 0.018,
+        "bytes": 40,
+        "sha256": "3d07375e8f1e232a03549bc8852aa68f576e546631669847adda82791102b56a",
+        "source": null
+      },
+      {
+        "path": "/api/v1/day?date=2026-10-29",
+        "status": 200,
+        "elapsed_seconds": 0.05,
+        "bytes": 38722,
+        "sha256": "cd6876ba9b1ed80f7eb38a3d4e1f6ebbb16af3bde02838e5946bf48b6719b7cc",
+        "source": "forecast"
+      },
+      {
+        "path": "/api/v1/grid?date=2026-10-29",
+        "status": 200,
+        "elapsed_seconds": 2.246,
+        "bytes": 3212623,
+        "sha256": "0012f1ab7e6ae342c1608531bd48832f8ec5f14aeaf72aaa33681163925036a5",
+        "source": "mixed"
+      },
+      {
+        "path": "/v1/segments?page_size=100",
+        "status": 200,
+        "elapsed_seconds": 0.707,
+        "bytes": 29815,
+        "sha256": "9b0f830cfaf62c84cc33e83e1be1152c85cc6070de07a287dc9659a2e45d50fa",
+        "source": null
+      },
+      {
+        "path": "/v1/segments?page_size=100&page_token=segments-6a4735a774514dca4970855aef50789ff3b70726e8fd802a11f957926562ead3-e3b0c44298fc-100",
+        "status": 200,
+        "elapsed_seconds": 1.181,
+        "bytes": 31198,
+        "sha256": "780d6460631b9ed065115927a47412a1291797b5d105f183fd57c85f31725e6f",
+        "source": null
+      },
+      {
+        "path": "/scores?profile=running&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 3.885,
+        "bytes": 639678,
+        "sha256": "505991bbb3612275400bac6f07daf24bab69ee903d7c0ff35f5d60110e5c6d47",
+        "source": null
+      },
+      {
+        "path": "/score?lat=49.1682409&lon=9.2026135&profile=running&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 0.79,
+        "bytes": 1731,
+        "sha256": "55a299752df479532d8078a3dba6002ec12adb94a7c13a57aa62a572cd56e789",
+        "source": null
+      },
+      {
+        "path": "/v1/segments/16492/bestTimes/2026-10-29?profile=running",
+        "status": 200,
+        "elapsed_seconds": 0.014,
+        "bytes": 162,
+        "sha256": "a3eca19c7d59d38aa55b9225605eb0b7c79a650df631c19fb10e8f668dd5731a",
+        "source": null
+      },
+      {
+        "path": "/scores?profile=cycling&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 3.278,
+        "bytes": 639678,
+        "sha256": "924bd9b7044f58d51cc2a524ad339ac13e1b0101cc67b5ee383d648569f92b33",
+        "source": null
+      },
+      {
+        "path": "/score?lat=49.1682409&lon=9.2026135&profile=cycling&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 1.181,
+        "bytes": 1732,
+        "sha256": "fb0b3f3741a58446ba4a4851fb43ce542aa28d39e5e3b8e5d466854c274e9ada",
+        "source": null
+      },
+      {
+        "path": "/v1/segments/16492/bestTimes/2026-10-29?profile=cycling",
+        "status": 200,
+        "elapsed_seconds": 0.015,
+        "bytes": 162,
+        "sha256": "bac083f9b364a665fbf538b854304ff2d06615a6a44bd11a1df17df6a893c33c",
+        "source": null
+      },
+      {
+        "path": "/scores?profile=walking&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 3.313,
+        "bytes": 639678,
+        "sha256": "eec7a5efbaa016269f7674a76b11b4a2e49650b04b5c7ff9ecba00e2af38cd95",
+        "source": null
+      },
+      {
+        "path": "/score?lat=49.1682409&lon=9.2026135&profile=walking&t=2026-10-29T12:00:00Z",
+        "status": 200,
+        "elapsed_seconds": 1.228,
+        "bytes": 1732,
+        "sha256": "3270c06ae67c4a33995898292b233235adbe07f8c8af3571ec4c52a8dd3a4aac",
+        "source": null
+      },
+      {
+        "path": "/v1/segments/16492/bestTimes/2026-10-29?profile=walking",
+        "status": 200,
+        "elapsed_seconds": 0.015,
+        "bytes": 162,
+        "sha256": "4b4ba7426164b78f5627c91621052e4ede7b8f0a3297e4ea2a9546a4b2a2d62b",
+        "source": null
+      },
+      {
+        "path": "/api/v1/sensors",
+        "status": 200,
+        "elapsed_seconds": 0.003,
+        "bytes": 2230,
+        "sha256": "bf6e8c6c63b97e523b72a476cb03369ef0df6f93ad99082ebeab41f95880d34a",
+        "source": "measured"
+      },
+      {
+        "path": "/v1/status",
+        "status": 200,
+        "elapsed_seconds": 0.004,
+        "bytes": 1016,
+        "sha256": "1496e69b831513f4d300cb93639dc7c5fab5cb983d092305c69ad3389fa969e5",
+        "source": null
+      },
+      {
+        "path": "/openapi.json",
+        "status": 200,
+        "elapsed_seconds": 0.075,
+        "bytes": 77781,
+        "sha256": "27a60c5a4845641465c35a80f8996a31f246dc43e3e22df2b4891d221e039a8d",
+        "source": null
+      }
+    ]
+  },
+  "restart": {
+    "unchanged_resources_after_container_restart": 16,
+    "compared_sha256_by_resource": {
+      "/health": "3d07375e8f1e232a03549bc8852aa68f576e546631669847adda82791102b56a",
+      "/api/v1/day?date=2026-10-29": "cd6876ba9b1ed80f7eb38a3d4e1f6ebbb16af3bde02838e5946bf48b6719b7cc",
+      "/api/v1/grid?date=2026-10-29": "0012f1ab7e6ae342c1608531bd48832f8ec5f14aeaf72aaa33681163925036a5",
+      "/v1/segments?page_size=100": "9b0f830cfaf62c84cc33e83e1be1152c85cc6070de07a287dc9659a2e45d50fa",
+      "/v1/segments?page_size=100&page_token=segments-6a4735a774514dca4970855aef50789ff3b70726e8fd802a11f957926562ead3-e3b0c44298fc-100": "780d6460631b9ed065115927a47412a1291797b5d105f183fd57c85f31725e6f",
+      "/scores?profile=running&t=2026-10-29T12:00:00Z": "505991bbb3612275400bac6f07daf24bab69ee903d7c0ff35f5d60110e5c6d47",
+      "/score?lat=49.1682409&lon=9.2026135&profile=running&t=2026-10-29T12:00:00Z": "55a299752df479532d8078a3dba6002ec12adb94a7c13a57aa62a572cd56e789",
+      "/v1/segments/16492/bestTimes/2026-10-29?profile=running": "a3eca19c7d59d38aa55b9225605eb0b7c79a650df631c19fb10e8f668dd5731a",
+      "/scores?profile=cycling&t=2026-10-29T12:00:00Z": "924bd9b7044f58d51cc2a524ad339ac13e1b0101cc67b5ee383d648569f92b33",
+      "/score?lat=49.1682409&lon=9.2026135&profile=cycling&t=2026-10-29T12:00:00Z": "fb0b3f3741a58446ba4a4851fb43ce542aa28d39e5e3b8e5d466854c274e9ada",
+      "/v1/segments/16492/bestTimes/2026-10-29?profile=cycling": "bac083f9b364a665fbf538b854304ff2d06615a6a44bd11a1df17df6a893c33c",
+      "/scores?profile=walking&t=2026-10-29T12:00:00Z": "eec7a5efbaa016269f7674a76b11b4a2e49650b04b5c7ff9ecba00e2af38cd95",
+      "/score?lat=49.1682409&lon=9.2026135&profile=walking&t=2026-10-29T12:00:00Z": "3270c06ae67c4a33995898292b233235adbe07f8c8af3571ec4c52a8dd3a4aac",
+      "/v1/segments/16492/bestTimes/2026-10-29?profile=walking": "4b4ba7426164b78f5627c91621052e4ede7b8f0a3297e4ea2a9546a4b2a2d62b",
+      "/api/v1/sensors": "bf6e8c6c63b97e523b72a476cb03369ef0df6f93ad99082ebeab41f95880d34a",
+      "/openapi.json": "b76cb362ac23810a0d8f0303d43a9c305255ddc844e2e9104bd36735658cf9bf"
+    },
+    "excluded": "/v1/status has a current generated_at clock"
+  },
+  "production_browser": {
+    "checked_at_utc": "2026-10-29T08:29:08.086399+00:00",
+    "scope": "dated captured replay; not current observations",
+    "selected_date": "2026-10-29",
+    "checks": [
+      "Historical street capture, unknown survey age and model air are explicit",
+      "UTC browser chooses Berlin date; model provenance and traffic gap are visible",
+      "Real station marker opens per-channel sensor details",
+      "Stored surface/close-pass lenses and tapped road-cell details expose zero confidence",
+      "All sports work without direct environmental provider requests",
+      "Explore plays available city conditions without place rankings",
+      "Analytics handles available dates and missing forecast dates",
+      "Coach declines street/park ranking without spatial coverage",
+      "Partial day and out-of-horizon date show explicit gaps/errors with date recovery, without dummy fallback"
+    ],
+    "page_errors": [],
+    "api_responses": [
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/grid?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/sensors",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-02",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-03",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-01",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-04",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-02",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-01",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-03",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-04",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/grid?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      }
+    ],
+    "direct_provider_requests": []
+  },
+  "final_image_grid_header_matches_payload_build_id": true,
+  "local_checks": {
+    "backend_passed": 277,
+    "backend_offline_postgres_skipped": 5,
+    "research_passed": 12,
+    "commit_tools_passed": 45,
+    "postgres_migration_cycles_passed": [
+      66,
+      66
+    ],
+    "web_unit_passed": 5,
+    "web_lint_typecheck_production_build": "passed",
+    "mock_container_documented_get_routes_passed": 20
+  },
+  "without_spatial_regression_browser": {
+    "checked_at_utc": "2026-10-29T08:31:27.397727+00:00",
+    "scope": "dated captured replay; not current observations",
+    "selected_date": "2026-10-29",
+    "checks": [
+      "UTC browser chooses Berlin date; model provenance and traffic gap are visible",
+      "Real station marker opens per-channel sensor details",
+      "All sports work without direct environmental provider requests",
+      "Explore plays available city conditions without place rankings",
+      "Analytics handles available dates and missing forecast dates",
+      "Coach declines street/park ranking without spatial coverage",
+      "Partial day and out-of-horizon date show explicit gaps/errors with date recovery, without dummy fallback"
+    ],
+    "page_errors": [],
+    "api_responses": [
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/grid?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/sensors",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-01",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-03",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-02",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-04",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-03",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-01",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-02",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-29",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-11-04",
+        "status": 404
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/grid?date=2026-10-30",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:8017/api/v1/day?date=2026-10-31",
+        "status": 404
+      }
+    ],
+    "direct_provider_requests": []
+  }
+}

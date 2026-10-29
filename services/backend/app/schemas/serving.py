@@ -9,7 +9,7 @@ from pydantic.alias_generators import to_camel
 
 Score = Annotated[float, Field(ge=0, le=100)]
 Fraction = Annotated[float, Field(ge=0, le=1)]
-HourlyScores = Annotated[list[Score], Field(min_length=24, max_length=24)]
+HourlyScores = Annotated[list[Score | None], Field(min_length=24, max_length=24)]
 Point = tuple[float, float]
 
 
@@ -81,7 +81,13 @@ class CellProperties(BaseModel):
     traffic: HourlyScores
     light: HourlyScores
     safety: Score | None
-    green: Fraction
+    green: Fraction | None
+    surface: Score | None = None
+    confidence: Fraction = 0
+    recommendable: bool = True
+    segment_ids: list[int] = Field(default_factory=list)
+    coverage: dict[str, int] = Field(default_factory=dict)
+    provenance: dict[str, str] = Field(default_factory=dict)
 
 
 class Polygon(BaseModel):
@@ -109,6 +115,12 @@ class GridResponse(ClientModel):
     cells: GridCells
     status: Literal["available", "partial", "unavailable"] = "available"
     message: str | None = None
+    build_id: str | None = None
+    captured_at: AwareDatetime | None = None
+    spatial_observed_at: AwareDatetime | None = None
+    stale: bool = False
+    attribution: list[str] = Field(default_factory=list)
+    coverage: dict[str, int] = Field(default_factory=dict)
 
 
 class Sensor(ClientModel):
@@ -140,7 +152,8 @@ class SegmentProperties(BaseModel):
     segment_id: int
     name: str
     resource_name: str
-    coverage: Literal["mock"] = "mock"
+    coverage: Literal["mock", "partial"] = "mock"
+    static_attributes: list[str] = Field(default_factory=list)
 
 
 class SegmentFeature(BaseModel):
@@ -180,6 +193,7 @@ class ScoreComponent(BaseModel):
     value: float | None
     unit: str
     weight: float
+    method: str | None = None
     source: DataSource = "mock"
 
 
@@ -190,8 +204,13 @@ class SegmentDetail(BaseModel):
     t: str
     kind: Literal["forecast"] = "forecast"
     source: DataSource = "mock"
-    score: Score
+    score: Score | None
     confidence: Fraction
+    build_id: str | None = None
+    spatial_build_id: str | None = None
+    pm_source: Literal["samples", "idw", "none"] = "none"
+    stale: bool = False
+    message: str | None = None
     components: list[ScoreComponent]
     gates: list[str]
     missing: list[str]

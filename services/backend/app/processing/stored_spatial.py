@@ -136,7 +136,9 @@ def process_spatial(repository: ResultRepository, *, since: datetime, now: datet
             raise RuntimeError("spatial processing already running")
         reader = SpatialRepository(repository.repository)
         captures = [
-            c for collection in COLLECTIONS if (c := reader.latest_capture(collection)) is not None
+            c
+            for collection in COLLECTIONS
+            if (c := reader.latest_capture(collection, retrieved_before=now)) is not None
         ]
         issues = Counter()
         for collection in COLLECTIONS:
@@ -204,6 +206,7 @@ def process_spatial(repository: ResultRepository, *, since: datetime, now: datet
                 )
             )
         result = SpatialResult(
+            bbox=repository.repository.bbox,
             streets=streets,
             reference_start=since,
             reference_end=now,

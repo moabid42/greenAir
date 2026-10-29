@@ -79,7 +79,9 @@ export function cellFactors(c: CellProperties, hour: Hour): Record<Factor, numbe
 }
 
 export function cellScore(c: CellProperties, hour: Hour, activity: Activity, tune?: Tune): number {
-  return combine(cellFactors(c, hour), activity, tune);
+  const factors = cellFactors(c, hour);
+  if ([factors.heat, factors.air, factors.wind].some((v) => v == null)) return Number.NaN;
+  return combine(factors, activity, tune);
 }
 
 export function hourScore(h: HourConditions, activity: Activity, tune?: Tune): number {

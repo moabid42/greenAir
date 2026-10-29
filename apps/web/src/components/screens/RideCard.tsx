@@ -16,7 +16,7 @@ const LEGEND = [
 
 /** Ride mode: real measured road quality and close-pass spots inside your reach. */
 export default function RideCard() {
-  const { ride, grid, home, prefs, windows, bestSpot, focusMap, showToast } = useApp();
+  const { ride, grid, day, home, prefs, windows, bestSpot, focusMap, showToast } = useApp();
 
   // Average road-safety score of the places inside your reach.
   const safe = useMemo(() => {
@@ -35,6 +35,15 @@ export default function RideCard() {
     if (!bestSpot) return showToast("Nothing within reach yet — try a bigger distance.");
     window.open(directionsUrl(bestSpot.lngLat, "ride"), "_blank", "noopener");
   };
+
+  if (day?.source !== "mock") return (
+    <section aria-label="Cycling near you" className="pointer-events-auto space-y-2 rounded-[28px] bg-white/97 p-4 text-sm shadow-lg">
+      <h2 className="font-bold">{grid?.status === "unavailable" ? "Street data unavailable" : "Rider-derived street data"}</h2>
+      <p>{grid?.coverage?.roughness?.toLocaleString() ?? "—"} roads with surface data · {grid?.coverage?.overtaking_share?.toLocaleString() ?? "—"} with close-pass histograms.</p>
+      <p className="text-xs text-mute">Use the map layers to inspect historical attributes. Survey age is unknown; missing areas stay blank. No verified street PM coverage or place recommendation.</p>
+      <p className="text-xs text-mute">ATRAI / senseBox:bike · OpenStreetMap contributors</p>
+    </section>
+  );
 
   return (
     <>

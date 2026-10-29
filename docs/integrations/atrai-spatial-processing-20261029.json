@@ -1,9 +1,9 @@
 {
-  "build_id": "142224db7c0c6232b22437a60bfe774d12ef7177a0cbdf94235757334a334341",
+  "build_id": "6a4735a774514dca4970855aef50789ff3b70726e8fd802a11f957926562ead3",
   "resource_key": "spatial",
   "schema_version": "spatial-v1",
-  "input_sha256": "7efe621211436a6433c5f892bb220f85c0448d280793d17a875eedd5f0bdbbb8",
-  "built_at": "2026-10-29T08:04:29.753642Z",
+  "input_sha256": "14269d8759fa0efc72ca78134d650635a09144aeb79d41d90df87b069822a0f0",
+  "built_at": "2026-10-29T08:20:48.095342Z",
   "status": "PARTIAL",
   "scope": "Full live-captured 2026-10-29 static layers plus explicitly historical first-slice fixture observations; no raw mobile pollutant observations.",
   "streets": 34241,

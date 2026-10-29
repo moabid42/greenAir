@@ -22,9 +22,10 @@ export default function SegmentSheet() {
       {segmentView.state === "ready" && (
         <>
           <p className="text-sm">
-            <b className="font-display text-2xl text-brand">{segmentView.detail.score}</b>/100 · {segmentView.detail.source === "mock" ? "Simulated" : segmentView.detail.kind === "forecast" ? "Forecast" : "Observed"} · {when(segmentView.detail.t)} ·{" "}
+            <b className="font-display text-2xl text-brand">{segmentView.detail.score ?? "—"}</b>/100 · {segmentView.detail.source === "mock" ? "Simulated" : segmentView.detail.kind === "forecast" ? "Forecast" : "Observed"} · {when(segmentView.detail.t)} ·{" "}
             {segmentView.detail.confidence < 0.3 ? "little data" : `confidence ${Math.round(segmentView.detail.confidence * 100)}%`}
           </p>
+          {segmentView.detail.message && <p className="mt-2 text-xs text-mute">{segmentView.detail.message}{segmentView.detail.stale ? " Stored model data is stale." : ""}</p>}
           {segmentView.detail.gates.length > 0 && <p className="mt-2 rounded-2xl bg-ok-soft p-3 text-[13px] font-semibold text-[#7a5200]">Conditions: {segmentView.detail.gates.join(", ")}</p>}
           <div className="mt-3 flex flex-col gap-1.5">
             {segmentView.detail.components.map((c) => (

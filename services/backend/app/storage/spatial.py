@@ -31,7 +31,9 @@ class SpatialRepository:
     def __init__(self, repository: Repository):
         self.repository, self.engine = repository, repository.engine
 
-    def latest_capture(self, collection: str, *, max_rows=60_000) -> Capture | None:
+    def latest_capture(
+        self, collection: str, *, max_rows=60_000, retrieved_before: datetime | None = None
+    ) -> Capture | None:
         source = f"atrai_{collection}"
         with self.engine.connect() as conn:
             # Bounded candidate history. Skip interrupted/inconsistent captures;
@@ -39,7 +41,12 @@ class SpatialRepository:
             terminal = (
                 conn.execute(
                     select(db.manifest.c.details)
-                    .where(db.manifest.c.source_id == source)
+                    .where(
+                        db.manifest.c.source_id == source,
+                        db.manifest.c.retrieved_at_utc <= retrieved_before
+                        if retrieved_before is not None
+                        else True,
+                    )
                     .order_by(db.manifest.c.id.desc())
                     .limit(2000)
                 )
@@ -68,7 +75,10 @@ class SpatialRepository:
                 # A committed page may be replayed after a crash. Its offset,
                 # raw bytes and outcomes must be identical to count it once.
                 by_offset = {}
-                invalid = len(manifests) > 1000
+                invalid = len(manifests) > 1000 or (
+                    retrieved_before is not None
+                    and any(r["retrieved_at_utc"] > retrieved_before for r in manifests)
+                )
                 for row in manifests:
                     offset = row["details"].get("offset")
                     if offset in by_offset and row["sha256"] != by_offset[offset]["sha256"]:

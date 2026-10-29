@@ -1,5 +1,6 @@
 """Read-only application queries with frontend-compatible aliases."""
 
+import hashlib
 from datetime import date as Date
 from datetime import datetime
 from typing import Annotated
@@ -60,22 +61,22 @@ def parse_hour(t: str) -> datetime:
     return moment
 
 
-def page(items: list, page_size: int, page_token: str) -> tuple[list, str]:
+def page(items: list, page_size: int, page_token: str, *, prefix="mock-v1-") -> tuple[list, str]:
     # A versioned cursor, deliberately independent of future database row identities.
     if page_token:
         if (
-            not page_token.startswith("mock-v1-")
-            or not page_token[8:].isascii()
-            or not page_token[8:].isdigit()
+            not page_token.startswith(prefix)
+            or not page_token[len(prefix) :].isascii()
+            or not page_token[len(prefix) :].isdigit()
         ):
             raise HTTPException(400, "Use next_page_token from a previous response.")
-        offset = int(page_token[8:])
+        offset = int(page_token[len(prefix) :])
         if offset > len(items):
             raise HTTPException(400, "Page token is beyond this collection.")
     else:
         offset = 0
     end = offset + page_size
-    return items[offset:end], f"mock-v1-{end}" if end < len(items) else ""
+    return items[offset:end], f"{prefix}{end}" if end < len(items) else ""
 
 
 def set_headers(
@@ -136,13 +137,15 @@ def get_day(date: Date, response: Response, repository: Repository) -> DayForeca
     summary="Get a grid resource",
 )
 def get_grid(date: Date, response: Response, repository: Repository) -> GridResponse:
-    """Return synthetic 250 m cells over the frontend viewport, with stable IDs and 24 scores
-    per factor. Geometry and values are for demonstration, not verified environmental coverage.
+    """Return 250 m cells with nullable hourly factors and per-layer coverage/provenance.
+    Stored cells summarize verified roads; mock cells and their values are synthetic.
     Try date `2026-10-29`. The response is compressed when the client accepts gzip.
     """
     check_date(date)
     data = repository.grid(date)
     set_headers(response, repository, source=data.source)
+    if data.build_id:
+        response.headers["X-Build-Id"] = data.build_id
     return data
 
 
@@ -226,10 +229,15 @@ def list_segments(
         ),
     ] = None,
 ) -> ListSegmentsResponse:
-    """Return invented demo lines as GeoJSON. IDs match the score responses. Vector tiles
+    """Return stored road geometry, or invented geometry in explicit mock mode, as GeoJSON.
+    IDs match the score responses. Vector tiles
     are deferred; this endpoint supports small GeoJSON overlays without a tile server.
     """
-    segments = repository.segments()
+    collection = getattr(repository, "segment_collection", None)
+    if collection is not None:
+        segments, identifier, source = collection()
+    else:
+        segments, identifier, source = repository.segments(), repository.build_id, "mock"
     if bbox is not None:
         try:
             west, south, east, north = map(float, bbox.split(","))
@@ -249,12 +257,14 @@ def list_segments(
                 and max(p[1] for p in s.geometry.coordinates) >= south
             )
         ]
-    features, token = page(segments, page_size, page_token)
+    scope = hashlib.sha256((bbox or "").encode()).hexdigest()[:12]
+    prefix = f"segments-{identifier}-{scope}-" if source != "mock" else "mock-v1-"
+    features, token = page(segments, page_size, page_token, prefix=prefix)
     return ListSegmentsResponse(
         features=features,
         next_page_token=token,
-        build_id=repository.build_id,
-        source=getattr(repository, "spatial_source", "mock"),
+        build_id=identifier,
+        source=source,
     )
 
 
@@ -266,7 +276,7 @@ def list_segments(
     summary="Get a segment resource",
 )
 def get_segment(segment_id: int, repository: Repository) -> SegmentFeature:
-    """Get one invented demo line, for example segment `1`."""
+    """Get one road geometry. List segments to discover the current stable IDs."""
     segment = next(
         (s for s in repository.segments() if s.properties.segment_id == segment_id), None
     )
@@ -290,11 +300,14 @@ def get_segment(segment_id: int, repository: Repository) -> SegmentFeature:
     summary="List scores for a profile and UTC hour",
 )
 def list_scores(profile: SportProfile, t: UtcHour, repository: Repository) -> ScoreSnapshot:
-    """Run the existing sport scoring engine on synthetic inputs. `kind=forecast` describes
-    the time category; `source=mock` identifies provenance. Confidence is zero because there
-    is no verified coverage. Integer segment IDs match `/v1/segments`.
+    """Run the sport scoring engine on the selected repository inputs. The score is derived;
+    `kind=forecast` describes temporal inputs and `source` identifies provenance.
+    Confidence is zero without spatial PM evidence. IDs match `/v1/segments`.
     """
     moment = parse_hour(t)
+    batch = getattr(repository, "score_snapshot", None)
+    if batch is not None:
+        return batch(profile, moment).model_copy(update={"t": t})
     details = [
         repository.detail(s.properties.segment_id, profile, moment) for s in repository.segments()
     ]
@@ -306,7 +319,11 @@ def list_scores(profile: SportProfile, t: UtcHour, repository: Repository) -> Sc
         if getattr(repository, "source", "mock") == "mock"
         else "unavailable",
         build_id=repository.build_id,
-        scores={str(d.segment_id): (round(d.score), d.confidence, 0) for d in details},
+        scores={
+            str(d.segment_id): (round(d.score), d.confidence, 0)
+            for d in details
+            if d.score is not None
+        },
     )
 
 
@@ -327,7 +344,7 @@ def list_scores(profile: SportProfile, t: UtcHour, repository: Repository) -> Sc
 def lookup_score(
     lat: Latitude, lon: Longitude, profile: SportProfile, t: UtcHour, repository: Repository
 ) -> SegmentDetail:
-    """Find the nearest demo line within 200 m; return NOT_FOUND outside that coverage.
+    """Find the nearest available road within 200 m; return NOT_FOUND outside that coverage.
     Try lat=49.1425, lon=9.2115, profile=running, t=2026-10-29T12:00:00Z.
     Component values are goodness scores (0–100), not raw pollutant measurements.
     """

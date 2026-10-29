@@ -168,7 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (a: Activity) => {
       update({ activity: a });
       setBikeLayers(a === "ride" ? ["surface", "danger"] : []);
-      setLensState((l) => (a !== "ride" && l === "safety" ? "index" : l));
+      setLensState((l) => (a !== "ride" && (l === "safety" || l === "surface") ? "index" : l));
     },
     [update],
   );
@@ -231,7 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Cycling stats come from the real senseBox:bike data inside the user's reach.
   useEffect(() => {
-    if (!ready || activity !== "ride" || !day || grid?.status === "unavailable") return;
+    if (!ready || activity !== "ride" || !day || day.source !== "mock" || grid?.status === "unavailable") return;
     let cancelled = false;
     computeRideStats(home, prefs.radiusKm)
       .then((s) => !cancelled && setRide(s))
@@ -243,7 +243,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, activity, home?.join(), prefs.radiusKm, day?.source, grid?.status]);
 
-  const effectiveLens: Lens = lens === "safety" && activity !== "ride" ? "index" : lens;
+  const effectiveLens: Lens = (lens === "safety" || lens === "surface") && activity !== "ride" ? "index" : lens;
 
   const values = useMemo(() => {
     const out: Record<string, number> = {};
@@ -255,7 +255,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const focusScores = useMemo(() => {
     if (!day) return Array<number>(24).fill(Number.NaN);
-    if (homeCell) return Array.from({ length: 24 }, (_, h) => cellScore(homeCell.properties, h, activity, tune));
+    if (homeCell && homeCell.properties.recommendable !== false) return Array.from({ length: 24 }, (_, h) => cellScore(homeCell.properties, h, activity, tune));
     return day.hours.map((h) => hourScore(h, activity, tune));
   }, [day, homeCell, activity, tune]);
 

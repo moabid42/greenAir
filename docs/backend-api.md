@@ -1,10 +1,11 @@
-# Backend API and demo contract
+# Backend API contract
 
-The FastAPI application runs offline with synthetic inputs. This is the frontend
-integration backend, not a connected measurement pipeline. Every serving response
-includes `source: mock`; sensor IDs and street lines are invented. Street confidence
-is zero because there is no verified spatial coverage. Day/grid factors are synthetic
-0–100 values, not measured evidence or calibrated recommendations.
+The FastAPI application defaults to offline `mock` mode with synthetic inputs.
+Explicit `GREENAIR_SERVING_DATA_MODE=stored` plus `GREENAIR_DATABASE_URL` selects
+persisted real-source results. Day air/weather are models; sensor markers are
+measurements. Versioned spatial results add rider-derived attributes with explicit
+missing coverage and unknown survey age. See the [stored contract](integrations/real-serving-contract.md)
+and [verified spatial contract/evidence](integrations/atrai-spatial.md).
 
 ## Run and explore
 
@@ -29,19 +30,19 @@ All endpoints are public, read-only GETs. No authentication or request body is r
 | Canonical resource route | Existing frontend route | Result |
 |---|---|---|
 | `/health` | same | Process liveness, independent of data availability |
-| `/v1/days/{date}` | `/api/v1/day?date=` | 24 city-wide hours with raw mock values and factor scores |
+| `/v1/days/{date}` | `/api/v1/day?date=` | 24 city-wide hours with nullable values, factors and source metadata |
 | `/v1/grids/{date}` | `/api/v1/grid?date=` | GeoJSON cells with 24 values per factor |
-| `/v1/sensors` | `/api/v1/sensors` | Paginated resources / compatibility array of mock markers |
-| `/v1/sensors/{sensor_id}` | — | One mock sensor, e.g. `mock-1` |
+| `/v1/sensors` | `/api/v1/sensors` | Paginated resources / compatibility array of station markers |
+| `/v1/sensors/{sensor_id}` | — | One sensor; IDs are discovered by listing |
 | `/stations/status` | same | Mock station upload status; opt-in live adapter remains available |
-| `/v1/segments` | `/segments` | Paginated demo line GeoJSON; optional `bbox=west,south,east,north` |
-| `/v1/segments/{segment_id}` | — | One demo segment, IDs 1–6 |
+| `/v1/segments` | `/segments` | Paginated road GeoJSON (invented in mock mode); optional `bbox=west,south,east,north` |
+| `/v1/segments/{segment_id}` | — | One segment; stable IDs are discovered by listing |
 | `/v1/scores?profile=&t=` | `/scores?profile=&t=` | Score tuples keyed by segment ID |
 | `/v1/scores:lookup?lat=&lon=&profile=&t=` | `/score` with same query | Nearest line within 200 m and component goodness scores |
 | `/v1/segments/{segment_id}/bestTimes/{date}?profile=` | `/best-time?segment_id=&date=&profile=` | Up to three distinct recommended hours |
-| `/v1/status` | `/status` | Geometry build ID, mock provenance, pipeline disconnected |
+| `/v1/status` | `/status` | Build/source status, actual date coverage and spatial availability |
 
-Try date `2026-10-29`, sensor `mock-1`, segment `1`, profile `running`, and UTC hour
+In mock mode, try date `2026-10-29`, sensor `mock-1`, segment `1`, profile `running`, and UTC hour
 `2026-10-29T12:00:00Z`. The score lookup example is lat `49.1425`, lon `9.2115`.
 Profiles: `running`, `cycling`, `walking`; `cycling` maps to the engine's `road_cycling`.
 
@@ -52,6 +53,8 @@ curl 'http://localhost:8000/api/v1/sensors'
 curl 'http://localhost:8000/scores?profile=running&t=2026-10-29T12:00:00Z'
 curl 'http://localhost:8000/score?lat=49.1425&lon=9.2115&profile=running&t=2026-10-29T12:00:00Z'
 ```
+
+## Mock mode behavior
 
 Supported mock dates are 2020-01-01 through 2100-12-31; other dates return 404 and
 malformed dates return validation errors. This includes the frontend's historical
@@ -107,16 +110,31 @@ large JSON responses support gzip. `X-Data-Source` and `X-Build-Id` accompany th
 responses. The mock build is versioned; it is not a timestamp of measured data.
 
 `app/serving/repository.py` is the replaceable query interface. `create_app(repository=...)`
-and `get_repository` dependency overrides allow a future persistent provider without
-changing route paths or client shapes. No file reads, database SQL, or provider
+and `get_repository` dependency overrides support either provider in tests without
+changing route paths. No file reads, database SQL, or provider
 fetching are embedded in serving routes. The default provider generates deterministic
-values on demand, so there is no scheduler or cache race to manage now.
+values on demand; the stored provider reads immutable versioned results.
 
-Only `/stations/status` can opt into the existing live adapter with
-`GREENAIR_STATION_DATA_MODE=live`. The other APIs remain mock. This task did not
-recheck any external data service; previous probes remain historical evidence.
+`/stations/status` has its separate opt-in `GREENAIR_STATION_DATA_MODE=live` adapter.
+It does not select the repository used by day/grid/sensors. Stored mode reads
+versioned snapshots built by independent ingestion/processing commands, never by
+API startup. Stored core responses use no-cache so updated snapshots are visible.
+Missing data is null/404, storage outages 503; there is no dummy fallback.
 
-Future work: real pipeline inputs and durable snapshots, refresh workers, SSE
-notifications keyed by build/version, optional vector tiles, and source-specific
-coverage/confidence. The earlier research counts and synthetic fixture values are
-never presented as current observations.
+Run `just ingest-spatial --max-pages 4` repeatedly to resume a manual city-layer
+capture, then `just process-results --spatial --reference-days 7`. This adds real
+road geometries, partial grids and derived sport scores in stored mode. Core grid
+factors still receive client-side sport weights; optional street scores use the
+separate backend engine. They are different contracts. Street cursor tokens bind
+the spatial build and bbox; restart pagination if either changes.
+
+Spatial arrays accept null; `green` is null without a verified greenery source.
+Cells expose surface goodness, close-pass goodness, static flow, contributing road
+IDs/counts and provenance. City model air remains spatially uniform without measured
+adjustments. Grid confidence stays zero and recommendable=false until an area-level
+confidence model is validated. Street confidence is zero without PM evidence;
+missing required city inputs yield a null detail score and no score tuple. Best-time
+results exclude zero-confidence/stale hours. Unknown rider survey age is explicit.
+
+SSE, vector tiles, large backfills and score calibration remain deferred. Dated
+research/capture counts and synthetic test values are never current observations.

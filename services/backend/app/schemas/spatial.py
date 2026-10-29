@@ -40,6 +40,7 @@ class CaptureSummary(BaseModel):
 
 
 class SpatialResult(BaseModel):
+    bbox: tuple[float, float, float, float] = (9.05, 49.05, 9.35, 49.25)
     streets: list[SpatialStreet]
     captures: list[CaptureSummary]
     reference_start: AwareDatetime

@@ -156,8 +156,12 @@ export default function SportMap(props: SportMapProps) {
         firstSymbol,
       );
 
-      // Invisible cells: only used to know what you tap.
+      // Stored grids show bounded road-cell summaries; hit cells also support inspection.
       map.addSource("grid", { type: "geojson", data: { type: "FeatureCollection", features: [] }, promoteId: "id" });
+      map.addLayer({ id: "grid-data", type: "fill", source: "grid", paint: {
+        "fill-color": ["get", "color"],
+        "fill-opacity": ["case", ["==", ["get", "visible"], true], 0.30, 0],
+      } }, firstSymbol);
       map.addLayer({ id: "grid-hit", type: "fill", source: "grid", paint: { "fill-opacity": 0 } });
 
       map.addLayer({
@@ -205,7 +209,7 @@ export default function SportMap(props: SportMapProps) {
     else map.once("app:ready", () => fn(map));
   };
 
-  // --- tap cells (the values still drive best-spot ranking and bubble colours; nothing is painted over the map) ---
+  // --- stored grid summaries and tap targets; missing values remain transparent ---
   useEffect(() => {
     whenReady((map) => {
       if (!grid) return;
@@ -214,7 +218,8 @@ export default function SportMap(props: SportMapProps) {
         features: grid.cells.features.map((f) => ({
           type: "Feature",
           geometry: f.geometry,
-          properties: { id: f.properties.id, value: values[f.properties.id] ?? 0 },
+          properties: { id: f.properties.id, color: scoreColor(values[f.properties.id]),
+            visible: grid.source === "mixed" && Number.isFinite(values[f.properties.id]) },
         })),
       });
     });
