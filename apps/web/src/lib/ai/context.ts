@@ -55,7 +55,7 @@ export function buildMessages(opts: { question: string; facts: Facts; memory: Co
   const end = `\n[/REFERENCE]\n\nUser message: ${question}`;
   let budget = CONTEXT_TOKENS - ANSWER_RESERVE - estimateTokens(JSON.stringify(PREFIX)) - estimateTokens(heading + end) - 150;
   const selection = selectData(question, opts.history);
-  const referenceLimit = selection.topics.some((t) => ["weather", "air", "activity"].includes(t)) ? DAILY_REFERENCE_TOKEN_LIMIT : REFERENCE_TOKEN_LIMIT;
+  const referenceLimit = selection.topics.includes("activity") ? DAILY_REFERENCE_TOKEN_LIMIT : REFERENCE_TOKEN_LIMIT;
   const reference = questionNeedsRecords(question)
     ? selectRecords(question, opts.records ?? [], Math.max(0, Math.min(budget, referenceLimit)), selection)
     : "No records selected for this social message. Do not assert current conditions or readings.";
@@ -76,7 +76,7 @@ export interface ContextRecord {
   data: unknown;
 }
 
-/** All loaded records are candidates; retain complete records and report selection coverage. */
+/** Rank only selected data families; report coverage within the supplied candidate pool. */
 export function selectRecords(question: string, records: ContextRecord[], budget: number, selection = selectData(question)): string {
   const words = question.toLowerCase().match(/[\p{L}\p{N}_]+/gu)?.filter((w) => w.length > 2) ?? [];
   const deviceQuestion = selection.topics.includes("devices");
@@ -108,5 +108,5 @@ export function selectRecords(question: string, records: ContextRecord[], budget
     counts[r.category].included++;
     remaining -= cost;
   }
-  return `Selection: ${JSON.stringify(selection)}. Only loaded data are available; do not infer coverage for another date. If needsClarification=true, ask what data the user means.\nCoverage (omitted records are not evidence of absence): ${JSON.stringify(counts)}\n${selected.join("\n")}`;
+  return `Selection: ${JSON.stringify(selection)}. Coverage is limited to the dates and fields in the selected records.\nCoverage (omitted records are not evidence of absence): ${JSON.stringify(counts)}\n${selected.join("\n")}`;
 }

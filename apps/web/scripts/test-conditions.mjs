@@ -136,7 +136,7 @@ test('fresh AI context preserves backend fields, zero, null, provenance and devi
     readings: [observed], recent: [observed], ble: { connected: true, battery: 0, last: observed }, error: null,
   });
   assert.equal(records.filter((r) => r.category === 'ble_sample').length, 1);
-  const messages = buildMessages({ question: 'Compare WHOOP heart rate with air and ozone at the station and street segment temperature today', facts, memory: {}, history: [], records });
+  const messages = buildMessages({ question: 'Compare WHOOP heart rate with air and ozone at the station and street segment temperature forecast today', facts, memory: {}, history: [], records });
   const body = messages.at(-1).content;
   for (const field of ['synthetic local fixture', 'observed BLE', 'ozone', 'provenance', 'recommendable', 'segment_id', 'tempC":0', 'no2":null', 'recoveryScoreDemo']) assert.ok(body.includes(field), field);
   assert.doesNotMatch(messages[0].content, /no live weather/);
@@ -183,7 +183,7 @@ test('social turns skip records but data questions and ambiguous follow-ups reta
   }
   for (const question of ['Hello, what is the air quality?', 'And tomorrow?', 'What about that?', 'Tell me more']) {
     assert.equal(questionNeedsRecords(question), true);
-    const messages = buildMessages({ question, facts, memory: {}, history: [], records });
+    const messages = buildMessages({ question, facts, memory: {}, history: [{ role: 'user', text: 'Air at the station?' }], records });
     assert.ok(messages.at(-1).content.includes('fresh-reading'));
   }
 });
@@ -253,5 +253,95 @@ test('focused references leave spare budget unused rather than padding with unre
   assert.ok(!focused.includes('"tempC"'));
   assert.ok(focused.includes('"device_metadata":{"total":1,"included":0}'));
   const followup = selectRecords('Tell me more', records, 3000);
-  assert.ok(followup.includes('unrelated-watch'));
+  assert.ok(!followup.includes('unrelated-watch'));
+  assert.ok(followup.includes('needsClarification'));
+});
+
+const { selectData } = load('ai/selection');
+const routingInputs = {
+  day: { date: facts.date, timezone: 'Europe/Berlin', source: 'forecast', hours: [{ hour: 12,
+    tempC: 0, humidity: null, windKmh: 8, no2: 14, pm25: 4, daylight: 1, missing: ['humidity'],
+    factors: { heat: 90, air: 80 }, instants: ['2026-10-29T11:00:00Z'],
+    provenance: { tempC: { unit: '°C', kind: 'model' }, no2: { unit: 'µg/m³', kind: 'model' } },
+  }] },
+  grid: { source: 'mixed', cells: { features: [{ properties: { id: 'street', recommendable: false } }] } },
+  sensors: [{ id: 'station', name: 'Station', stale: true, updatedAt: '2026-10-29T10:00:00Z',
+    latest: { 'PM2.5': 0, NO2: null, Temperature: 10 },
+    channelProvenance: { 'PM2.5': { unit: 'µg/m³', kind: 'observation' }, Temperature: { unit: '°C' } } }],
+  segments: null, segmentDetail: null,
+  devices: [{ id: 'watch', name: 'WHOOP', samples: [{ heartRateBpm: 80 }], summary: {} }],
+  readings: [], recent: [], ble: { connected: false, battery: null, last: null }, error: null,
+};
+
+test('weather routing excludes pollution, stations, streets and devices while retaining field provenance', () => {
+  const selection = selectData('What is the temperature forecast?');
+  assert.deepEqual(selection.topics, ['weather']);
+  const records = contextRecords(routingInputs, selection);
+  assert.ok(!records.some((r) => /sensor|grid|device|ble/.test(r.category)));
+  const hour = records.find((r) => r.category === 'day_hour').data;
+  assert.equal(hour.tempC, 0);
+  assert.equal(hour.humidity, null);
+  assert.equal(hour.provenance.tempC.unit, '°C');
+  assert.ok(!('no2' in hour));
+  assert.ok(!('no2' in hour.provenance));
+  assert.deepEqual(hour.missing, ['humidity']);
+  assert.deepEqual(hour.instants, ['2026-10-29T11:00:00Z']);
+});
+
+test('station air routing keeps measured channels and freshness without injecting a forecast', () => {
+  const records = contextRecords(routingInputs, selectData('Air quality measured at the station?'));
+  assert.ok(!records.some((r) => /day|device|grid|ble/.test(r.category)));
+  const station = records.find((r) => r.category === 'sensor').data;
+  assert.equal(station.latest['PM2.5'], 0);
+  assert.equal(station.latest.NO2, null);
+  assert.ok(!('Temperature' in station.latest));
+  assert.equal(station.channelProvenance['PM2.5'].kind, 'observation');
+  assert.equal(station.stale, true);
+  assert.equal(station.updatedAt, routingInputs.sensors[0].updatedAt);
+  assert.deepEqual(station.omittedChannels, ['Temperature']);
+});
+
+test('follow-ups inherit user topics, explicit new topics replace them, unknown questions request clarification', () => {
+  const history = [{ role: 'user', text: 'What is my WHOOP heart rate?' }, { role: 'assistant', text: 'Weather and street data' }];
+  const inherited = selectData('And tomorrow?', history);
+  assert.deepEqual(inherited.topics, ['devices']);
+  assert.equal(inherited.inherited, true);
+  const records = contextRecords(routingInputs, inherited);
+  assert.ok(records.some((r) => r.category === 'device_sample'));
+  assert.ok(!records.some((r) => /day|sensor|grid/.test(r.category)));
+  assert.deepEqual(selectData('Temperature forecast?', history).topics, ['weather']);
+  const unknown = selectData('Explain it', []);
+  assert.equal(unknown.needsClarification, true);
+  assert.deepEqual(contextRecords(routingInputs, unknown).map((r) => r.category), ['availability_metadata']);
+});
+
+test('mixed topics select both data families and exercise advice keeps all daily factors', () => {
+  const mixed = contextRecords(routingInputs, selectData('Compare my heart rate with air quality'));
+  assert.ok(mixed.some((r) => r.category === 'sensor'));
+  assert.ok(mixed.some((r) => r.category === 'device_sample'));
+  const daily = contextRecords(routingInputs, selectData('Best time to run today?'));
+  assert.equal(daily.find((r) => r.category === 'day_hour').data.factors.heat, 90);
+  assert.ok(!daily.some((r) => /sensor|grid|device|ble/.test(r.category)));
+});
+
+test('air forecasts omit weather fields and explicit model/measurement comparisons retain both sources', () => {
+  const air = selectData('Air quality forecast?');
+  assert.deepEqual(air.topics, ['air']);
+  const forecastRecords = contextRecords(routingInputs, air);
+  const hour = forecastRecords.find((r) => r.category === 'day_hour').data;
+  assert.equal(hour.no2, 14);
+  assert.ok(!('tempC' in hour));
+  const comparison = contextRecords(routingInputs, selectData('Compare the air forecast with measured station air'));
+  assert.ok(comparison.some((r) => r.category === 'day_hour'));
+  assert.ok(comparison.some((r) => r.category === 'sensor'));
+});
+
+test('temperature at a station uses measurements unless a forecast comparison is explicit', () => {
+  const records = contextRecords(routingInputs, selectData('Temperature at the station?'));
+  assert.ok(!records.some((r) => r.category.startsWith('day_')));
+  const sensor = records.find((r) => r.category === 'sensor').data;
+  assert.equal(sensor.latest.Temperature, 10);
+  assert.ok(!('NO2' in sensor.latest));
+  const comparison = contextRecords(routingInputs, selectData('Compare temperature forecast and station measurements'));
+  assert.ok(comparison.some((r) => r.category === 'day_hour'));
 });

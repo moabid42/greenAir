@@ -140,3 +140,50 @@ so they do not isolate prefill from all other overhead. Thinking remains disable
 A fake-runtime test verifies timings/counts as well as the disabled-thinking
 arguments. Web lint/tests (14)/production build pass. Actual device latency and
 model answer quality remain unverified.
+
+### Question-specific data contracts — 2026-10-29
+
+`ai/selection.ts` routes questions locally before constructing records. The six
+families are weather, air, station measurements, devices, streets and activity.
+Mixed questions select multiple families. Weather includes only tempC, humidity,
+windKmh and daylight plus hour/UTC instants, original missing flags and matching
+channel provenance. Air forecasts use pm25/no2. Activity advice retains all day
+fields/factors. Station questions select measurements without a city forecast,
+unless explicitly comparing with a forecast. Pollutant/temperature station queries
+project matching original channel keys and provenance; selected/omitted channel
+names disclose the projection, retaining identity, exposure, timestamps and stale
+flags. Generic station queries retain every station channel. Source data are not
+mutated. Unrecognized provider channel names may be omitted by channel matching.
+
+Street questions select grid/segment data; device questions select synthetic
+fixture and real BLE records with the original distinct source labels. The scoped
+candidate pool excludes unrelated families before expensive construction. Coverage
+counts describe that candidate pool, not every backend record; availability
+metadata still reports loaded day/grid status, sensor count, errors and units.
+The record budget remains 1,600 estimated tokens, expanded to 2,000 for activity
+advice; complete selected fields/records can still be omitted for size.
+
+Temporal/pronominal follow-ups inherit the most recent recognized **user** topic
+within six recent turns, never topics introduced only by assistant claims.
+Explicit new topics replace previous ones. Unknown questions without usable
+context receive availability metadata plus needsClarification=true, not all data.
+The model is instructed to ask which data the user means. A requested date does
+not imply that date's records were loaded: routing does not fetch new dates,
+query the backend archive or create a forecast. Topic matching uses bounded local
+English/German keyword rules, not an extra inference request; unsupported wording
+can require clarification and real-model compliance is still unverified.
+
+Validation covers weather/air field projection, null/zero, original units and
+provenance, station freshness, explicit model/measurement comparisons, mixed
+families, full-day exercise advice, user-only history inheritance and clarification.
+Local stored-data GET probes at 2026-10-29T11:27:07Z again returned HTTP 200 JSON
+on the existing day/grid/sensor routes. Selected prompt estimates: weather 2,460,
+station air 2,617, device query with no loaded device 1,201. These are local
+heuristic size estimates, not measured model latency. Ignored probe reports remain
+in data/runtime/ai-latency-20261029/. No upstream API or serving contract changed.
+
+Final checks: web lint, all 20 tests, TypeScript and production build passed;
+root `just lint` passed. Local web container rebuilt and healthy. HTTP 200 and
+served-bundle checks verified topic routing, explicit forecast selection, selected/
+omitted channel labels and disabled thinking. Real model interpretation and
+real-device latency remain unverified.

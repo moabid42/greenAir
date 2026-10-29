@@ -5,7 +5,7 @@ import type { DemoDevice } from "../wearables/devices";
 import type { HeartRateSample } from "../wearables/ble";
 import type { ContextRecord } from "./context";
 
-/** Preserve every loaded backend/device record as a candidate for question-time selection. */
+/** Construct only requested data families; optional unscoped mode supports offline inspection. */
 export function contextRecords(inputs: {
   day: DayForecast | null; grid: GridResponse | null; sensors: Sensor[];
   segments: SegmentSnapshot | null; segmentDetail: SegmentDetail | null;
@@ -43,7 +43,22 @@ export function contextRecords(inputs: {
     add("grid_metadata", metadata);
     cells.features.forEach((cell) => add("grid_cell", cell));
   }
-  if (wants("sensor")) inputs.sensors.forEach((sensor) => add("sensor", sensor));
+  if (wants("sensor")) inputs.sensors.forEach((sensor) => {
+    if (!selection || (!selection.topics.includes("air") && !selection.topics.includes("weather"))) {
+      add("sensor", sensor);
+      return;
+    }
+    const channelMatches = (key: string) => {
+      const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return (selection.topics.includes("air") && /pm25|pm10|no2|ozone|^o3$|particulate/.test(normalized))
+        || (selection.topics.includes("weather") && /temp|humid|wind|feucht/.test(normalized));
+    };
+    const latest = Object.fromEntries(Object.entries(sensor.latest).filter(([key]) => channelMatches(key)));
+    add("sensor", { ...sensor, latest,
+      channelProvenance: Object.fromEntries(Object.entries(sensor.channelProvenance ?? {}).filter(([key]) => channelMatches(key))),
+      selectedChannels: Object.keys(latest), omittedChannels: Object.keys(sensor.latest).filter((key) => !channelMatches(key)),
+    });
+  });
   if (inputs.segments && wants("segment_metadata")) {
     const { scores, ...metadata } = inputs.segments;
     add("segment_metadata", { ...metadata, tupleFields: ["score", "confidence", "flags"] });

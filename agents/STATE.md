@@ -627,3 +627,18 @@ offline. Record a later successful check alongside the earlier failure.
 - [Contract, local HTTP probe and limitations](../docs/integrations/ai-companion-context.md).
   Web lint/types/build and 10 offline tests passed on Node24.22.2. No new upstream
   source verification, real-mic check or downloaded-model quality claim.
+
+### AI question-specific data selection — 2026-10-29
+
+- `ai/selection.ts` selects weather, air, stations, devices, streets and activity
+  before record construction; mixed topics combine families. Weather/air fields
+  and station channels are projected with original keys, matching provenance,
+  missing/stale flags and explicit selected/omitted channel labels.
+- Follow-ups inherit recent user topics only. Unknown intent requests clarification
+  instead of injecting every family. Requested dates do not fetch unavailable days.
+  Routing is local keyword matching; unknown channel names/wording remain limits.
+- Contract/probes/limitations: [AI context](../docs/integrations/ai-companion-context.md).
+  No source adapter/API change or upstream verification; thinking stays disabled.
+- Validation: 20 web tests, lint/types/production build and root lint passed;
+  rebuilt local web is healthy, with served-bundle routing/thinking checks passed.
+  Real-model interpretation and actual device latency still need user-device checks.
