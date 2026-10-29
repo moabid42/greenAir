@@ -104,3 +104,9 @@ Use `just check-web` and `just check-admin` to lint and build them; the admin co
 also runs its unit tests. CI runs both apps as separate matrix jobs using Node.js 24.
 Backend hooks keep running the root lint/test recipes. A frontend change must also
 pass its app-specific check before merging.
+
+## End-to-end checks
+
+Run `just test-e2e` for isolated production-database, worker, container API, web and
+admin browser verification. It creates and cleans up its own services and preserves
+existing databases and worktrees. See [coverage, prerequisites and artifacts](docs/testing.md).

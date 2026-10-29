@@ -20,7 +20,7 @@ test:
     npm run test:commits
 
 # Check backend style, research integrity, workflows, tooling syntax, and whitespace.
-lint: lint-workflows
+lint: lint-workflows lint-e2e
     uv run --locked --directory services/backend ruff check .
     uv run --locked --directory services/backend ruff format --check .
     python3 agents/context.py check
@@ -128,3 +128,12 @@ smoke-real-browser *args:
 # Manual bounded city-layer import; repeat to resume persisted offsets.
 ingest-spatial *args:
     uv run --locked --directory services/backend python -m app.ingestion.worker --once --backfill --registry app.ingestion.registry:get_spatial_jobs {{args}}
+
+# Full local e2e: isolated DB/HTTP source replay, container API, web and admin browsers.
+test-e2e *args:
+    python3 scripts/test-e2e.py {{args}}
+
+# Keep the system-test orchestration and browser drivers checked without executing them.
+lint-e2e:
+    uv run --locked --directory services/backend ruff check ../../scripts/test-e2e.py ../../scripts/browser_fixture.py ../../scripts/smoke-real-browser.py ../../scripts/smoke-admin-browser.py
+    uv run --locked --directory services/backend ruff format --check ../../scripts/test-e2e.py ../../scripts/browser_fixture.py ../../scripts/smoke-real-browser.py ../../scripts/smoke-admin-browser.py
