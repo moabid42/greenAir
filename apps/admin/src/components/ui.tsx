@@ -50,6 +50,7 @@ export function CategoryIcon({ category, size = 40 }: { category: Category; size
 const PILL: Record<Health, { box: string; dot: string }> = {
   healthy: { box: "bg-great-soft text-[#0b6b4c]", dot: "bg-great" },
   degraded: { box: "bg-ok-soft text-[#8a5f00]", dot: "bg-ok" },
+  unverified: { box: "bg-ok-soft text-[#8a5f00]", dot: "bg-ok" },
   offline: { box: "bg-bad-soft text-[#a43a2a]", dot: "bg-bad" },
   unconfigured: { box: "bg-wash text-mute", dot: "bg-mute/50" },
   checking: { box: "bg-wash text-mute", dot: "bg-mute/50 animate-pulse" },

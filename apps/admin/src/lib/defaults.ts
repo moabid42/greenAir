@@ -24,7 +24,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "{base}/api/v1/day?date={today}",
     category: "environment",
     origin: "backend",
-    note: "City-wide hourly conditions. Required by the web client; not implemented in the backend yet.",
+    note: "City-wide hourly conditions. Served from stored model results with provenance.",
     redirect: { ...off },
   },
   {
@@ -34,7 +34,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "{base}/api/v1/grid?date={today}",
     category: "environment",
     origin: "backend",
-    note: "Per-cell hourly factor scores (about 600 KB). Required by the web client; not implemented yet.",
+    note: "Real captured road/layer cells. Missing pollution calibration stays unavailable.",
     redirect: { ...off },
   },
   {
@@ -44,7 +44,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "{base}/api/v1/sensors",
     category: "air",
     origin: "backend",
-    note: "Real sensor markers and their latest readings. Optional for the web client; not implemented yet.",
+    note: "Real sensor markers and their latest readings. Stored community and official station measurements.",
     redirect: { ...off },
   },
   {
@@ -54,7 +54,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "https://api.open-meteo.com/v1/forecast?latitude=49.1427&longitude=9.2185&hourly=temperature_2m&forecast_days=1",
     category: "weather",
     origin: "third-party",
-    note: "Open-Meteo forecast. The web client uses it in demo mode for real temperature, humidity and wind.",
+    note: "Open-Meteo forecast. Fetched by the backend refresh worker.",
     redirect: { ...off },
   },
   {
@@ -64,7 +64,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=49.1427&longitude=9.2185&hourly=pm2_5&forecast_days=1",
     category: "air",
     origin: "third-party",
-    note: "Open-Meteo air quality (PM2.5, NO₂). Used in demo mode.",
+    note: "Open-Meteo air quality (PM2.5, NO₂). Fetched by the backend refresh worker.",
     redirect: { ...off },
   },
   {
@@ -74,7 +74,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
     url: "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items?f=json&limit=1",
     category: "bike",
     origin: "third-party",
-    note: "senseBox:bike road-surface layer from atrai.bike. Loaded directly by the web client in ride mode.",
+    note: "senseBox:bike road-surface layer from atrai.bike. Captured by the backend, with unknown survey age labelled.",
     redirect: { ...off },
   },
   {
@@ -110,7 +110,7 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
 ];
 
 export const DEFAULT_SETTINGS: Settings = {
-  backendUrl: (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, ""),
+  backendUrl: (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, ""),
   intervalSec: 60,
   timeoutMs: 8000,
   degradedMs: 1000,

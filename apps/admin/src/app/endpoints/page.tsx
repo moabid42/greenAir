@@ -18,10 +18,11 @@ const STATUS_CHIPS: { id: StatusFilter; label: string }[] = [
   { id: "healthy", label: "Healthy" },
   { id: "degraded", label: "Degraded" },
   { id: "offline", label: "Offline" },
+  { id: "unverified", label: "Unverified" },
   { id: "unconfigured", label: "Not configured" },
 ];
 // Worst first, so problems rise to the top when sorting by status.
-const SEVERITY: Record<Health, number> = { offline: 0, degraded: 1, checking: 2, healthy: 3, unconfigured: 4 };
+const SEVERITY: Record<Health, number> = { offline: 0, unverified: 1, degraded: 2, checking: 3, healthy: 4, unconfigured: 5 };
 
 export default function EndpointsPage() {
   const a = useAdmin();
@@ -33,7 +34,7 @@ export default function EndpointsPage() {
 
   const health = useMemo(() => new Map(a.endpoints.map((e) => [e.id, a.healthOf(e)])), [a]);
   const counts = useMemo(() => {
-    const c: Record<StatusFilter, number> = { all: a.endpoints.length, healthy: 0, degraded: 0, offline: 0, unconfigured: 0, checking: 0 };
+    const c: Record<StatusFilter, number> = { all: a.endpoints.length, healthy: 0, degraded: 0, offline: 0, unverified: 0, unconfigured: 0, checking: 0 };
     for (const h of health.values()) c[h]++;
     return c;
   }, [a.endpoints.length, health]);
@@ -67,7 +68,7 @@ export default function EndpointsPage() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-[32px] font-extrabold leading-tight sm:text-[38px]">Endpoints</h1>
-          <p className="mt-1 text-[15px] text-mute">Every data endpoint the EcoMAB web client uses or expects, checked live from this browser.</p>
+          <p className="mt-1 text-[15px] text-mute">Checks run from this browser. External provider URLs are independent of your greenAir backend URL. Healthy means an HTTP 2xx response; check Source data for actual ingestion and freshness.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => void a.checkAll()} disabled={!a.ready || anyChecking} className={btnOutline}>

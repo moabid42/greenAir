@@ -141,6 +141,8 @@ def main():
             "--env",
             f"GREENAIR_SERVING_DATA_MODE={mode}",
             "--env",
+            "GREENAIR_STATION_DATA_MODE=mock",
+            "--env",
             f"GREENAIR_CORS_ORIGINS={json.dumps([web, admin, 'http://localhost:3000'])}",
         ]
         if mode == "stored":

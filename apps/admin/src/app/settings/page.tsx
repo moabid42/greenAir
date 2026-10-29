@@ -144,7 +144,7 @@ export default function SettingsPage() {
           <li><b className="text-ink">Where checks come from.</b> Every check is a plain GET from your browser, so it measures what you can reach from here, not what users or a server see. Real monitoring should run on a server.</li>
           <li><b className="text-ink">Secrets.</b> URLs with passwords or API keys are refused, because they would be stored unencrypted. Keep credentials on the server.</li>
           <li><b className="text-ink">Changes are local.</b> Editing an endpoint or its redirect here does not change what the EcoMAB web client calls.</li>
-          <li><b className="text-ink">Client data.</b> The numbers on the Client data page are simulated. No personal data is collected, sent or shown.</li>
+          <li><b className="text-ink">Client data.</b> The Source data page reads stored provider counts and processing status from the backend. Client uploads and request analytics are unavailable.</li>
         </ul>
       </Section>
     </div>

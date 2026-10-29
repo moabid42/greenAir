@@ -38,8 +38,9 @@ PROFILE = {
 ATTRIBUTION = ["ATRAI / senseBox:bike", "© OpenStreetMap contributors"]
 MESSAGE = (
     "Rider-derived street attributes; survey and provider build times unknown. "
-    "Air/weather retain city-model coverage unless a measured spatial adjustment is identified. "
-    "Zero spatial PM confidence excludes place recommendations. Flow is a historical speed proxy."
+    "Air/weather are models; station IDW is a spatial estimate, not a street measurement. "
+    "Confidence is an unvalidated heuristic; area rankings are withheld. "
+    "Flow is a historical speed proxy."
 )
 
 
@@ -118,8 +119,10 @@ def project_detail(street: SpatialStreet, profile, moment, day, spatial_id, *, c
         missing.append("street_heat_coverage")
     missing += ["greenery", "live_traffic", "provider_survey_time", "rain", "o3", "uv", "crowding"]
     methods = {
-        Component.PM25: "city model × measured spatial ratio"
-        if street.layer.pm_source != "none"
+        Component.PM25: "city model × station IDW estimate from measured ratios"
+        if street.layer.pm_source == "idw"
+        else "city model × measured spatial ratio"
+        if street.layer.pm_source == "samples"
         else "unadjusted city model; no street PM evidence",
         Component.APPARENT_TEMPERATURE: "city model + measured heat anomaly"
         if street.layer.heat_anomaly is not None
@@ -276,7 +279,7 @@ def project_grid(result, day, spatial_id, generated_at, *, factor_function):
                         ),
                         "air": "city model; no street PM coverage"
                         if not covered
-                        else "city model plus measured spatial adjustment on covered roads",
+                        else "city model plus spatial estimates from measured ratios",
                         "heat": "city model plus heat anomaly where covered",
                         "wind": "city weather model",
                         "light": "city solar calculation",

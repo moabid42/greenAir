@@ -56,7 +56,7 @@ export default function DevicesScreen() {
           {connected ? "Sensor connected" : "Not connected"}
         </span>
       </header>
-      <p className="px-4 pb-1 text-xs leading-relaxed text-mute">Simulated devices replay a fixed, synthetic session (29 Oct 2026, 14:00–16:00 Europe/Berlin). They do not connect to real watches or brand services.</p>
+      {devices.length > 0 && <><p className="px-4 pb-1 text-xs leading-relaxed text-mute">Simulated devices replay a fixed, synthetic session (29 Oct 2026, 14:00–16:00 Europe/Berlin). They do not connect to real watches or brand services.</p>
 
       <Section title="SIMULATED DEVICES">
         <div className="flex flex-col gap-2">
@@ -91,6 +91,8 @@ export default function DevicesScreen() {
         </div>
         <p className="mt-1.5 px-1 text-[11px] font-semibold text-mute">Browser storage is not the same as encrypted native storage. Sample sessions never upload.</p>
       </Section>
+
+      </>}
 
       <Section title="BLUETOOTH HEART-RATE SENSOR">
         <p className="mb-2 px-1 text-xs leading-relaxed text-mute">

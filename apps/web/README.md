@@ -1,8 +1,15 @@
+> Current runtime (2026-10-29): the default API is `http://localhost:8000`.
+> `just up` starts real ingestion and stored serving; unavailable API/data remains
+> unavailable. Synthetic conditions and wearable sessions require explicit
+> `NEXT_PUBLIC_DEMO_MODE=true`. Admin now reads actual stored pipeline status.
+> See [runtime details](../../docs/integrations/real-data-runtime.md); older demo/admin
+> proposals below describe the previous implementation.
+
 # Web client boundary
 
 The MapLibre web client for greenAir (EcoMAB Heilbronn), built with Next.js. It consumes the
 backend's REST API, then vector tiles and score update SSE once those interfaces exist.
-Without a configured backend it runs in synthetic demo mode. The backend's explicit
+An unset API URL uses localhost:8000; offline demos require explicit opt-in. The backend's explicit
 stored mode serves nullable model day conditions, measured stations and optional
 verified historical street attributes. [Current contract](../../docs/integrations/real-serving-contract.md)
 and [spatial evidence](../../docs/integrations/atrai-spatial.md) override the older
@@ -30,7 +37,7 @@ npm run dev -- -p 3100     # http://localhost:3100  (port 3000 works too if it i
 
 Open it on a phone-sized window (or your phone, same Wi-Fi: `http://<laptop-ip>:3100`). Install and GPS need HTTPS (e.g. a Vercel deploy).
 
-No backend yet? It runs in **demo mode**: real Open-Meteo weather and air quality for Heilbronn, spread over the city with a local model. Real senseBox:bike cycling data loads from atrai.bike. When the backend exists: copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` (shapes in [Expected API endpoints](#expected-api-endpoints)).
+Start the real stack with `just up` from the repository root. Set `NEXT_PUBLIC_API_URL` for another backend address before building. Unavailable APIs show errors. Deliberate offline demo runs require `NEXT_PUBLIC_DEMO_MODE=true`.
 
 Optional street-by-street scores (vector tiles + `/scores`, `/score`): set `NEXT_PUBLIC_ECOMAB_API_BASE_URL`. Off by default; the client in `src/lib/api/consumer.ts` has been exercised only against a stub, not a deployed service.
 
@@ -48,8 +55,8 @@ Optional street-by-street scores (vector tiles + `/scores`, `/score`): set `NEXT
 | **Place** | One spot up close: dial, best time, 6 factors, save, navigate, remind |
 | **Ride** | Real measured road roughness and overtaking distance from senseBox:bike, inside your reach |
 | **Coach** | Ask anything. Answers come from the live data, with cards and action buttons. Voice input where the browser supports it |
-| **Analytics** | Environment for today or the next 7 days, wearable sample sessions joined to the real weather and air at the closest hour, your local-only readings (export / delete) |
-| **Devices** | Simulated WHOOP and Apple Watch sessions, a real Bluetooth heart-rate sensor (Web Bluetooth), privacy and sync controls, plus the watch faces, alerts and workout sources from before |
+| **Analytics** | Available environmental results and real local Bluetooth readings (export / delete); missing dates stay unavailable |
+| **Devices** | Real Bluetooth heart-rate sensor (Web Bluetooth), privacy and sync controls; synthetic sessions are disabled by default |
 | **Me** | Preferences that change the scores, saved places, reminders, data and privacy |
 
 ## The Coach
@@ -69,8 +76,8 @@ Works with **no key**: a built-in analyst (`src/lib/coach/engine.ts`) understand
 
 - **Watch sync:** a website cannot read Apple Health / Health Connect / Garmin. Reminders reach a paired watch because phones mirror notifications. Reading workouts needs the native app.
 - **Reminders** fire while the app is open or alive in the background. Reliable background delivery needs a push server.
-- Street-by-street differences in demo mode come from a simple model (parks and the Neckar cool, main roads add NO₂). City-wide weather and air are real.
-- Rush hours 7–9 and 16–18 are an approximate German-city prior, not a Heilbronn measurement.
+- Real mode does not infer street pollution differences from a city-wide model; spatial confidence remains unvalidated.
+- Traffic and safety inputs remain missing rather than filled with rush-hour priors.
 
 ## Where things live
 

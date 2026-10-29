@@ -1,14 +1,15 @@
 /**
  * The ONLY place the UI gets data from.
  * - NEXT_PUBLIC_API_URL set   → calls the team backend (see the README (Expected API endpoints))
- * - NEXT_PUBLIC_API_URL unset → explicitly synthetic offline demo data
+ * - NEXT_PUBLIC_API_URL unset → local backend; demo requires explicit opt-in
  */
 import type { DayForecast, GridResponse, Sensor } from "./types";
 import { demoDay, demoGrid, demoSensors } from "./demo";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+const BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
-export const usingBackend = Boolean(BASE);
+export const usingBackend = !DEMO;
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { headers: { Accept: "application/json" } });
@@ -20,11 +21,11 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export async function getDay(date: string): Promise<DayForecast> {
-  return BASE ? get<DayForecast>(`/api/v1/day?date=${date}`) : demoDay(date);
+  return !DEMO ? get<DayForecast>(`/api/v1/day?date=${date}`) : demoDay(date);
 }
 
 export async function getGrid(date: string, day: DayForecast): Promise<GridResponse> {
-  return BASE ? get<GridResponse>(`/api/v1/grid?date=${date}`) : demoGrid(day);
+  return !DEMO ? get<GridResponse>(`/api/v1/grid?date=${date}`) : demoGrid(day);
 }
 
 // The backend's sensor list does not depend on the hour, but the app asks again whenever the hour changes
@@ -32,7 +33,7 @@ export async function getGrid(date: string, day: DayForecast): Promise<GridRespo
 let sensorCache: { at: number; req: Promise<Sensor[]> } | null = null;
 
 export async function getSensors(day: DayForecast, hour: number): Promise<Sensor[]> {
-  if (!BASE) return demoSensors(day, hour);
+  if (DEMO) return demoSensors(day, hour);
   if (sensorCache && Date.now() - sensorCache.at < 60_000) return sensorCache.req;
   const req = get<Sensor[]>(`/api/v1/sensors`);
   sensorCache = { at: Date.now(), req };

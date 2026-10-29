@@ -36,7 +36,7 @@ worker, PostgreSQL and MapLibre overlays are real processes.
 | Web without spatial results | Onboarding, Berlin date in a UTC browser, provenance, sensor inspection, sports, disabled street layers, Explore playback, Analytics, Coach, partial/missing dates and recovery |
 | Web with spatial results | Historical layers, a selected road-cell inspection, missing greenery/zero confidence, saved-place controls and withheld rankings |
 | Devices and Me | Explicit sample-device playback, browser-only preferences and saved-place persistence/removal; no hardware permission requested |
-| Admin | All four pages, actual cross-origin backend probes, add/edit/search endpoint, HTTP 404 → HTTP 200 recovery, reload persistence, simulated-data filters/CSV, settings/configuration import/export and invalid JSON, mobile navigation/layout |
+| Admin | All four pages, actual cross-origin backend probes, add/edit/search endpoint, HTTP 404 → HTTP 200 recovery, reload persistence, stored source-status CSV and unavailable client analytics, settings/configuration import/export and invalid JSON, mobile navigation/layout |
 | Upstream failure | A fixture HTTP 503 leaves the last committed checkpoint/snapshot intact; API restart returns identical day/grid/sensor content |
 | Database outage | Only the disposable DB is stopped: process health stays 200, day returns typed 503, DB restart reconnects and preserves results |
 

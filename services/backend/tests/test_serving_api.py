@@ -16,7 +16,9 @@ def client(monkeypatch):
         raise AssertionError("The demo API must not fetch upstream data")
 
     monkeypatch.setattr(urllib.request, "urlopen", forbid_network)
-    application = create_app(Settings(_env_file=None, station_data_mode="mock"))
+    application = create_app(
+        Settings(_env_file=None, serving_data_mode="mock", station_data_mode="mock")
+    )
     with TestClient(application) as connection:
         yield connection
 

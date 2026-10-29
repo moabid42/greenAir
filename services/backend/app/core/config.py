@@ -16,13 +16,15 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "greenAir API"
-    cors_origins: list[str] = []
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3200"]
 
-    serving_data_mode: Literal["mock", "stored"] = "mock"
-    database_url: str | None = None
+    serving_data_mode: Literal["mock", "stored"] = "stored"
+    database_url: str | None = (
+        "postgresql+psycopg://greenair:greenair-local@localhost:55433/greenair"
+    )
     snapshot_stale_after_hours: float = Field(default=3, gt=0, le=168)
 
-    station_data_mode: Literal["mock", "live"] = "mock"
+    station_data_mode: Literal["mock", "live"] = "live"
 
     # Green City stationary senseBoxes; `heilbronn` selects the mobile bike boxes instead.
     opensensemap_base_url: str = "https://api.opensensemap.org"

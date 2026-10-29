@@ -499,3 +499,86 @@ offline. Record a later successful check alongside the earlier failure.
   Original demo backend/PostgreSQL/Redis IDs unchanged. PostgreSQL/Redis remain
   running; original demo backend is currently stopped (not stopped by these test commands).
   No pushes or commits for this change; inherited STATE/NEXT notes preserved.
+
+### Real data enabled in the application runtime — 2026-10-29
+
+- Default app settings, Compose and host dev now use stored serving/live stations;
+  web defaults to localhost:8000 and never silently selects synthetic data. Offline
+  mock providers remain explicit tests/demos. Existing CI route smoke explicitly
+  selects mock modes and skips dependencies; normal application data stays real.
+- `just up` owns a dedicated persistent PostgreSQL 17/PostGIS/TimescaleDB volume,
+  migrations and separate refresher alongside API/web/admin. Source cadences and
+  retry/checkpoints are retained; city-only static jobs bootstrap four bounded
+  pages/pass, resume offsets and recapture weekly. Spatial artifacts build hourly
+  or on new street pages. `just down` preserves all stored inputs/results.
+- [Runtime contract/evidence](../docs/integrations/real-data-runtime.md). Fresh
+  live GETs began 09:42Z; 72 actual responses had metadata exported to ignored
+  data/runtime/real-runtime-20261029/live-captures.json. Bodies/manifests remain in
+  the new application DB. Original greenair-db/Redis remain untouched/running.
+- Full capture yields 34,241 roads and 1,562 cells; 9,600 surface, 1,389 close-pass,
+  7,154 flow records. Current sensors 22; live network status 14 boxes (6 online,
+  7 stale, 1 without data) at this check, not a standing availability guarantee.
+  Weather/modelled air succeeded; community/Bright Sky/UBA retain actual gaps.
+- Important fresh-input finding: enough shared stationary hours now produce
+  station-IDW PM estimates on 4,449 roads. These are derived estimates, not street
+  measurements; API/UI wording distinguishes them and calls confidence an
+  unvalidated heuristic. Grid confidence remains 0 and area recommendations false.
+- Admin Overview/Source data/CSV use real stored counts, refresh status and builds
+  via `/api/v1/data-status`. Missing client uploads/request analytics remain null,
+  not generated. Production wearable sessions are hidden; real Bluetooth waits
+  for hardware readings. No native watch/cloud upload service is invented.
+- Final lint/test passed: 281 backend/5 explicit offline PG skips, research 12,
+  commit 45; frontend lint/unit/build (web 5/admin 11). Full e2e passed at
+  data/runtime/e2e-1d8a69f0ca34/ (includes migration 66 twice); final production
+  browser/recovery repeat e2e-483f91547654 also passed. Both cleaned owned resources.
+- Default-stack live Chrome checks passed all 6 web/all 4 admin screens, actual
+  API/CORS/provenance, no sample devices, source CSV, persistence and mobile; no
+  JS errors in final builds. One earlier image had a nonreproduced hydration
+  warning; final rebuilt images and repeated browser runs were clean.
+- Actual `just down` → `just up` preserved every prior build ID/raw count and all
+  roads; final HTTP checked forecast day, measured sensors, mixed static grid and
+  live station status. Evidence: ignored real-runtime-20261029/persistence-results.json.
+  Application stack intentionally left running at 3000/3200/8000, DB 55433; only
+  debugging/test services stopped. Changes remain uncommitted; nothing pushed.
+
+
+### Endpoint health verification and provider independence — 2026-10-29
+
+- User broke the admin's backend URL and saw third-party rows stay healthy. This
+  is expected: weather/air call Open-Meteo, cycling calls ATRAI, search Photon,
+  map OpenFreeMap directly. They do not route through the configured greenAir URL.
+  None of those rows is a synthetic service; health does not prove ingestion or
+  fresh measurements. Models/static captures retain their existing labels.
+- Fixed a real false-positive path: no-cors opaque responses previously recorded
+  ok=true and could appear Healthy even for hidden HTTP404/500. New Unverified
+  status (also for old stored opaque results) excludes them from healthy totals
+  and uptime. Actual verified HTTP errors remain Offline. Rows display source and
+  resolved host; list text explains independent provider vs backend checks.
+- Backend URL changes clear affected old probe history, preserve external history,
+  and discard delayed old-URL/out-of-order results. Browser regression held a real
+  HTTP200 response while replacing the backend URL, observed new404 and confirmed
+  the delayed old success could not overwrite it. A separate actual HTTP404 server
+  without CORS produced Unverified while a readable provider200 stayed Healthy.
+- Live provider/body audit: backend day forecast source=forecast, sensors measured,
+  stored status real; weather/air/ATRAI/Photon JSON200. Fresh production Chrome
+  checked all five configured external providers HTTP200, including OpenFreeMap
+  (command-line probe got403: client/environment differs). One full-grid browser
+  probe hit the configured8s timeout; it correctly stayed failed, not synthetic
+  success. Full grid inputs/results are still persisted real captures.
+- Evidence remains ignored at data/runtime/real-runtime-20261029/endpoint-audit.json
+  and health-check/ (actual provider results, controlled HTTP regression, screenshot).
+  Admin13 unit tests, lint/typecheck and production Docker build passed; targeted
+  actual Chrome regression passed without JS errors. No remote changes or commits.
+
+### Atomic publication authorized — 2026-10-29
+
+- User subsequently requested atomic commits, merge into dev and push. This
+  explicitly supersedes the earlier local-only/no-push preference for this work.
+- Implementation is organized on feat/real-data-runtime: API status, persistent
+  real runtime, explicit web demo opt-in, spatial estimate wording, endpoint
+  health verification, actual admin pipeline monitoring, then documentation.
+- Latest admin verification passed lint,13 unit tests, typecheck and production
+  build; root hooks remain active. Prior full source/storage/browser e2e and the
+  actual broken-backend/CORS/race browser checks are linked in the entries above.
+- Local runtime captures, credentials and playground are excluded. Only dev is
+  selected for publication; feature branches/worktrees are retained.

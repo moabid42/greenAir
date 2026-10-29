@@ -1,3 +1,9 @@
+> Current runtime (2026-10-29): `just up` serves real stored provider data. Overview
+> and Source data read `/api/v1/data-status`; synthetic traffic/upload figures have
+> been removed. Client uploads and server request analytics remain unavailable.
+> Configuration and endpoint-probe history stay in this browser. The older API
+> proposals below are historical; see [runtime details](../../docs/integrations/real-data-runtime.md).
+
 # EcoMAB Admin
 
 A web admin for the EcoMAB platform: monitor data endpoints, review incoming client data and check system health.
@@ -21,23 +27,27 @@ npm run lint && npm run typecheck && npm run build
 ```
 
 Optional: copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_API_URL` to the greenAir backend (or set it in Settings).
-Without it, the greenAir endpoints show as **Not configured** rather than failing.
+Without an override, the backend URL is `http://localhost:8000`.
 
-## What is real and what is simulated
+## Data sources
 
 | Part | Source |
 |---|---|
 | Endpoint status, latency, last check, uptime, recent checks | **Real.** A plain `GET` from your browser to each URL, timed until the response headers arrive. Third-party endpoints (Open-Meteo, atrai.bike, Photon, OpenFreeMap) are checked for real today. greenAir endpoints are checked as soon as a backend URL is set. |
 | Healthy / degraded counts and their "vs. previous check" trend | **Real**, derived from the checks above. |
-| Total requests, client data received, unique clients, data types, recent uploads | **Simulated sample** (deterministic, `src/lib/sim.ts`), labelled "Simulated" everywhere it appears, including CSV exports. The web client uploads nothing and the backend has no ingestion endpoint, so there is nothing real to show. |
+| Provider counts, refresh status and processing builds | **Stored real data** from `/api/v1/data-status`, including UTC times and source-status CSV. |
+| Total server requests, client uploads and unique clients | **Unavailable.** There is no collection service; these figures are not generated. |
 | Wearable sync endpoint | **Planned.** No such endpoint exists (wearable data stays on the device). Shown as Not configured. |
 | Adding, editing, removing endpoints and redirect settings | **Saved in this browser only.** They change what the admin checks, not what the web client calls. The redirect dialog says so. |
 
 How status is decided (`src/lib/health.ts`): **Offline** when the last check failed (HTTP error, timeout, unreachable);
 **Degraded** when it passed but was slower than the threshold (default 1 s) or one of the previous four checks failed;
-**Healthy** otherwise; **Not configured** when there is no URL (or `{base}` without a backend URL).
-If the browser cannot read a response because of CORS, the server is still reported reachable and the status code is
-marked as hidden, never invented.
+**Healthy** for a verified HTTP 2xx response within the threshold; **Not configured** when there is no URL (or `{base}` without a backend URL).
+CORS-hidden responses are **Unverified**, including older stored opaque successes. They cannot count as healthy or inflate uptime.
+These checks establish HTTP reachability, not payload validity, ingestion success or data freshness.
+Each row shows its source/actual host. External provider URLs are independent of the backend URL in Settings.
+Changing that URL clears old backend probe history; delayed results for replaced URLs are discarded.
+Read Source data for stored inputs, refresh states and build times.
 
 ## Access control: none
 
@@ -67,9 +77,9 @@ the web client; if the identity changes, update both.
   Checks run only while the admin is open.
 - Configuration and history are per browser: not shared between admins or devices, not encrypted, lost if site data is cleared.
 - Redirect settings are a record of intent. Nothing applies them.
-- The date range controls the simulated figures; real check history only goes back to the first check in this browser.
+- Pipeline counts describe the stored database; real check history starts with this browser.
 - Browser consoles log a "Failed to load resource" line when a checked endpoint answers with an error. That is the check working.
-- Not yet verified: a real greenAir backend (only `/health` exists there today), and Safari/Firefox.
+- Browser coverage is Chrome; Safari/Firefox and real Bluetooth hardware need separate validation.
 
 
 ## Docker

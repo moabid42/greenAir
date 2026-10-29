@@ -73,7 +73,7 @@ export function useWearables() {
 
   return {
     ready: s != null,
-    devices: (s?.demos.list() ?? []) as DemoDevice[],
+    devices: (process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? s?.demos.list() ?? [] : []) as DemoDevice[],
     demos: s?.demos,
     ble: s?.ble,
     readings: s?.store.read() ?? [],

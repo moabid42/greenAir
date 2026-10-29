@@ -11,7 +11,7 @@ setup:
 
 # Start the local API with reload enabled.
 dev:
-    uv run --locked --directory services/backend uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+    GREENAIR_SERVING_DATA_MODE=stored GREENAIR_STATION_DATA_MODE=live GREENAIR_DATABASE_URL="${GREENAIR_DATABASE_URL:-postgresql+psycopg://greenair:greenair-local@localhost:55433/greenair}" uv run --locked --directory services/backend uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 # Run backend, agent-tool, and commit-convention tests.
 test:
@@ -45,7 +45,7 @@ format:
 openapi:
     uv run --locked --directory services/backend python -c 'import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))'
 
-# Build and start backend, mobile web and admin; wait until all are healthy.
+# Start persistent real storage, migrations, refresh worker, API, web and admin.
 up:
     docker compose up --build --detach --wait --wait-timeout 180
 
@@ -53,11 +53,11 @@ up:
 down:
     docker compose down
 
-# Build and start the standalone demo backend; wait for its health check.
+# Build and start the stored-data API and its database/migration dependencies.
 backend-up:
     docker compose up --build --detach --wait backend
 
-# Stop only this demo backend (does not remove unrelated ingestion infrastructure).
+# Stop only this backend (does not remove unrelated ingestion infrastructure).
 backend-down:
     docker compose stop backend
 
@@ -65,7 +65,7 @@ backend-down:
 backend-logs:
     docker compose logs --follow backend
 
-# Smoke-test all documented routes through the running container's published port.
+# Offline mock contract smoke; requires an explicitly configured mock API.
 backend-smoke:
     python3 scripts/smoke-backend.py
 

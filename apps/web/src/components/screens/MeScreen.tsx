@@ -137,7 +137,7 @@ export default function MeScreen() {
         <div className="px-4 py-3 text-xs font-semibold leading-relaxed text-mute">
           <p>
             Today’s data:{" "}
-            <b className="text-ink">{day ? { mixed: "Mixed sources", unavailable: "Unavailable", forecast: "live forecast (Open-Meteo)", measured: "measured", mock: "simulated (live weather unreachable)" }[day.source] : "loading…"}</b>.
+            <b className="text-ink">{day ? { mixed: "Mixed sources", unavailable: "Unavailable", forecast: "live forecast (Open-Meteo)", measured: "measured", mock: "simulated (explicit demo mode)" }[day.source] : "loading…"}</b>.
           </p>
           <p className="mt-1.5">Sources: senseBox:home &amp; senseBox:bike (atrai.bike) · LUBW NO₂ · Open-Meteo · OpenStreetMap, OpenFreeMap, Mapzen terrain · Green City Heilbronn.</p>
           <p className="mt-1.5">Rush hours 7–9 and 16–18 are an approximate German-city prior, not a Heilbronn measurement.</p>

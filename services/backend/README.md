@@ -1,16 +1,20 @@
+> Current application runtime: `just up` starts a dedicated persistent database,
+> applies migrations and runs automatic provider refresh. Compose and `just dev`
+> explicitly select stored serving/live station status. The app defaults are also stored/live;
+> explicit mock modes remain for isolated tests/demos. See
+> [real runtime](../../docs/integrations/real-data-runtime.md).
+
 # greenAir backend
 
-FastAPI backend with a complete offline demo API and the merged processing/scoring
-modules. Serving data is synthetic (`source: mock`), including sensor identities and
-street geometry; no real pipeline, database, broker, or upstream service is needed.
+FastAPI backend with persisted real-source serving, independent ingestion/processing,
+and explicit offline demo providers for tests. Normal defaults use stored/live data.
 
 ## Start with Docker
 
 From the repository root, with Docker Engine and Compose running:
 
 ```sh
-just backend-up
-just backend-smoke
+just up
 ```
 
 Open [Swagger UI](http://localhost:8000/docs), choose an endpoint and **Try it out**.
@@ -18,8 +22,8 @@ The [OpenAPI document](http://localhost:8000/openapi.json) is generated dynamica
 from registered routes and Pydantic models. [ReDoc](http://localhost:8000/redoc) is
 also available. The container health check uses `/health`.
 
-Use date `2026-10-29`, sensor `mock-1`, segment `1`, profile `running`, UTC hour
-`2026-10-29T12:00:00Z`, and lookup point lat `49.1425`, lon `9.2115`.
+Use an available date from `/v1/status`, real sensor/segment IDs from list routes,
+and an actual UTC hour within stored coverage.
 Core frontend routes are `/api/v1/day?date=`, `/api/v1/grid?date=`, and
 `/api/v1/sensors`. Versioned resource routes and street-score routes are also
 exposed in Swagger. See [the API contract](../../docs/backend-api.md) for all paths,
@@ -32,7 +36,7 @@ just backend-down
 
 The image uses locked production dependencies, runs as UID/GID 10001, and excludes
 local `.env`, tests, caches, downloads, and credentials. Compose runs it with a
-read-only root filesystem, temporary `/tmp`, no Linux capabilities, and no database.
+read-only root filesystem, temporary `/tmp`, no Linux capabilities, and a separately managed persistent database.
 It uses a separate `greenair-demo` project so existing ingestion experiments are
 unaffected. Do not use `--reload` in the container.
 
@@ -56,13 +60,14 @@ just openapi
 `just openapi` prints JSON on stdout. No generated specification needs committing.
 To customize local settings, copy `.env.example` to `.env` here. Environment
 variables take precedence. `GREENAIR_CORS_ORIGINS` is a JSON array, for example
-`["http://localhost:3000"]`. Local Python defaults to no cross-origin permissions;
+`["http://localhost:3000"]`. Local Python defaults allow localhost:3000 and :3200;
 Compose defaults to localhost:3000, :3200 and :5173. Configure the frontend with
 `NEXT_PUBLIC_API_URL=http://localhost:8000` before starting/building it.
 
-`GREENAIR_STATION_DATA_MODE=mock` is the default. Explicit `live` mode enables only
-`/stations/status`'s existing openSenseMap adapter; all other serving APIs remain
-mock. No fresh provider verification was performed for this demo implementation.
+`GREENAIR_STATION_DATA_MODE=live` and `GREENAIR_SERVING_DATA_MODE=stored` are
+the defaults. Synthetic offline tests require explicit mock modes.
+`scripts/smoke-backend.py` is the offline mock contract smoke; it is not a live
+provider availability check.
 
 ## Ownership and future integration
 

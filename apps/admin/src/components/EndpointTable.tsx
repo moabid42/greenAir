@@ -11,7 +11,7 @@ import { btnIcon, CategoryIcon, StatusPill } from "./ui";
 const SOURCE: Record<Endpoint["origin"], string> = { backend: "greenAir API", "third-party": "Third party", planned: "Planned", custom: "Custom" };
 
 /** The endpoint list: a table from tablet width up, stacked cards on phones. */
-export default function EndpointTable({ rows, onEdit, showSource = false, dense = false }: { rows: Endpoint[]; onEdit: (ep: Endpoint) => void; showSource?: boolean; dense?: boolean }) {
+export default function EndpointTable({ rows, onEdit, showSource = true, dense = false }: { rows: Endpoint[]; onEdit: (ep: Endpoint) => void; showSource?: boolean; dense?: boolean }) {
   const py = dense ? "py-1.5" : "py-3";
   const a = useAdmin();
   const now = useNow();
@@ -71,7 +71,8 @@ export default function EndpointTable({ rows, onEdit, showSource = false, dense 
                       <button type="button" onClick={() => open(ep)} aria-pressed={selected} className="block max-w-[140px] xl:max-w-[190px] truncate text-left text-[15px] font-bold hover:underline">
                         {ep.name}
                       </button>
-                      <p className="max-w-[140px] xl:max-w-[190px] truncate text-[13px] text-mute">{ep.path || "–"}{showSource && <span> · {SOURCE[ep.origin]}</span>}</p>
+                      <p className="max-w-[140px] xl:max-w-[190px] truncate text-[13px] text-mute">{ep.path || "–"}</p>
+                      {showSource && <p className="max-w-[190px] truncate text-[11px] text-mute" title={a.resolved(ep) ?? "No URL configured"}>{SOURCE[ep.origin]} · {a.resolved(ep) ? new URL(a.resolved(ep)!).host : "Not configured"}</p>}
                     </div>
                   </div>
                 </td>
@@ -96,7 +97,8 @@ export default function EndpointTable({ rows, onEdit, showSource = false, dense 
                 <CategoryIcon category={ep.category} size={38} />
                 <button type="button" onClick={() => open(ep)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate text-[15px] font-bold">{ep.name}</span>
-                  <span className="block truncate text-[13px] text-mute">{ep.path || "–"}{showSource && <span> · {SOURCE[ep.origin]}</span>}</span>
+                  <span className="block truncate text-[13px] text-mute">{ep.path || "–"}</span>
+                  {showSource && <span className="block truncate text-[11px] text-mute">{SOURCE[ep.origin]} · {a.resolved(ep) ? new URL(a.resolved(ep)!).host : "Not configured"}</span>}
                 </button>
                 <StatusPill health={health} className="px-2.5 py-1 text-xs" />
               </div>

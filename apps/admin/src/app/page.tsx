@@ -2,46 +2,39 @@
 
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
-import { BarChart3, Database, Leaf, Plus, RefreshCw, RotateCw, ShieldAlert, TriangleAlert, Users } from "lucide-react";
+import { Database, Leaf, Plus, RefreshCw, RotateCw, ShieldAlert, TriangleAlert, Users } from "lucide-react";
 import { useAdmin } from "@/components/AdminProvider";
-import { ClientChart, Donut } from "@/components/Charts";
+import { PipelineSources, PipelineBuilds } from "@/components/PipelineStatus";
+import { usePipeline } from "@/lib/pipeline";
 import EndpointTable from "@/components/EndpointTable";
-import { RangeSelect } from "@/components/RangeSelect";
 import { StatCard } from "@/components/StatCard";
 import { DetailsHost, FIT_QUERY, useEndpointDialogs, useMedia } from "@/components/Workspace";
-import { btnOutline, btnPrimary, card, EmptyState, LiveBadge, SimBadge, Skeleton, Spinner } from "@/components/ui";
+import { btnOutline, btnPrimary, card, EmptyState, LiveBadge, Skeleton, Spinner } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { fmtInt } from "@/lib/format";
-import { todayIso } from "@/lib/probe";
-import { simDays } from "@/lib/sim";
-import { breakdown, periods, summarize, trend } from "@/lib/stats";
 import type { Health } from "@/lib/types";
 
 /** The reference design shows four endpoints; in the one-screen layout the ones that need attention come first. */
 const FIT_ROWS = 4;
-const SEVERITY: Record<Health, number> = { offline: 0, degraded: 1, checking: 2, healthy: 3, unconfigured: 4 };
+const SEVERITY: Record<Health, number> = { offline: 0, unverified: 1, degraded: 2, checking: 3, healthy: 4, unconfigured: 5 };
 
 export default function Overview() {
   const a = useAdmin();
   const dialogs = useEndpointDialogs();
   // One screen, no page scroll, like the reference. Smaller windows get the stacked layout that scrolls.
   const fit = useMedia(FIT_QUERY);
-  const all = useMemo(() => simDays(todayIso()), []);
-
-  const { current, previous } = useMemo(() => periods(all, a.range), [all, a.range]);
-  const chartDays = useMemo(() => all.slice(-a.chartRange), [all, a.chartRange]);
-  const split = useMemo(() => breakdown(summarize(chartDays).types), [chartDays]);
+  const pipeline = usePipeline(a.settings.backendUrl);
 
   const checkable = a.endpoints.filter((e) => a.blockedReason(e) == null);
   const states = checkable.map((e) => a.healthOf(e));
   const healthy = states.filter((s) => s === "healthy").length;
   const degraded = states.filter((s) => s === "degraded").length;
   const offline = states.filter((s) => s === "offline").length;
+  const unverified = states.filter((s) => s === "unverified").length;
   const waiting = states.filter((s) => s === "checking").length;
   const unconfigured = a.endpoints.length - checkable.length;
   const prev = a.previousCounts;
   const versusCheck = prev ? (fit ? "vs. last check" : "vs. previous check") : fit ? "No earlier check" : "No earlier check yet";
-  const versusRange = fit ? `vs. prev. ${a.range} days` : `vs. previous ${a.range} days`;
   const anyChecking = a.checking.size > 0;
 
   const rows = useMemo(() => {
@@ -101,29 +94,16 @@ export default function Overview() {
   );
 
   const chartCard = (
-    <section className={cn(card, "flex min-h-0 flex-col", fit ? "p-4" : "p-4 sm:p-6")} aria-labelledby="chart-h">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <BarChart3 className="size-7 shrink-0 text-brand" aria-hidden />
-          <div className="min-w-0">
-            <h2 id="chart-h" className="flex flex-wrap items-center gap-2 font-display text-lg font-extrabold leading-tight">Aggregated client data</h2>
-            <p className="truncate text-[13px] text-mute">{fit ? "Client data received over time." : "Total client data received over time (all clients, aggregated)."}</p>
-          </div>
-        </div>
-        <RangeSelect value={a.chartRange} onChange={a.setChartRange} label="Date range for the chart" compact className="shrink-0" />
-      </div>
-      <div className={cn("mt-2", fit && "min-h-0 flex-1")}>{a.ready ? <ClientChart days={chartDays} fill={fit} legendExtra={<SimBadge className="px-2 py-0.5 text-[9px]" />} /> : <Skeleton className={fit ? "h-full" : "h-[260px]"} />}</div>
+    <section className={cn(card, "flex min-h-0 flex-col p-4")}>
+      <h2 className="font-display text-lg font-bold">Provider refresh status</h2>
+      <div className="min-h-0 flex-1 overflow-auto"><PipelineSources {...pipeline} /></div>
     </section>
   );
-
   const donutCard = (
-    <section className={cn(card, "flex min-h-0 flex-col", fit ? "p-4" : "p-4 sm:p-6")} aria-labelledby="types-h">
-      <div>
-        <h2 id="types-h" className={cn("font-display font-extrabold leading-tight", fit ? "text-base" : "text-lg")}>Data types (aggregated)</h2>
-        <p className="text-[12px] leading-snug text-mute">Breakdown of received client data by type.</p>
-      </div>
-      <div className={cn("mt-3", fit && "min-h-0 flex-1")}>{a.ready ? <Donut total={split.total} rows={split.rows} compact={fit} /> : <Skeleton className="h-full min-h-32" />}</div>
-      {fit ? <SimBadge className="mt-1.5 self-start px-2 py-0.5 text-[9px]" /> : <div className="mt-4 flex items-center justify-between gap-2"><SimBadge /><Link href="/client-data" className="text-sm font-bold text-brand hover:underline">See all client data →</Link></div>}
+    <section className={cn(card, "flex min-h-0 flex-col p-4")}>
+      <h2 className="font-display text-lg font-bold">Latest processing attempts</h2>
+      <div className="min-h-0 flex-1 overflow-auto"><PipelineBuilds {...pipeline} /></div>
+      <Link href="/client-data" className="mt-2 text-sm font-bold text-brand">See source data →</Link>
     </section>
   );
 
@@ -133,14 +113,14 @@ export default function Overview() {
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className={cn("font-display font-extrabold leading-tight", fit ? "text-[32px]" : "text-[32px] sm:text-[38px]")}>Admin overview</h1>
-            <span className="rounded-full bg-great-soft px-3 py-1 text-[13px] font-bold text-brand" title="Endpoint checks are live; requests and client data are simulated samples">Demo data</span>
+            <span className="rounded-full bg-great-soft px-3 py-1 text-[13px] font-bold text-brand" title="Provider inputs and processed builds from the backend">{pipeline.data?.mode === "stored" ? "Stored real data" : pipeline.error ? "Data unavailable" : pipeline.data ? "Demo backend" : "Loading data…"}</span>
             <Link href="/settings#access" className="inline-flex items-center gap-1.5 rounded-full bg-bad-soft px-3 py-1 text-[13px] font-bold text-[#a43a2a]" title="Anyone who can open this address can use the admin">
               <ShieldAlert className="size-3.5" aria-hidden /> No sign-in
             </Link>
           </div>
-          <p className="mt-0.5 text-[15px] text-mute">Monitor data endpoints, incoming client data and system health.</p>
+          <p className="mt-0.5 text-[15px] text-mute">Monitor data endpoints, stored source data and system health.</p>
         </div>
-        <RangeSelect value={a.range} onChange={a.setRange} label="Date range for the summary cards" />
+
       </header>
 
       <section aria-label="Summary" className={cn("grid grid-cols-[minmax(0,1fr)] sm:grid-cols-2", fit ? "grid-cols-4 gap-3 sm:grid-cols-4" : "gap-4 min-[1400px]:grid-cols-4")}>
@@ -148,10 +128,10 @@ export default function Overview() {
           Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[104px] rounded-[20px]" />)
         ) : (
           <>
-            <StatCard dense={fit} icon={Leaf} tint="bg-great-soft text-great" label="Healthy endpoints" value={String(healthy)} outOf={String(checkable.length)} delta={{ value: prev ? healthy - prev.healthy : null, unit: "", versus: versusCheck, upIsGood: true }} note={[waiting ? `${waiting} being checked` : "", unconfigured ? `${unconfigured} not configured` : ""].filter(Boolean).join(" · ") || undefined} />
+            <StatCard dense={fit} icon={Leaf} tint="bg-great-soft text-great" label="Healthy endpoints" value={String(healthy)} outOf={String(checkable.length)} delta={{ value: prev ? healthy - prev.healthy : null, unit: "", versus: versusCheck, upIsGood: true }} note={[unverified ? `${unverified} unverified (CORS)` : "", waiting ? `${waiting} being checked` : "", unconfigured ? `${unconfigured} not configured` : ""].filter(Boolean).join(" · ") || undefined} />
             <StatCard dense={fit} icon={TriangleAlert} tint="bg-ok-soft text-ok" label="Degraded endpoints" value={String(degraded)} outOf={String(checkable.length)} delta={{ value: prev ? degraded - prev.degraded : null, unit: "", versus: versusCheck, upIsGood: false }} note={offline ? `${offline} offline` : undefined} />
-            <StatCard dense={fit} icon={RotateCw} tint="bg-great-soft text-great" label="Total requests" value={fmtInt(current.requests)} delta={{ value: trend(current.requests, previous?.requests), unit: "%", versus: versusRange, upIsGood: true }} simulated />
-            <StatCard dense={fit} icon={Users} tint="bg-great-soft text-great" label="Client data received" value={fmtInt(current.records)} delta={{ value: trend(current.records, previous?.records), unit: "%", versus: versusRange, upIsGood: true }} simulated />
+            <StatCard dense={fit} icon={RotateCw} tint="bg-great-soft text-great" label="Stored canonical values" value={pipeline.data?.observations == null ? "—" : fmtInt(pipeline.data.observations)} delta={{ value: null, unit: "", versus: "Provider values, including nulls" }} />
+            <StatCard dense={fit} icon={Users} tint="bg-great-soft text-great" label="Real road segments" value={pipeline.data?.roads == null ? "—" : fmtInt(pipeline.data.roads)} delta={{ value: null, unit: "", versus: "Captured Heilbronn geometry" }} />
           </>
         )}
       </section>

@@ -18,6 +18,7 @@ def test_openapi_covers_every_route_with_unique_operations_and_valid_references(
         "/health",
         "/stations/status",
         "/api/v1/day",
+        "/api/v1/data-status",
         "/api/v1/grid",
         "/api/v1/sensors",
         "/v1/days/{date}",

@@ -83,7 +83,7 @@ export default function EndpointDetails({ endpoint, onEdit, onRedirect, onClose,
           <>
             {HEALTH_DETAIL[health]}
             {last && !last.ok && <span className="block text-[13px] font-normal text-bad">{last.error}</span>}
-            {last?.opaque && <span className="block text-[13px] font-normal text-mute">Reachable. The server hides its status code from browsers (CORS).</span>}
+            {last?.opaque && <span className="block text-[13px] font-normal text-mute">The browser cannot verify whether this URL returned success or an HTTP error. This is excluded from uptime calculations.</span>}
           </>,
         )}
         {row(

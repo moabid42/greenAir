@@ -33,7 +33,7 @@ export interface Probe {
   error?: string;
 }
 
-export type Health = "healthy" | "degraded" | "offline" | "unconfigured" | "checking";
+export type Health = "healthy" | "degraded" | "offline" | "unverified" | "unconfigured" | "checking";
 
 export type RangeDays = 7 | 14 | 30 | 90;
 
