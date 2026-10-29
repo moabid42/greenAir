@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Database, House, Settings, ShieldAlert, type LucideIcon } from "lucide-react";
+import { BarChart3, Database, House, Leaf, Settings, ShieldAlert, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { ago } from "@/lib/format";
 import { useAdmin } from "./AdminProvider";
@@ -12,6 +12,7 @@ import { type ReactNode, useEffect, useState } from "react";
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Overview", icon: House },
   { href: "/endpoints", label: "Endpoints", icon: Database },
+  { href: "/environment", label: "Environmental conditions", icon: Leaf },
   { href: "/client-data", label: "Source data", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -57,7 +58,7 @@ function Sidebar() {
               className={cn("flex h-12 items-center justify-center gap-3 rounded-2xl text-[15px] font-bold transition-colors lg:justify-start lg:px-4", on ? "bg-brand text-white" : "text-ink hover:bg-great-soft")}
             >
               <Icon className="size-5 shrink-0" aria-hidden />
-              <span className="hidden lg:inline">{label}</span>
+              <span className="hidden min-w-0 lg:inline">{label}</span>
             </Link>
           );
         })}
@@ -87,7 +88,7 @@ function MobileBar() {
 function BottomNav() {
   const active = useActive();
   return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-line/70 bg-white/95 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden">
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line/70 bg-white/95 px-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur md:hidden">
       {NAV.map(({ href, label, icon: Icon }) => {
         const on = active(href);
         return (
@@ -95,7 +96,7 @@ function BottomNav() {
             <span className={cn("grid h-7 w-12 place-items-center rounded-full", on && "bg-great-soft")}>
               <Icon className="size-5" aria-hidden />
             </span>
-            {label}
+            {href === "/environment" ? "Environment" : label}
           </Link>
         );
       })}

@@ -21,7 +21,7 @@ const SEVERITY: Record<Health, number> = { offline: 0, unverified: 1, degraded: 
 export default function Overview() {
   const a = useAdmin();
   const dialogs = useEndpointDialogs();
-  // One screen, no page scroll, like the reference. Smaller windows get the stacked layout that scrolls.
+  // One screen on wide displays; smaller windows use a stacked, scrolling layout.
   const fit = useMedia(FIT_QUERY);
   const pipeline = usePipeline(a.settings.backendUrl);
 

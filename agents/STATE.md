@@ -582,3 +582,24 @@ offline. Record a later successful check alongside the earlier failure.
   actual broken-backend/CORS/race browser checks are linked in the entries above.
 - Local runtime captures, credentials and playground are excluded. Only dev is
   selected for publication; feature branches/worktrees are retained.
+
+### Admin environmental conditions — 2026-10-29
+
+- The dedicated `/environment` sidebar tab shows measured NO2/PM2.5/PM10/O3, forecast weather,
+  hourly model charts, station filters and tagged network counts, using existing
+  serving routes. [Contract and dated evidence](../docs/integrations/admin-environment.md).
+- Per-channel observation age governs stale labels; zero/missing/QC semantics,
+  indoor/outdoor exposure, provider identity and model/measurement distinctions
+  remain explicit. Stored inventory and GreenCityHN network are different populations.
+- No new data adapter or measurement-history API. O3/PM10 forecasts remain absent
+  from the day serving contract. Actual city-only station coverage remains limited;
+  surrounding locations are labelled. Browser artifacts remain ignored.
+- Validation: `just check-admin` passed lint,17 unit tests and production build;
+  root `just lint` passed. Rebuilt local admin container is healthy on port3200.
+  Production Chrome passed real data/official+indoor filters/forecast values,
+  mobile overflow and independent503 station/404 forecast failure states; no JS
+  errors. No new upstream availability or historical measurement coverage claim.
+
+- User layout correction: environmental content lives only in its own sidebar tab;
+  Overview keeps its compact endpoint workspace and Source data keeps pipeline
+  monitoring. Mobile navigation includes the new tab as Environment.

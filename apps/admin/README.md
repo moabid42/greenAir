@@ -1,6 +1,8 @@
 > Current runtime (2026-10-29): `just up` serves real stored provider data. Overview
 > and Source data read `/api/v1/data-status`; synthetic traffic/upload figures have
 > been removed. Client uploads and server request analytics remain unavailable.
+> Environmental conditions show measured pollutants, model weather, hourly forecasts,
+> station filters and network availability. See [environmental data](../../docs/integrations/admin-environment.md).
 > Configuration and endpoint-probe history stay in this browser. The older API
 > proposals below are historical; see [runtime details](../../docs/integrations/real-data-runtime.md).
 
@@ -12,9 +14,10 @@ It is a **second frontend**, separate from the public web client (`../frontend`)
 
 | Section | What it does |
 |---|---|
-| **Overview** | Healthy and degraded endpoint counts, requests and client data with trends, the endpoint table with details panel, the aggregated client-data chart and the data-type breakdown. On a window of at least 1360×720 it is a single screen with no page scroll, laid out like the reference design (it shows the 4 endpoints that need attention first, with a link to all of them). Smaller windows get a stacked layout that scrolls |
-| **Endpoints** | Every endpoint the web client uses or expects. Search, filter by status and source, sort, add, edit, remove, check now, redirect configuration, per-endpoint latency history |
-| **Client data** | Records, unique clients and requests over a date range, chart (records, clients or both), breakdown by type, recent uploads with filters, CSV export |
+| **Overview** | Endpoint health, stored provider counts and ingestion/build status. Wide screens use a dense endpoint workspace. |
+| **Endpoints** | Search, filter, configure and probe endpoints; inspect HTTP status and latency history. Configuration changes apply to this browser only. |
+| **Environmental conditions** | Dedicated `/environment` tab for pollutant readings, exposure/provider filters, hourly model forecasts and station availability. |
+| **Source data** | Source refresh status, processing attempts and source-status CSV export. |
 | **Settings** | Backend URL, check interval, timeout, "slow" threshold, default range, export / import configuration, restore defaults, clear history, access and privacy notes |
 
 ## Run it
