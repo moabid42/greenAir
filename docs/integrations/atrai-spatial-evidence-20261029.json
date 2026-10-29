@@ -1,0 +1,840 @@
+[
+  {
+    "collection": "road_network_heilbronn",
+    "captured_at": "2026-10-29T07:56:15.826436+00:00",
+    "retrieved_at": "2026-10-29T07:56:37.317742+00:00",
+    "reported_total": 34243,
+    "local": 34241,
+    "filtered": 2,
+    "raw_refs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+    ],
+    "joins": {
+      "unique": 34241
+    },
+    "pages": [
+      {
+        "id": 1,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:16.178245+00:00",
+        "sha256": "3097ac311a0f5a8f19c78d904256fd2b956e5b27f80ce7ced71d9bc3177beae2"
+      },
+      {
+        "id": 2,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 1000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:16.760621+00:00",
+        "sha256": "79d6bec137b750c7e3ec5b1e5e4bd733b50af50b432492a4b1e89cc4809246bc"
+      },
+      {
+        "id": 3,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 2000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:17.375452+00:00",
+        "sha256": "e1e7df46aac1166ffc0a2098c51d5929945d66ec8d7c0794dbb5cea9b2ae8bf5"
+      },
+      {
+        "id": 4,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 3000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:17.941375+00:00",
+        "sha256": "6f7c0f99115236dc4c030752e56e8b09e8b7fc8a2bcb8e21680f48f16fe8bfa3"
+      },
+      {
+        "id": 5,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 4000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:18.557503+00:00",
+        "sha256": "42be0fa46dacc72b20a4382c48d8e725373a1cdf0094c38552cc860e3f232cc6"
+      },
+      {
+        "id": 6,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 5000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:19.158026+00:00",
+        "sha256": "d5c4962d1258d6cc602f0984bae23a0582552832e8751348cbf3fb10a9396cac"
+      },
+      {
+        "id": 7,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 6000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:19.737449+00:00",
+        "sha256": "9bed87bdad7a5ec84da227cb33cf2d4235b15107a58bb375397a63c77f1491f5"
+      },
+      {
+        "id": 8,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 7000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:20.310663+00:00",
+        "sha256": "ef725f1354132cc84e9d2977500711f4a139b2c3439ecc03d98c09c026ce0420"
+      },
+      {
+        "id": 9,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 8000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:20.904340+00:00",
+        "sha256": "aafbb49507c50221394d65e9a1d4a46ecf6fe46835e3766dcfad7f004d782491"
+      },
+      {
+        "id": 10,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 9000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:21.485527+00:00",
+        "sha256": "ca87df81dbdb62f4f00ad3cee189a29283a44840726c913520e3c49b6fe6c50a"
+      },
+      {
+        "id": 11,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 10000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:22.063860+00:00",
+        "sha256": "6e60fd6108511109d0ba33e72754f585642b24f019f3bab4d83d3ab2bd774d22"
+      },
+      {
+        "id": 12,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 11000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:22.656012+00:00",
+        "sha256": "33bee481ccef75ba71e9f2735348a591f85ead368a4d6384d2d3497aa2d04fcf"
+      },
+      {
+        "id": 13,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 12000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:23.225654+00:00",
+        "sha256": "9aad29d90b73e22a0984d6bb4a6a67b7824506377be0e52308dfa35d676e4b4d"
+      },
+      {
+        "id": 14,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 13000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:23.833444+00:00",
+        "sha256": "3d97fd39bb49d40d98b863acd45e574574e4e19cecc53d09261a7a8a564beb58"
+      },
+      {
+        "id": 15,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 14000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:24.424263+00:00",
+        "sha256": "e0fd7d2c6c105efe8327d291bce973ca3778b1dffe9c2816bf5e382b1a9b3ea6"
+      },
+      {
+        "id": 16,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 15000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:24.960448+00:00",
+        "sha256": "a3e89d4c4a1d4bca631b2bf6f02eb42f55cc94a57455d60a70337d8a7aeec22f"
+      },
+      {
+        "id": 17,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 16000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:25.545986+00:00",
+        "sha256": "ff71f3202292c3cf6aa04d45c7d1c62e8a7104add4547d27415424e078139826"
+      },
+      {
+        "id": 18,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 17000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:26.144635+00:00",
+        "sha256": "855e479e7b5f3a7269732648ff99be6996c9cbe00744e3b207ae7542650e8453"
+      },
+      {
+        "id": 19,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 18000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:26.753510+00:00",
+        "sha256": "e01f4503eedf09262c9fbc49eb29f771a84107c426c31e25618362c65d99a8f2"
+      },
+      {
+        "id": 20,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 19000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:27.297915+00:00",
+        "sha256": "46e068cc6cba308ac65e1eaf2accc36a6ae347f142a601417d69afbcdc4fb7c7"
+      },
+      {
+        "id": 21,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 20000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:27.919917+00:00",
+        "sha256": "8e8642b0f8979a0c381a8b14fdc80e10aa883df0a5c7063519c80ec2629c6b1e"
+      },
+      {
+        "id": 22,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 21000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:28.495514+00:00",
+        "sha256": "5389fca286d1d7326396ffedc148a69b9e8f604e654531b09d7abc64ce07356d"
+      },
+      {
+        "id": 23,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 22000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:29.116144+00:00",
+        "sha256": "784418be54d46e8efbe0430c0a0231d71d7375f6bc8d312186794b36d5d47717"
+      },
+      {
+        "id": 24,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 23000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:29.699327+00:00",
+        "sha256": "690a27695290623226c8950b7b648dee050bde1d5eded4b1429ebd776e1c31b5"
+      },
+      {
+        "id": 25,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 24000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:30.406786+00:00",
+        "sha256": "2063f6b1c209da3e8daf764119b67c396f625c68691a88cfb42643cb0f544334"
+      },
+      {
+        "id": 26,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 25000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:31.147202+00:00",
+        "sha256": "755cf1f121627fa048c5b760ca12504ded50ea74d76285356427143c4007b3df"
+      },
+      {
+        "id": 27,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 26000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:31.826234+00:00",
+        "sha256": "858b61894f405654a4e30b1d138ccf68c02f7a7a389d42956f16d554dcab876c"
+      },
+      {
+        "id": 28,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 27000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:32.709975+00:00",
+        "sha256": "298f417360fae103aad3e27ef8b2118bb7ca587f7a22822882edaef615cd59cb"
+      },
+      {
+        "id": 29,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 28000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:33.705365+00:00",
+        "sha256": "1369cba9bfbaf4a6e548cee8aa58d58dd6ba09c133f7a98d9e2ea59fd25722f7"
+      },
+      {
+        "id": 30,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 29000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:34.417557+00:00",
+        "sha256": "aab2c5af008fe0032a74561b2dc5c9a4658779812616622dda7d4191052cfbd9"
+      },
+      {
+        "id": 31,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 30000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:34.992885+00:00",
+        "sha256": "325cee0b004095b8c3fea1f12bfa8605a7faef0ab03048cc558d31aa0e7a4a2d"
+      },
+      {
+        "id": 32,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 31000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:35.590675+00:00",
+        "sha256": "73748410e1bef60a7729c2da38a41ed7da4c537fb636899ad3a273d019a46b62"
+      },
+      {
+        "id": 33,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 32000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:36.174106+00:00",
+        "sha256": "27f223bf54ce607a4b14224ee006128d90fd11c73b80f851b2c77fe94dacdf30"
+      },
+      {
+        "id": 34,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 33000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:36.774545+00:00",
+        "sha256": "b157523c924236eafe378905c3dcb8955c430336a6292601aa1db981275a0c8d"
+      },
+      {
+        "id": 35,
+        "url": "https://api.atrai.bike/collections/road_network_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 34000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:37.317742+00:00",
+        "sha256": "d388a8591117fc31b2f6c2b653049f098d54a11bce808564257a5141037aa337"
+      }
+    ]
+  },
+  {
+    "collection": "bumpy_roads_heilbronn",
+    "captured_at": "2026-10-29T07:56:38.601984+00:00",
+    "retrieved_at": "2026-10-29T07:56:44.025084+00:00",
+    "reported_total": 9600,
+    "local": 9600,
+    "filtered": 0,
+    "raw_refs": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+    ],
+    "joins": {
+      "unique": 9600
+    },
+    "pages": [
+      {
+        "id": 36,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:38.842922+00:00",
+        "sha256": "d9cb04fd11b61a95123d5594a06cc918104790d4e57c73d0f89335bbf45626c0"
+      },
+      {
+        "id": 37,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 1000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:39.600040+00:00",
+        "sha256": "cdb043992e4bf43219face45998ea72a99f83674299776871a9bf7f62b1a48d2"
+      },
+      {
+        "id": 38,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 2000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:40.046263+00:00",
+        "sha256": "33b7e074808956578bd02bd0e8afe7a913ef9aa25273f3dc42fc99faa54a139e"
+      },
+      {
+        "id": 39,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 3000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:40.490221+00:00",
+        "sha256": "e7dc87ffa39555aaf49c7cd0e167c96295ea587e4cb5dcc705e1db216752d5e6"
+      },
+      {
+        "id": 40,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 4000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:41.191433+00:00",
+        "sha256": "c8af1664a817d736eaa110bf17967fdb4a9e0f1c62dbfb39c8166bf1b2a4d819"
+      },
+      {
+        "id": 41,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 5000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:41.678185+00:00",
+        "sha256": "743376065414fc3d5693c1eb1efa841f262e2c105d81d9902e73f4e99b24dd54"
+      },
+      {
+        "id": 42,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 6000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:42.133624+00:00",
+        "sha256": "cae68c35fe41baf087c68ba023b76fba80563d66c04136c7967069823a4457b3"
+      },
+      {
+        "id": 43,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 7000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:42.601271+00:00",
+        "sha256": "bfdc7cb11236c768fdad4253578bda4ddbe94bac48807b4e37b7cdc655459f51"
+      },
+      {
+        "id": 44,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 8000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:43.565321+00:00",
+        "sha256": "b9ddc953a16ad7ed1437ab5c42ff58585404d17b98e28d825eeaab9d3d3a1aff"
+      },
+      {
+        "id": 45,
+        "url": "https://api.atrai.bike/collections/bumpy_roads_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 9000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:44.025084+00:00",
+        "sha256": "08977377f2e7d6c57daf446afc3e90ffb499feec205613dcbb32343efc399e45"
+      }
+    ],
+    "roughness_min_max": [
+      0,
+      100
+    ]
+  },
+  {
+    "collection": "overtaking_distance_heilbronn",
+    "captured_at": "2026-10-29T07:56:44.900706+00:00",
+    "retrieved_at": "2026-10-29T07:56:45.847387+00:00",
+    "reported_total": 1389,
+    "local": 1389,
+    "filtered": 0,
+    "raw_refs": [
+      46,
+      47
+    ],
+    "joins": {
+      "unique": 1389
+    },
+    "pages": [
+      {
+        "id": 46,
+        "url": "https://api.atrai.bike/collections/overtaking_distance_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:45.304339+00:00",
+        "sha256": "f37b33bc9a68044f1cb66783d98ce9072a68d5de5d01d7e6cb56c034b87c4601"
+      },
+      {
+        "id": 47,
+        "url": "https://api.atrai.bike/collections/overtaking_distance_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 1000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:45.847387+00:00",
+        "sha256": "3ec1cef255ce624456611b8c94da7b4947bbc8d3a5443fcf90e25c3872faa2c7"
+      }
+    ],
+    "histograms": {
+      "five_nonnegative": 1389,
+      "sum_matches_points": 1389
+    }
+  },
+  {
+    "collection": "traffic_flow_heilbronn",
+    "captured_at": "2026-10-29T07:56:46.012189+00:00",
+    "retrieved_at": "2026-10-29T07:56:49.679067+00:00",
+    "reported_total": 7155,
+    "local": 7154,
+    "filtered": 1,
+    "raw_refs": [
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+    ],
+    "joins": {
+      "unique": 7154
+    },
+    "pages": [
+      {
+        "id": 48,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 0
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:46.189517+00:00",
+        "sha256": "950745da320da62fae0fecb3d1177a120ecb5e16da9136f4e5013f9b576f11b3"
+      },
+      {
+        "id": 49,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 1000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:46.671592+00:00",
+        "sha256": "b3e3896fc82515096b6a75a3cc319da270b85e6030437f4513cc851ea8a847e5"
+      },
+      {
+        "id": 50,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 2000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:47.103386+00:00",
+        "sha256": "feb1c416f4c4fcbc3316e6412e946c2de608f4a5b6c2f4b7dfaad6bd53d4445c"
+      },
+      {
+        "id": 51,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 3000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:47.539967+00:00",
+        "sha256": "90cafbcbcb3c2fecd5a15738aea9eb3446ca01e7ec6798a7ad2b7710acae3f8d"
+      },
+      {
+        "id": 52,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 4000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:48.014632+00:00",
+        "sha256": "cb02af8dcf43caea6f23218157238416f6932e251ea39889b32b95b4006ddbc7"
+      },
+      {
+        "id": 53,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 5000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:48.751422+00:00",
+        "sha256": "bbe94a5702cff9930572851bb3a84fe02a2a46494a9b35789e56c6c7ca531ce2"
+      },
+      {
+        "id": 54,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 6000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:49.217981+00:00",
+        "sha256": "214e234f25cb8327c69974c4edfeec5f53b9a3cfa62317e0fefcf3cbd58f2233"
+      },
+      {
+        "id": 55,
+        "url": "https://api.atrai.bike/collections/traffic_flow_heilbronn/items",
+        "method": "GET",
+        "request_params": {
+          "f": "json",
+          "limit": 1000,
+          "offset": 7000
+        },
+        "http_status": 200,
+        "retrieved_at_utc": "2026-10-29 07:56:49.679067+00:00",
+        "sha256": "91f86b3fd4b190253d63b14520ee0b2626910da585421e43bd6cd9a2663956b4"
+      }
+    ]
+  }
+]

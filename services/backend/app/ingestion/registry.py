@@ -40,3 +40,23 @@ def get_jobs(settings: IngestionSettings) -> list[Job]:
 
         jobs.append(Job(adapter.source_id, cadence, adapter, request, lookback=timedelta(days=1)))
     return jobs
+
+
+def get_spatial_jobs(settings: IngestionSettings) -> list[Job]:
+    """Manual, city-only captures. Never add a global raw export to normal polling."""
+    from app.ingestion.adapters.atrai_segments import COLLECTIONS, AtraiSegmentAdapter
+
+    jobs = []
+    for collection in COLLECTIONS:
+        adapter = AtraiSegmentAdapter(
+            f"atrai_{collection}",
+            collection,
+            bbox=settings.bbox,
+            page_size=min(settings.page_size, 1000),
+        )
+
+        def request(watermark, start, end, *, adapter=adapter):
+            return RequestSpec(**adapter.request(watermark, start, end))
+
+        jobs.append(Job(adapter.source_id, None, adapter, request))
+    return jobs
