@@ -46,9 +46,11 @@ export interface AIState {
   unsupportedReason: string | null;
   /** The model files are in the browser cache. */
   installed: boolean;
+  /** Last generation only, in memory. Contains timing and counts, never chat text. */
+  lastGeneration: { firstTextMs: number | null; totalMs: number; promptCharacters: number; stopped: boolean } | null;
 }
 
-const INITIAL: AIState = { status: "checking", progress: 0, progressText: "", error: null, unsupportedReason: null, installed: false };
+const INITIAL: AIState = { status: "checking", progress: 0, progressText: "", error: null, unsupportedReason: null, installed: false, lastGeneration: null };
 
 let state: AIState = INITIAL;
 const listeners = new Set<() => void>();
@@ -194,13 +196,14 @@ async function startEngine(): Promise<void> {
     n_threads: (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 2) : 1,
     n_gpu_layers: backend === "webgpu" ? 99 : 0,
     reasoning: false, // no "thinking" mode: answers start straight away
+    reasoning_budget_tokens: 0,
     default_template_kwargs: { enable_thinking: false },
     progressCallback: ({ loaded, total }) => {
       if (!total) return;
       set({ progress: loaded / total, progressText: `${mb(loaded)} of ${mb(total)} MB`, status: state.installed ? "loading" : "downloading" });
     },
   });
-  // Pre-read the fixed start of the prompt once, so every answer only has to process the user's new words.
+  // Warm the fixed prefix; fresh reference records still require prefill on each turn.
   set({ status: "loading", progress: 1, progressText: "Warming up…" });
   await w.createChatCompletion({ messages: [...PREFIX, { role: "user", content: "hi" }], max_tokens: 1, cache_prompt: true, chat_template_kwargs: { enable_thinking: false } });
   // The download is finished; what remains is loading it into memory.
@@ -296,12 +299,14 @@ export async function generate(messages: ChatMessage[], onText: (text: string) =
   stopRequested = false;
   abort = new AbortController();
   let raw = "";
+  const startedAt = performance.now();
+  let firstTextMs: number | null = null;
   try {
     const stream = await w.createChatCompletion({
       messages,
       stream: true,
       abortSignal: abort.signal,
-      max_tokens: 200, // enough room for data, provenance and limitations
+      max_tokens: 120, // short replies while retaining room for provenance and limitations
       temperature: 0.3, // low and a fixed seed keep the tone consistent from one answer to the next
       seed: 7,
       top_k: 20,
@@ -314,12 +319,16 @@ export async function generate(messages: ChatMessage[], onText: (text: string) =
       const piece = chunk.choices[0]?.delta?.content;
       if (piece) {
         raw += piece;
-        onText(clean(raw));
+        const visible = clean(raw);
+        if (visible && firstTextMs === null) firstTextMs = Math.round(performance.now() - startedAt);
+        onText(visible);
       }
     }
   } catch (e) {
     if (!stopRequested) throw e; // stopping on purpose is not an error
   } finally {
+    set({ lastGeneration: { firstTextMs, totalMs: Math.round(performance.now() - startedAt),
+      promptCharacters: messages.reduce((n, m) => n + m.content.length, 0), stopped: stopRequested } });
     const now = getState().status; // read fresh: it changed while we were generating
     if (now === "generating" || now === "stopping") set({ status: llama ? "ready" : "off" });
   }

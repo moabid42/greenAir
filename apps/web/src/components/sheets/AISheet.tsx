@@ -81,6 +81,12 @@ export default function AISheet() {
           <Cpu className="size-4 text-mute" aria-hidden />
         </div>
 
+        {ai.lastGeneration && (
+          <p className="px-1 text-xs font-semibold text-mute">
+            Last reply: {ai.lastGeneration.firstTextMs === null ? "no text produced" : `${(ai.lastGeneration.firstTextMs / 1000).toFixed(1)}s to first text`}, { (ai.lastGeneration.totalMs / 1000).toFixed(1)}s total{ai.lastGeneration.stopped ? " (stopped)" : ""}. Thinking off.
+          </p>
+        )}
+
         {ai.status === "unsupported" && (
           <div className="rounded-2xl bg-bad-soft p-3.5 text-[13px] leading-snug text-[#9a3a12]">
             <p className="font-extrabold">This device can’t run the on-device AI.</p>

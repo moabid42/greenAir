@@ -136,7 +136,7 @@ test('fresh AI context preserves backend fields, zero, null, provenance and devi
     readings: [observed], recent: [observed], ble: { connected: true, battery: 0, last: observed }, error: null,
   });
   assert.equal(records.filter((r) => r.category === 'ble_sample').length, 1);
-  const messages = buildMessages({ question: 'Compare WHOOP heart rate with air and ozone at the station', facts, memory: {}, history: [], records });
+  const messages = buildMessages({ question: 'Compare WHOOP heart rate with air and ozone at the station and street segment temperature today', facts, memory: {}, history: [], records });
   const body = messages.at(-1).content;
   for (const field of ['synthetic local fixture', 'observed BLE', 'ozone', 'provenance', 'recommendable', 'segment_id', 'tempC":0', 'no2":null', 'recoveryScoreDemo']) assert.ok(body.includes(field), field);
   assert.doesNotMatch(messages[0].content, /no live weather/);
@@ -170,4 +170,88 @@ test('all-hour overview keeps every value available when repeated provenance exc
   assert.ok(body.includes('"no2":[' + Array(24).fill(0).join(',') + ']'));
   assert.ok(body.includes('"source":"forecast"'));
   assert.ok(estimateTokens(JSON.stringify(messages)) + 200 < CONTEXT_TOKENS);
+});
+
+test('social turns skip records but data questions and ambiguous follow-ups retain access', () => {
+  const { questionNeedsRecords } = load('ai/context');
+  const records = [{ category: 'sensor', data: { privateMarker: 'fresh-reading', temperature: 12 } }];
+  for (const question of ['Hello!', 'hi coach', 'Thanks.', 'How are you?']) {
+    assert.equal(questionNeedsRecords(question), false);
+    const messages = buildMessages({ question, facts, memory: {}, history: [], records });
+    assert.ok(!messages.at(-1).content.includes('fresh-reading'));
+    assert.ok(estimateTokens(JSON.stringify(messages)) < 1400);
+  }
+  for (const question of ['Hello, what is the air quality?', 'And tomorrow?', 'What about that?', 'Tell me more']) {
+    assert.equal(questionNeedsRecords(question), true);
+    const messages = buildMessages({ question, facts, memory: {}, history: [], records });
+    assert.ok(messages.at(-1).content.includes('fresh-reading'));
+  }
+});
+
+test('station records outrank unrelated metadata under a tight data budget', () => {
+  const records = Array.from({ length: 20 }, (_, i) => ({ category: 'grid_metadata', data: { id: i, payload: 'x'.repeat(100) } }));
+  records.push({ category: 'sensor', data: { id: 'measured-station', no2: 0, stale: true } });
+  const reference = selectRecords('Air quality at the station?', records, 300);
+  assert.ok(reference.includes('measured-station'));
+  assert.ok(reference.includes('"no2":0'));
+  assert.ok(reference.includes('"stale":true'));
+  assert.ok(reference.includes('"total":20'));
+});
+
+test('model load, warmup and streamed replies explicitly disable thinking', async () => {
+  const calls = [];
+  class FakeWllama {
+    cacheManager = { list: async () => [] };
+    async loadModelFromUrl(url, options) { calls.push({ kind: 'load', options }); }
+    async createChatCompletion(options) {
+      calls.push({ kind: 'chat', options });
+      if (!options.stream) return {};
+      return (async function* () { yield { choices: [{ delta: { content: 'Hello!' } }] }; })();
+    }
+  }
+  const source = fs.readFileSync(path.resolve(__dirname, '../src/lib/ai/engine.ts'), 'utf8');
+  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
+  const compiledEngine = { exports: {} };
+  vm.runInNewContext(`(function(require,module,exports){${outputText}\n})`, {
+    WebAssembly, AbortController, performance, setTimeout, clearTimeout, self: { crossOriginIsolated: true },
+    navigator: { hardwareConcurrency: 4, deviceMemory: 8, storage: { estimate: async () => ({ quota: 2 ** 32, usage: 0 }) } },
+    document: { addEventListener() {} },
+  })((name) => name === './prompt' ? load('ai/prompt') : { Wllama: FakeWllama }, compiledEngine, compiledEngine.exports);
+  const engine = compiledEngine.exports;
+  await engine.initAI();
+  await engine.installModel();
+  assert.equal(engine.getState().status, 'ready');
+  const result = await engine.generate([{ role: 'user', content: 'Hello' }], () => {});
+  assert.equal(result.text, 'Hello!');
+  const metrics = engine.getState().lastGeneration;
+  assert.equal(metrics.promptCharacters, 5);
+  assert.ok(metrics.firstTextMs >= 0);
+  assert.ok(metrics.totalMs >= metrics.firstTextMs);
+  assert.equal(metrics.stopped, false);
+  assert.ok(!JSON.stringify(metrics).includes('Hello'));
+  const options = calls.find((c) => c.kind === 'load').options;
+  assert.equal(options.reasoning, false);
+  assert.equal(options.reasoning_budget_tokens, 0);
+  assert.equal(options.default_template_kwargs.enable_thinking, false);
+  const chats = calls.filter((c) => c.kind === 'chat');
+  assert.equal(chats.length, 2);
+  for (const { options } of chats) assert.equal(options.chat_template_kwargs.enable_thinking, false);
+  assert.equal(chats[1].options.max_tokens, 120);
+});
+
+test('focused references leave spare budget unused rather than padding with unrelated records', () => {
+  const records = [
+    { category: 'availability_metadata', data: { sensorCount: 1, error: null } },
+    { category: 'sensor', data: { id: 'station', no2: 0, stale: false } },
+    { category: 'device_metadata', data: { name: 'unrelated-watch' } },
+    { category: 'day_series_metadata', data: { tempC: [1, 2, 3] } },
+  ];
+  const focused = selectRecords('Air at the station?', records, 3000);
+  assert.ok(focused.includes('"no2":0'));
+  assert.ok(focused.includes('"sensorCount":1'));
+  assert.ok(!focused.includes('unrelated-watch'));
+  assert.ok(!focused.includes('"tempC"'));
+  assert.ok(focused.includes('"device_metadata":{"total":1,"included":0}'));
+  const followup = selectRecords('Tell me more', records, 3000);
+  assert.ok(followup.includes('unrelated-watch'));
 });

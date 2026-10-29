@@ -614,6 +614,16 @@ offline. Record a later successful check alongside the earlier failure.
   omissions. Synthetic fixtures and observed BLE readings stay distinct.
 - Voice dictation accumulates across pauses and submits only after explicit
   Finish speaking plus final recognition results. Cancellation/errors never send.
+- Latency correction: simple social turns skip records; data references are capped
+  at 1,600 estimated tokens (2,000 for daily/timing queries), with topic records
+  ahead of unrelated metadata. Replies capped at 120 tokens. Thinking was already
+  off at load/template/request; added a zero reasoning budget and boundary test.
+  Local stored-data sample: greeting prompt estimate 3,591 → 1,122, daily query
+  3,607 → 3,077 retaining all hours. This is prompt sizing, not a model speed test.
+  A further pass shortened the fixed instructions and excluded unrelated categories
+  before serialization; latest estimates are 812 for greetings / 2,710 daily timing.
+  Availability/units take priority. AI settings show last reply's first-text/total
+  timing, retained in memory only. Fourteen web tests pass; device speed unverified.
 - [Contract, local HTTP probe and limitations](../docs/integrations/ai-companion-context.md).
   Web lint/types/build and 10 offline tests passed on Node24.22.2. No new upstream
   source verification, real-mic check or downloaded-model quality claim.

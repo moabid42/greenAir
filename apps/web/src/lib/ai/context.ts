@@ -1,3 +1,4 @@
+import { includesCategory, selectData } from "./selection";
 import type { ChatMessage } from "./engine";
 import type { CoachMemory } from "@/lib/prefs";
 import { CONTEXT_TOKENS } from "./engine";
@@ -7,6 +8,14 @@ export const estimateTokens = (s: string) => Math.ceil(s.length / 2);
 
 /** Tokens kept free for the model's answer. */
 const ANSWER_RESERVE = 500;
+/** A context window is a ceiling, not a target: prefill runs on the user's device. */
+export const REFERENCE_TOKEN_LIMIT = 1600;
+const DAILY_REFERENCE_TOKEN_LIMIT = 2000;
+
+/** Only self-contained social turns can safely skip data; follow-ups still get fresh records. */
+export function questionNeedsRecords(question: string): boolean {
+  return !/^(?:(?:hi|hello|hey|hallo|good morning|good evening)(?: coach)?|thanks|thank you|danke|bye|goodbye|how are you)[\s!?.]*$/i.test(question.trim());
+}
 
 import { PREFIX, SYSTEM_PROMPT } from "./prompt";
 
@@ -45,7 +54,11 @@ export function buildMessages(opts: { question: string; facts: Facts; memory: Co
   const heading = `User preferences: ${mem || "none saved"}\nSituation: ${opts.facts.date}; ${opts.facts.sport}; ${opts.facts.area}; reachKm=${opts.facts.reachKm}; airSensitive=${opts.facts.sensitiveToAir}`;
   const end = `\n[/REFERENCE]\n\nUser message: ${question}`;
   let budget = CONTEXT_TOKENS - ANSWER_RESERVE - estimateTokens(JSON.stringify(PREFIX)) - estimateTokens(heading + end) - 150;
-  const reference = selectRecords(question, opts.records ?? [], Math.max(0, budget));
+  const selection = selectData(question, opts.history);
+  const referenceLimit = selection.topics.some((t) => ["weather", "air", "activity"].includes(t)) ? DAILY_REFERENCE_TOKEN_LIMIT : REFERENCE_TOKEN_LIMIT;
+  const reference = questionNeedsRecords(question)
+    ? selectRecords(question, opts.records ?? [], Math.max(0, Math.min(budget, referenceLimit)), selection)
+    : "No records selected for this social message. Do not assert current conditions or readings.";
   budget -= estimateTokens(reference);
   const kept: ChatMessage[] = [];
   for (const t of [...opts.history].reverse().slice(0, 4)) {
@@ -64,19 +77,23 @@ export interface ContextRecord {
 }
 
 /** All loaded records are candidates; retain complete records and report selection coverage. */
-export function selectRecords(question: string, records: ContextRecord[], budget: number): string {
+export function selectRecords(question: string, records: ContextRecord[], budget: number, selection = selectData(question)): string {
   const words = question.toLowerCase().match(/[\p{L}\p{N}_]+/gu)?.filter((w) => w.length > 2) ?? [];
-  const deviceQuestion = /heart|bpm|device|watch|whoop|step|pace|cadence|workout|recovery|strain|distance/i.test(question);
-  const spatialQuestion = /street|park|place|where|route|surface|traffic|segment/i.test(question);
-  const sensorQuestion = /sensor|station|measured|pm|no2|ozone|temperature|humidity|air/i.test(question);
-  const ranked = records.map((r, index) => {
+  const deviceQuestion = selection.topics.includes("devices");
+  const spatialQuestion = selection.topics.includes("streets");
+  const sensorQuestion = selection.topics.includes("stations") || selection.topics.includes("air");
+  const dailyQuestion = selection.topics.some((t) => ["weather", "air", "activity"].includes(t));
+  const candidates = records.filter((r) => includesCategory(selection, r.category));
+  const ranked = candidates.map((r, index) => {
     const text = `${r.category}: ${JSON.stringify(r.data)}`;
     const lower = text.toLowerCase();
     const score = words.reduce((n, w) => n + (lower.includes(w) ? 1 : 0), 0)
-      + (r.category.endsWith("metadata") ? 30 : 0)
-      + (deviceQuestion && /device|ble/.test(r.category) ? 20 : 0)
-      + (spatialQuestion && /grid|segment/.test(r.category) ? 15 : 0)
-      + (sensorQuestion && /sensor/.test(r.category) ? 15 : 0);
+      + (r.category.endsWith("metadata") ? 5 : 0)
+      + (r.category === "availability_metadata" ? 1000 : 0)
+      + (dailyQuestion && r.category === "day_series_metadata" ? 60 : 0)
+      + (deviceQuestion && /device|ble/.test(r.category) ? 60 : 0)
+      + (spatialQuestion && /grid|segment/.test(r.category) ? 60 : 0)
+      + (sensorQuestion && /sensor/.test(r.category) ? 60 : 0);
     return { text, score, index, category: r.category };
   }).sort((a, b) => b.score - a.score || a.index - b.index);
   const counts: Record<string, { total: number; included: number }> = {};
@@ -91,5 +108,5 @@ export function selectRecords(question: string, records: ContextRecord[], budget
     counts[r.category].included++;
     remaining -= cost;
   }
-  return `Coverage (omitted records are not evidence of absence): ${JSON.stringify(counts)}\n${selected.join("\n")}`;
+  return `Selection: ${JSON.stringify(selection)}. Only loaded data are available; do not infer coverage for another date. If needsClarification=true, ask what data the user means.\nCoverage (omitted records are not evidence of absence): ${JSON.stringify(counts)}\n${selected.join("\n")}`;
 }

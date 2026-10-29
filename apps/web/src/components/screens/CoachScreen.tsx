@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Cpu, Mic, Sparkles, SquarePen, Square } from "lucide-react";
+import { selectData } from "@/lib/ai/selection";
 import { contextRecords } from "@/lib/ai/records";
 import { startDictation, type Recognizer } from "@/lib/ai/speech";
 import { useWearables } from "@/lib/wearables/useWearables";
-import { buildMessages } from "@/lib/ai/context";
+import { buildMessages, questionNeedsRecords } from "@/lib/ai/context";
 import { generate, getState as getAIState, stopGenerating } from "@/lib/ai/engine";
 import { clearHistory, HISTORY_CLEARED_EVENT, loadHistory, saveHistory, type StoredMessage } from "@/lib/ai/history";
 import { useAI } from "@/lib/ai/useAI";
@@ -101,15 +102,16 @@ export default function CoachScreen({ active }: { active: boolean }) {
       const history = messages.map((m) => ({ role: m.role === "coach" ? ("assistant" as const) : ("user" as const), text: m.text }));
       setMessages((m) => [...m, { id: idRef.current++, role: "user", text: q }, { id, role: "coach", text: "", streaming: true }]);
       try {
-        const records = contextRecords({
+        const selection = selectData(q, history);
+        const records = questionNeedsRecords(q) ? contextRecords({
           day, grid, sensors: app.sensors, segments: app.segments,
           segmentDetail: app.segmentView?.state === "ready" ? app.segmentView.detail : null,
           devices: wearables.demos?.list().filter((d) => d.samples.length > 0) ?? [],
           readings: wearables.readings, recent: wearables.recent,
           ble: { connected: wearables.ble?.connected ?? false, battery: wearables.ble?.battery ?? null, last: wearables.ble?.last ?? null },
           error: app.error,
-        });
-        records.push({ category: "activity_metadata", data: {
+        }, selection) : [];
+        if (selection.topics.includes("activity")) records.push({ category: "activity_metadata", data: {
           source: "derived from loaded application data", date, today, selectedHour: app.hour,
           currentHour: app.nowHour, activity, tune: app.tune,
           hourlyScores: app.focusScores, recommendedWindows: app.windows, bestSpot: app.bestSpot,
