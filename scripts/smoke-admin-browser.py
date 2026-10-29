@@ -90,10 +90,10 @@ def main():
                 )
                 for ep in endpoints
             )
-            page.get_by_text("Demo data", exact=True).wait_for()
+            page.get_by_text("Stored real data", exact=True).wait_for()
             checks.append(
                 "Overview probes the real local backend through browser CORS; "
-                "demo telemetry is labelled"
+                "stored pipeline status is fetched"
             )
             page.screenshot(path=str(args.output / "overview.png"))
             page.get_by_role("link", name="Endpoints", exact=True).click()
@@ -117,22 +117,21 @@ def main():
             checks.append(
                 "Endpoint add/edit/search persist after reload; HTTP404 failure recovers to HTTP200"
             )
-            page.get_by_role("link", name="Client data", exact=True).click()
-            page.get_by_role("heading", name="Client data", exact=True).wait_for()
+            page.get_by_role("link", name="Source data", exact=True).click()
+            page.get_by_role("heading", name="Source data", exact=True).wait_for()
             page.get_by_text(
-                "These numbers are a simulated sample, not measurements.", exact=True
+                re.compile("Client uploads and server request analytics are unavailable")
             ).wait_for()
-            page.get_by_role("combobox", name=re.compile("Filter by result")).select_option(
-                "rejected"
-            )
             with page.expect_download() as downloaded:
                 page.get_by_role("button", name="Export CSV", exact=True).click()
-            csv_path = args.output / "simulated.csv"
+            csv_path = args.output / "source-status.csv"
             downloaded.value.save_as(csv_path)
             csv_text = csv_path.read_text()
-            assert "note" in csv_text.splitlines()[0] and "simulated sample" in csv_text
+            assert "latest_observed_utc" in csv_text.splitlines()[0]
+            assert "simulated sample" not in csv_text
             checks.append(
-                "Client-data filters work; exported CSV explicitly labels simulated samples"
+                "Source data exports stored refresh status; "
+                "absent client analytics stay unavailable"
             )
             page.get_by_role("link", name="Settings", exact=True).click()
             page.get_by_role("heading", name="Settings", exact=True).wait_for()

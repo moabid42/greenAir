@@ -12,7 +12,7 @@ import { type ReactNode, useEffect, useState } from "react";
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Overview", icon: House },
   { href: "/endpoints", label: "Endpoints", icon: Database },
-  { href: "/client-data", label: "Client data", icon: BarChart3 },
+  { href: "/client-data", label: "Source data", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
