@@ -142,7 +142,7 @@ export default function AnalyticsScreen() {
 
         <Card title="Sample sessions">
           {!available.length ? (
-            <p className="mt-1 text-sm text-mute">No sample readings recorded yet. Play a simulated session under Devices.</p>
+            <p className="mt-1 text-sm text-mute">No wearable readings recorded yet. Connect a heart-rate sensor under Devices.</p>
           ) : (
             picked && (
               <>

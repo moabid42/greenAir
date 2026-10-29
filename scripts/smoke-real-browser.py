@@ -228,15 +228,15 @@ def main():
                 for r in responses
                 if r["url"].startswith(args.api_base_url) and r["status"] >= 500
             ], "Unexpected API server error"
-            # Exercise the two remaining main screens and explicit simulated devices.
+            # Exercise the two remaining main screens; production offers real devices only.
             page.get_by_role("navigation", name="Main").get_by_role(
                 "button", name="Devices", exact=True
             ).click()
             page.get_by_role("heading", name="Devices", exact=True).wait_for()
-            page.get_by_role("button", name="Play sample session", exact=True).first.click()
-            page.get_by_text(re.compile("Connected · simulated playback")).first.wait_for()
+            assert page.get_by_role("button", name="Play sample session", exact=True).count() == 0
+            page.get_by_text("Waiting for a real heart-rate notification.", exact=True).wait_for()
             checks.append(
-                "Devices plays an explicitly simulated session without Bluetooth permissions"
+                "Devices waits for actual Bluetooth readings and hides synthetic sessions"
             )
             page.get_by_role("navigation", name="Main").get_by_role(
                 "button", name="Me", exact=True
