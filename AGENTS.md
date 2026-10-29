@@ -12,8 +12,12 @@ The backend uses Python/FastAPI in `services/backend`. Read
 to install locked dependencies, `just dev` to serve locally, and `just test` /
 `just lint` for checks. Use the root `justfile` for development tasks.
 Domain modules are reserved boundaries; implement only
-the scope requested for the current task. The web client and infrastructure
-have reserved folders; no frontend framework, broker, or database is wired up.
+the scope requested for the current task. The public Next.js/MapLibre client lives in `apps/web`; the separate Next.js admin
+client lives in `apps/admin`. Use `just setup-web` / `setup-admin`, `dev-web` /
+`dev-admin`, and `check-web` / `check-admin` for these apps. `just up` starts persistent storage, migrations, a separate real-source refresh
+worker and both clients; `just down` preserves the database volume. Default serving
+is stored/live. Synthetic providers are explicit offline test/demo options. See
+[real runtime](docs/integrations/real-data-runtime.md).
 
 ## Quality checks and commits
 

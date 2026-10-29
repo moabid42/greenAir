@@ -1,0 +1,343 @@
+{
+  "capture_store": "local ignored data/runtime/source-check-20261028/captures.sqlite",
+  "probes": [
+    {
+      "source_id": "uba_docs",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/modules/custom/w21_uba_air_data_api_v4/assets/uba_api_v4.yml",
+      "request_params": {},
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 7,
+      "retrieved_at_utc": "2026-10-28T22:58:42.853808+00:00",
+      "sha256": "e6d03a9150e516a30179c959a0e4342d4014ea08092869eaf7248cafd509405c",
+      "bytes": 75617,
+      "decode_error": "expected JSON, got 'application/yaml'",
+      "content_type": "application/yaml"
+    },
+    {
+      "source_id": "uba_stations",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/stations/json",
+      "request_params": {
+        "lang": "en",
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-28"
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 8,
+      "retrieved_at_utc": "2026-10-28T22:58:43.037560+00:00",
+      "sha256": "1a3496f57bec6bfd440acf12be3cea69877d83f71c502a42773007ab7f1617dc",
+      "bytes": 509954,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "count",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_components",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/components/json",
+      "request_params": {
+        "lang": "en"
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 9,
+      "retrieved_at_utc": "2026-10-28T22:58:43.096267+00:00",
+      "sha256": "5231003d6156d354c86d69e9f1e9b0326338e8c45c45971842e5aa639196b78c",
+      "bytes": 1248,
+      "schema_keys": [
+        "count",
+        "indices",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_scopes",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/scopes/json",
+      "request_params": {
+        "lang": "en"
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 10,
+      "retrieved_at_utc": "2026-10-28T22:58:43.145386+00:00",
+      "sha256": "9b2ec796878c99396cd46608cc182bab60da6e5b7c6d5114c558f55203ec7087",
+      "bytes": 811,
+      "schema_keys": [
+        "count",
+        "indices",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_226_1",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "request_params": {
+        "station": "226",
+        "component": "1",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 11,
+      "retrieved_at_utc": "2026-10-28T22:58:43.261436+00:00",
+      "sha256": "e813e8565b0a8220d75864a374127606f159c8b9a4140fb75154613655430aa2",
+      "bytes": 2197,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_226_3",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "request_params": {
+        "station": "226",
+        "component": "3",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 12,
+      "retrieved_at_utc": "2026-10-28T22:58:43.324588+00:00",
+      "sha256": "d41b060724dd1697668d6fab058d853de9cfd6fed211728ead77738684e20f0d",
+      "bytes": 2182,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_226_5",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "request_params": {
+        "station": "226",
+        "component": "5",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 13,
+      "retrieved_at_utc": "2026-10-28T22:58:43.384487+00:00",
+      "sha256": "c0fdb350cb92f79b0d0c81e96d6d4f86c679751f0b8c2fa702ce195b4c195039",
+      "bytes": 2197,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_226_9",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "request_params": {
+        "station": "226",
+        "component": "9",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 14,
+      "retrieved_at_utc": "2026-10-28T22:58:43.442030+00:00",
+      "sha256": "a944455f001c574a38b8a036c9df8c0ec6bc0f416750bb1d415e5bd51651383b",
+      "bytes": 2182,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "meta"
+      ],
+      "content_type": "application/json"
+    },
+    {
+      "source_id": "uba_353_5",
+      "method": "GET",
+      "url": "https://luftdaten.umweltbundesamt.de/api/air-data/v4/measures/json",
+      "request_params": {
+        "station": "353",
+        "component": "5",
+        "scope": 2,
+        "date_from": "2026-10-27",
+        "date_to": "2026-10-27",
+        "time_from": 1,
+        "time_to": 24
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 15,
+      "retrieved_at_utc": "2026-10-28T22:58:43.509433+00:00",
+      "sha256": "48f902519482ba2328009994a866020890d1586cfb737e183b8037e311fac4d1",
+      "bytes": 2197,
+      "schema_keys": [
+        "request",
+        "indices",
+        "data",
+        "meta"
+      ],
+      "content_type": "application/json"
+    }
+  ],
+  "replay": [
+    {
+      "source": "uba_226_1",
+      "raw_ref": 11,
+      "rows": 24,
+      "insert_counts": [
+        {
+          "observations": 24,
+          "layers": 0,
+          "segments": 0
+        },
+        {
+          "observations": 0,
+          "layers": 0,
+          "segments": 0
+        }
+      ],
+      "status": "SUCCESS",
+      "latest_observed_at": "2026-10-27T23:00:00Z",
+      "earliest_observed_at": "2026-10-27T00:00:00Z",
+      "missing_values": 0
+    },
+    {
+      "source": "uba_226_3",
+      "raw_ref": 12,
+      "rows": 24,
+      "insert_counts": [
+        {
+          "observations": 24,
+          "layers": 0,
+          "segments": 0
+        },
+        {
+          "observations": 0,
+          "layers": 0,
+          "segments": 0
+        }
+      ],
+      "status": "SUCCESS",
+      "latest_observed_at": "2026-10-27T23:00:00Z",
+      "earliest_observed_at": "2026-10-27T00:00:00Z",
+      "missing_values": 0
+    },
+    {
+      "source": "uba_226_5",
+      "raw_ref": 13,
+      "rows": 24,
+      "insert_counts": [
+        {
+          "observations": 24,
+          "layers": 0,
+          "segments": 0
+        },
+        {
+          "observations": 0,
+          "layers": 0,
+          "segments": 0
+        }
+      ],
+      "status": "SUCCESS",
+      "latest_observed_at": "2026-10-27T23:00:00Z",
+      "earliest_observed_at": "2026-10-27T00:00:00Z",
+      "missing_values": 0
+    },
+    {
+      "source": "uba_226_9",
+      "raw_ref": 14,
+      "rows": 24,
+      "insert_counts": [
+        {
+          "observations": 24,
+          "layers": 0,
+          "segments": 0
+        },
+        {
+          "observations": 0,
+          "layers": 0,
+          "segments": 0
+        }
+      ],
+      "status": "SUCCESS",
+      "latest_observed_at": "2026-10-27T23:00:00Z",
+      "earliest_observed_at": "2026-10-27T00:00:00Z",
+      "missing_values": 0
+    },
+    {
+      "source": "uba_353_5",
+      "raw_ref": 15,
+      "rows": 24,
+      "insert_counts": [
+        {
+          "observations": 24,
+          "layers": 0,
+          "segments": 0
+        },
+        {
+          "observations": 0,
+          "layers": 0,
+          "segments": 0
+        }
+      ],
+      "status": "SUCCESS",
+      "latest_observed_at": "2026-10-27T23:00:00Z",
+      "earliest_observed_at": "2026-10-27T00:00:00Z",
+      "missing_values": 0
+    }
+  ]
+}

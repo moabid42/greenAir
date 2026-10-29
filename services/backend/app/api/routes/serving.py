@@ -1,0 +1,412 @@
+"""Read-only application queries with frontend-compatible aliases."""
+
+import hashlib
+from datetime import date as Date
+from datetime import datetime
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+
+from app.api.errors import ERROR_RESPONSES
+from app.processing.spatial import point_to_line_m
+from app.schemas.serving import (
+    BestTimesResponse,
+    DayForecast,
+    GridResponse,
+    ListSegmentsResponse,
+    ListSensorsResponse,
+    ScoreSnapshot,
+    SegmentDetail,
+    SegmentFeature,
+    Sensor,
+    ServiceStatus,
+    SportProfile,
+)
+from app.serving.demo import LOCAL_TZ
+from app.serving.repository import ServingRepository
+
+router = APIRouter(responses=ERROR_RESPONSES)
+UtcHour = Annotated[
+    str,
+    Query(
+        pattern=r"^\d{4}-\d{2}-\d{2}T\d{2}:00:00Z$",
+        examples=["2026-10-29T12:00:00Z"],
+        description="UTC hour, exactly YYYY-MM-DDTHH:00:00Z.",
+    ),
+]
+PageSize = Annotated[int, Query(ge=1, le=100, description="Maximum resources per page.")]
+PageToken = Annotated[str, Query(max_length=200, description="Token from the previous response.")]
+Latitude = Annotated[float, Query(ge=-90, le=90, examples=[49.1425])]
+Longitude = Annotated[float, Query(ge=-180, le=180, examples=[9.2115])]
+
+
+def get_repository(request: Request) -> ServingRepository:
+    return request.app.state.serving_repository
+
+
+Repository = Annotated[ServingRepository, Depends(get_repository)]
+
+
+def check_date(selected: Date) -> None:
+    if not Date(2020, 1, 1) <= selected <= Date(2100, 12, 31):
+        raise HTTPException(404, "Date is outside the supported calendar range.")
+
+
+def parse_hour(t: str) -> datetime:
+    try:
+        moment = datetime.fromisoformat(t)
+    except ValueError as error:
+        raise HTTPException(400, "Use a valid UTC calendar hour.") from error
+    check_date(moment.astimezone(LOCAL_TZ).date())
+    return moment
+
+
+def page(items: list, page_size: int, page_token: str, *, prefix="mock-v1-") -> tuple[list, str]:
+    # A versioned cursor, deliberately independent of future database row identities.
+    if page_token:
+        if (
+            not page_token.startswith(prefix)
+            or not page_token[len(prefix) :].isascii()
+            or not page_token[len(prefix) :].isdigit()
+        ):
+            raise HTTPException(400, "Use next_page_token from a previous response.")
+        offset = int(page_token[len(prefix) :])
+        if offset > len(items):
+            raise HTTPException(400, "Page token is beyond this collection.")
+    else:
+        offset = 0
+    end = offset + page_size
+    return items[offset:end], f"{prefix}{end}" if end < len(items) else ""
+
+
+def set_headers(
+    response: Response,
+    repository: ServingRepository,
+    max_age: int = 300,
+    *,
+    source: str | None = None,
+) -> None:
+    source = source or getattr(repository, "source", "mock")
+    response.headers["Cache-Control"] = (
+        f"public, max-age={max_age}" if source == "mock" else "no-cache"
+    )
+    response.headers["X-Data-Source"] = source
+    response.headers["X-Build-Id"] = repository.build_id
+
+
+@router.get(
+    "/api/v1/day",
+    response_model=DayForecast,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendDay",
+    summary="Get hourly city conditions",
+)
+@router.get(
+    "/v1/days/{date}",
+    response_model=DayForecast,
+    tags=["Conditions"],
+    operation_id="GetDay",
+    summary="Get a day resource",
+)
+def get_day(date: Date, response: Response, repository: Repository) -> DayForecast:
+    """Return 24 Berlin slots with explicit missing values and per-channel provenance.
+
+    The frontend applies sport weights to the factor scores; this response has no combined index.
+    Try date `2026-10-29`. Supported demo dates: 2020-01-01 through 2100-12-31.
+    """
+    check_date(date)
+    data = repository.day(date)
+    set_headers(response, repository, source=data.source)
+    if data.build_id:
+        response.headers["X-Build-Id"] = data.build_id
+    return data
+
+
+@router.get(
+    "/api/v1/grid",
+    response_model=GridResponse,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendGrid",
+    summary="Get the city factor grid",
+)
+@router.get(
+    "/v1/grids/{date}",
+    response_model=GridResponse,
+    tags=["Conditions"],
+    operation_id="GetGrid",
+    summary="Get a grid resource",
+)
+def get_grid(date: Date, response: Response, repository: Repository) -> GridResponse:
+    """Return 250 m cells with nullable hourly factors and per-layer coverage/provenance.
+    Stored cells summarize verified roads; mock cells and their values are synthetic.
+    Try date `2026-10-29`. The response is compressed when the client accepts gzip.
+    """
+    check_date(date)
+    data = repository.grid(date)
+    set_headers(response, repository, source=data.source)
+    if data.build_id:
+        response.headers["X-Build-Id"] = data.build_id
+    return data
+
+
+@router.get(
+    "/api/v1/sensors",
+    response_model=list[Sensor],
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendSensors",
+    summary="Get sensor markers",
+)
+def frontend_sensors(response: Response, repository: Repository) -> list[Sensor]:
+    """Return sensor markers from the selected provider in the compatible array format."""
+    set_headers(
+        response,
+        repository,
+        60,
+        source="mock" if getattr(repository, "source", "mock") == "mock" else "measured",
+    )
+    return repository.sensors()
+
+
+@router.get(
+    "/v1/sensors",
+    response_model=ListSensorsResponse,
+    tags=["Sensors"],
+    operation_id="ListSensors",
+    summary="List sensor resources",
+)
+def list_sensors(
+    response: Response, repository: Repository, page_size: PageSize = 50, page_token: PageToken = ""
+) -> ListSensorsResponse:
+    """List selected-provider sensor resources with bounded pagination."""
+    set_headers(
+        response,
+        repository,
+        60,
+        source="mock" if getattr(repository, "source", "mock") == "mock" else "measured",
+    )
+    sensors, token = page(repository.sensors(), page_size, page_token)
+    return ListSensorsResponse(sensors=sensors, next_page_token=token)
+
+
+@router.get(
+    "/v1/sensors/{sensor_id}",
+    response_model=Sensor,
+    tags=["Sensors"],
+    operation_id="GetSensor",
+    summary="Get a sensor resource",
+)
+def get_sensor(sensor_id: str, repository: Repository) -> Sensor:
+    """Get a sensor by an ID returned from ListSensors (mock example: `mock-1`)."""
+    sensor = next((s for s in repository.sensors() if s.id == sensor_id), None)
+    if sensor is None:
+        raise HTTPException(404, "Sensor not found. List sensors to select a supported ID.")
+    return sensor
+
+
+@router.get(
+    "/segments",
+    response_model=ListSegmentsResponse,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendSegments",
+    summary="Get demo street GeoJSON",
+)
+@router.get(
+    "/v1/segments",
+    response_model=ListSegmentsResponse,
+    tags=["Street scores"],
+    operation_id="ListSegments",
+    summary="List segment resources",
+)
+def list_segments(
+    repository: Repository,
+    page_size: PageSize = 50,
+    page_token: PageToken = "",
+    bbox: Annotated[
+        str | None,
+        Query(
+            description="Optional west,south,east,north WGS84 bounding box.",
+            examples=["9.15,49.105,9.275,49.178"],
+        ),
+    ] = None,
+) -> ListSegmentsResponse:
+    """Return stored road geometry, or invented geometry in explicit mock mode, as GeoJSON.
+    IDs match the score responses. Vector tiles
+    are deferred; this endpoint supports small GeoJSON overlays without a tile server.
+    """
+    collection = getattr(repository, "segment_collection", None)
+    if collection is not None:
+        segments, identifier, source = collection()
+    else:
+        segments, identifier, source = repository.segments(), repository.build_id, "mock"
+    if bbox is not None:
+        try:
+            west, south, east, north = map(float, bbox.split(","))
+            if not (-180 <= west < east <= 180 and -90 <= south < north <= 90):
+                raise ValueError
+        except ValueError as error:
+            raise HTTPException(
+                400, "bbox must be west,south,east,north with increasing bounds."
+            ) from error
+        segments = [
+            s
+            for s in segments
+            if (
+                min(p[0] for p in s.geometry.coordinates) <= east
+                and max(p[0] for p in s.geometry.coordinates) >= west
+                and min(p[1] for p in s.geometry.coordinates) <= north
+                and max(p[1] for p in s.geometry.coordinates) >= south
+            )
+        ]
+    scope = hashlib.sha256((bbox or "").encode()).hexdigest()[:12]
+    prefix = f"segments-{identifier}-{scope}-" if source != "mock" else "mock-v1-"
+    features, token = page(segments, page_size, page_token, prefix=prefix)
+    return ListSegmentsResponse(
+        features=features,
+        next_page_token=token,
+        build_id=identifier,
+        source=source,
+    )
+
+
+@router.get(
+    "/v1/segments/{segment_id}",
+    response_model=SegmentFeature,
+    tags=["Street scores"],
+    operation_id="GetSegment",
+    summary="Get a segment resource",
+)
+def get_segment(segment_id: int, repository: Repository) -> SegmentFeature:
+    """Get one road geometry. List segments to discover the current stable IDs."""
+    segment = next(
+        (s for s in repository.segments() if s.properties.segment_id == segment_id), None
+    )
+    if segment is None:
+        raise HTTPException(404, "Segment not found. List segments to select a supported ID.")
+    return segment
+
+
+@router.get(
+    "/scores",
+    response_model=ScoreSnapshot,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendScores",
+    summary="Get street scores for one hour",
+)
+@router.get(
+    "/v1/scores",
+    response_model=ScoreSnapshot,
+    tags=["Street scores"],
+    operation_id="ListScores",
+    summary="List scores for a profile and UTC hour",
+)
+def list_scores(profile: SportProfile, t: UtcHour, repository: Repository) -> ScoreSnapshot:
+    """Run the sport scoring engine on the selected repository inputs. The score is derived;
+    `kind=forecast` describes temporal inputs and `source` identifies provenance.
+    Confidence is zero without spatial PM evidence. IDs match `/v1/segments`.
+    """
+    moment = parse_hour(t)
+    batch = getattr(repository, "score_snapshot", None)
+    if batch is not None:
+        return batch(profile, moment).model_copy(update={"t": t})
+    details = [
+        repository.detail(s.properties.segment_id, profile, moment) for s in repository.segments()
+    ]
+    return ScoreSnapshot(
+        profile=profile,
+        t=t,
+        source=getattr(repository, "spatial_source", "mock"),
+        version="mock-scoring-v1"
+        if getattr(repository, "source", "mock") == "mock"
+        else "unavailable",
+        build_id=repository.build_id,
+        scores={
+            str(d.segment_id): (round(d.score), d.confidence, 0)
+            for d in details
+            if d.score is not None
+        },
+    )
+
+
+@router.get(
+    "/score",
+    response_model=SegmentDetail,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendScore",
+    summary="Get street conditions near a point",
+)
+@router.get(
+    "/v1/scores:lookup",
+    response_model=SegmentDetail,
+    tags=["Street scores"],
+    operation_id="LookupScore",
+    summary="Look up a score by location",
+)
+def lookup_score(
+    lat: Latitude, lon: Longitude, profile: SportProfile, t: UtcHour, repository: Repository
+) -> SegmentDetail:
+    """Find the nearest available road within 200 m; return NOT_FOUND outside that coverage.
+    Try lat=49.1425, lon=9.2115, profile=running, t=2026-10-29T12:00:00Z.
+    Component values are goodness scores (0–100), not raw pollutant measurements.
+    """
+    moment = parse_hour(t)
+    segments = repository.segments()
+    if not segments:
+        raise HTTPException(404, "No street data is available here.")
+    nearest = min(segments, key=lambda s: point_to_line_m((lon, lat), s.geometry.coordinates))
+    if point_to_line_m((lon, lat), nearest.geometry.coordinates) > 200:
+        raise HTTPException(404, "No street data is available within 200 m.")
+    return repository.detail(nearest.properties.segment_id, profile, moment)
+
+
+@router.get(
+    "/v1/segments/{segment_id}/bestTimes/{date}",
+    response_model=BestTimesResponse,
+    tags=["Street scores"],
+    operation_id="GetBestTimes",
+    summary="Get recommended hours",
+)
+@router.get(
+    "/best-time",
+    response_model=BestTimesResponse,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendBestTimes",
+    summary="Get recommended hours for a segment",
+)
+def best_times(
+    segment_id: int, date: Date, profile: SportProfile, repository: Repository
+) -> BestTimesResponse:
+    """Return up to three distinct one-hour recommendations using synthetic scores.
+    Try segment_id=1, date=2026-10-29, profile=running. This is not an exercise safety guarantee.
+    """
+    check_date(date)
+    try:
+        return repository.best_times(segment_id, profile, date)
+    except KeyError as error:
+        raise HTTPException(404, "Segment not found.") from error
+
+
+@router.get(
+    "/status",
+    response_model=ServiceStatus,
+    tags=["Frontend compatibility"],
+    operation_id="GetFrontendStatus",
+    summary="Get data build status",
+)
+@router.get(
+    "/v1/status",
+    response_model=ServiceStatus,
+    tags=["Operations"],
+    operation_id="GetStatus",
+    summary="Get serving status",
+)
+def get_status(repository: Repository) -> ServiceStatus:
+    """Report selected-provider snapshots, actual coverage dates and source state.
+    This is separate from process liveness (`/health`) or a claim of continuous polling.
+    """
+    if hasattr(repository, "status"):
+        return repository.status()
+    return ServiceStatus(
+        build_id=repository.build_id,
+        generated_at=repository.generated_at,
+        sources=[{"id": "dummy", "status": "ok", "source": "mock"}],
+    )

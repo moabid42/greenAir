@@ -1,0 +1,65 @@
+{
+  "capture_store": "local ignored data/runtime/source-check-20261028/captures.sqlite",
+  "probes": [
+    {
+      "source_id": "osem",
+      "method": "GET",
+      "url": "https://api.opensensemap.org/boxes",
+      "request_params": {
+        "bbox": "9.05,49.05,9.35,49.25",
+        "limit": 20,
+        "full": "true"
+      },
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 5,
+      "retrieved_at_utc": "2026-10-28T22:58:42.160857+00:00",
+      "sha256": "fa314a255af1f9f276cc5a996adc37fe395893f1da1912d1df1449369b47e162",
+      "bytes": 177240,
+      "schema_keys": [
+        "array"
+      ],
+      "content_type": "application/json; charset=utf-8"
+    },
+    {
+      "source_id": "osem_docs",
+      "method": "GET",
+      "url": "https://docs.opensensemap.org/api_data.js",
+      "request_params": {},
+      "http_status": 200,
+      "error": null,
+      "raw_ref": 6,
+      "retrieved_at_utc": "2026-10-28T22:58:42.730725+00:00",
+      "sha256": "aae63092ce8100f4d66b5f183f9ac5d82d0a7f21aac1709463edf867b7a66f84",
+      "bytes": 139600,
+      "decode_error": "expected JSON, got 'application/javascript'",
+      "content_type": "application/javascript; charset=UTF-8"
+    }
+  ],
+  "replay": {
+    "raw_ref": 5,
+    "box_count": 81,
+    "canonical_rows": 91,
+    "insert_counts": [
+      {
+        "observations": 91,
+        "layers": 0,
+        "segments": 0
+      },
+      {
+        "observations": 0,
+        "layers": 0,
+        "segments": 0
+      }
+    ],
+    "exposures": {
+      "indoor": 10,
+      "outdoor": 81
+    },
+    "stationary_box_count": 30,
+    "missing_readings": 306,
+    "unresolved_count": 15,
+    "latest_observed_at": "2026-10-28T22:58:30.248000Z",
+    "status": "PARTIAL"
+  }
+}

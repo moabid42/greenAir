@@ -1,0 +1,216 @@
+{
+  "$defs": {
+    "Phenomenon": {
+      "enum": [
+        "temperature",
+        "relative_humidity",
+        "pressure",
+        "pm1",
+        "pm2_5",
+        "pm4",
+        "pm10",
+        "no2",
+        "o3",
+        "wind_speed",
+        "precipitation",
+        "uv_index",
+        "uv_intensity",
+        "illuminance"
+      ],
+      "title": "Phenomenon",
+      "type": "string"
+    },
+    "QcFlag": {
+      "enum": [
+        "assumed_utc",
+        "assumed_unit",
+        "non_numeric",
+        "unknown_unit",
+        "out_of_range",
+        "stuck",
+        "humid_pm"
+      ],
+      "title": "QcFlag",
+      "type": "string"
+    }
+  },
+  "description": "Canonical value: fixed unit per phenomenon, UTC time, provenance and QC flags.",
+  "properties": {
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "station_id": {
+      "minLength": 1,
+      "title": "Station Id",
+      "type": "string"
+    },
+    "platform": {
+      "enum": [
+        "stationary",
+        "mobile"
+      ],
+      "title": "Platform",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "observation",
+        "model",
+        "derived"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "phenomenon": {
+      "$ref": "#/$defs/Phenomenon"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Value"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "longitude": {
+      "maximum": 180,
+      "minimum": -180,
+      "title": "Longitude",
+      "type": "number"
+    },
+    "latitude": {
+      "maximum": 90,
+      "minimum": -90,
+      "title": "Latitude",
+      "type": "number"
+    },
+    "raw_key": {
+      "title": "Raw Key",
+      "type": "string"
+    },
+    "raw_value": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Raw Value"
+    },
+    "raw_unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Raw Unit"
+    },
+    "retrieved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retrieved At"
+    },
+    "sample_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sample Id"
+    },
+    "sensor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sensor Id"
+    },
+    "raw_ref": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Ref"
+    },
+    "issued_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Issued At"
+    },
+    "qc_flags": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/QcFlag"
+      },
+      "title": "Qc Flags",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source",
+    "station_id",
+    "platform",
+    "kind",
+    "phenomenon",
+    "value",
+    "unit",
+    "observed_at",
+    "longitude",
+    "latitude",
+    "raw_key",
+    "raw_value",
+    "raw_unit"
+  ],
+  "title": "Observation",
+  "type": "object"
+}

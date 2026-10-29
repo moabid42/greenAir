@@ -1,14 +1,101 @@
+> Current runtime (2026-10-29): the default API is `http://localhost:8000`.
+> `just up` starts real ingestion and stored serving; unavailable API/data remains
+> unavailable. Synthetic conditions and wearable sessions require explicit
+> `NEXT_PUBLIC_DEMO_MODE=true`. Admin now reads actual stored pipeline status.
+> See [runtime details](../../docs/integrations/real-data-runtime.md); older demo/admin
+> proposals below describe the previous implementation.
+
 # Web client boundary
 
-Reserved for the future MapLibre web client. It consumes the backend's REST API, then
-vector tiles and score update SSE once those interfaces exist. The framework is Next.js;
-the app itself is on the `web/ecomab-frontend` branch until it is merged, and no frontend
-application is scaffolded on `main` yet.
+The MapLibre web client for greenAir (EcoMAB Heilbronn), built with Next.js. It consumes the
+backend's REST API, then vector tiles and score update SSE once those interfaces exist.
+An unset API URL uses localhost:8000; offline demos require explicit opt-in. The backend's explicit
+stored mode serves nullable model day conditions, measured stations and optional
+verified historical street attributes. [Current contract](../../docs/integrations/real-serving-contract.md)
+and [spatial evidence](../../docs/integrations/atrai-spatial.md) override the older
+synthetic payload examples below: spatial arrays/greenery can be null, cells retain
+provenance/counts/zero confidence, and place rankings remain withheld without
+validated spatial confidence. Stored mode does not fetch direct ATRAI overlays.
+The map can inspect surface, close-pass histograms and historical flow proxies;
+these are distinct from modelled city air and current traffic.
 
 See the [architecture mapping](../../docs/architecture.md).
 
 This README documents **both frontends**: the public web client ([Expected API endpoints](#expected-api-endpoints)) and the
 admin frontend ([Admin frontend](#admin-frontend)). If you are new here, read `readme_before_readme.txt` in this folder first.
+
+Built for the Green City Hackathon Heilbronn, Oct 2026. **Mobile first**: it is a phone app (installable PWA). On a big screen it shows as a phone-sized column.
+
+## Run it
+
+Run the commands below from this folder (`apps/web`).
+
+```bash
+npm install
+npm run dev -- -p 3100     # http://localhost:3100  (port 3000 works too if it is free)
+```
+
+Open it on a phone-sized window (or your phone, same Wi-Fi: `http://<laptop-ip>:3100`). Install and GPS need HTTPS (e.g. a Vercel deploy).
+
+Start the real stack with `just up` from the repository root. Set `NEXT_PUBLIC_API_URL` for another backend address before building. Unavailable APIs show errors. Deliberate offline demo runs require `NEXT_PUBLIC_DEMO_MODE=true`.
+
+Optional street-by-street scores (vector tiles + `/scores`, `/score`): set `NEXT_PUBLIC_ECOMAB_API_BASE_URL`. Off by default; the client in `src/lib/api/consumer.ts` has been exercised only against a stub, not a deployed service.
+
+**Look and feel** follows the EcoMAB identity: deep green `#075b4a` on mint, Inter, the leaf-and-route logo (`public/brand.png`).
+
+## What is in the app
+
+| Screen | What it does |
+|---|---|
+| **Intro** (first run) | Sport, where you start, what you are sensitive to |
+| **Map tools** | On Today and Explore: use my location, map layers (views, sensor markers, legend), reset north, and a data-status pill. Tap a sensor marker for its readings, source and time |
+| **Today** | Map first. The Day Dial is the time control (tap or drag the ring). Best window, conditions, best spots on the map. Lens chips: Overall / Heat / Air / Traffic / Wind |
+| **Week sheet** | Pick a day: today, tomorrow, a real hot day (20 Jun), any date, plus a 7-day outlook with each day's best window |
+| **Explore** | Flat city map. Scrub or play through the day; heat alert; best places for the chosen layer |
+| **Place** | One spot up close: dial, best time, 6 factors, save, navigate, remind |
+| **Ride** | Real measured road roughness and overtaking distance from senseBox:bike, inside your reach |
+| **Coach** | On-device AI answers grounded in loaded backend and local device data. Voice input waits for Finish speaking |
+| **Analytics** | Available environmental results and real local Bluetooth readings (export / delete); missing dates stay unavailable |
+| **Devices** | Real Bluetooth heart-rate sensor (Web Bluetooth), privacy and sync controls; synthetic sessions are disabled by default |
+| **Me** | Preferences that change the scores, saved places, reminders, data and privacy |
+
+## The Coach
+
+Coach requires the on-device AI to answer. Tap **AI**, then **Download Qwen3-0.6B** (about 0.45 GB, once). Typed and spoken questions use the same model path; there are no canned analyst replies or fallback answers. Errors are shown as status messages.
+
+- Model: Qwen3-0.6B, GGUF Q5_K_M (`unsloth/Qwen3-0.6B-GGUF`), through `@wllama/wllama` with local WASM assets.
+- Thinking mode is off. Answers allow up to 200 tokens. The fixed system prompt is cached; data context refreshes for every question.
+- Context candidates include all loaded day hours and provenance, grid cells, stations/channels, segment scores/details, recorded/recent BLE samples and locally retained demo device sessions. All-hour columnar data helps compare the full selected day. No new device fixtures are connected automatically.
+- The 4,096-token model context uses question-based record selection and explicit included/total counts. Large records or unrelated rows can be omitted; this is not proof of missing source data. Context covers loaded data for the selected date, not the entire backend archive. Forecast, measurement, derived and synthetic labels, units and timestamps remain distinct.
+- Voice input shows a live transcript, survives browser recognition pauses, and submits only after **Finish speaking** and final recognition results. Leaving Coach or starting a new chat cancels recording. Browser recognition may use a provider speech service; model inference remains on-device.
+- The AI sleeps after 45 seconds in the background. Optional chat history lives in browser localStorage and may contain readings mentioned in answers; raw context records are not saved as chat history.
+
+## Honest limits
+
+- **Watch sync:** a website cannot read Apple Health / Health Connect / Garmin. Reminders reach a paired watch because phones mirror notifications. Reading workouts needs the native app.
+- **Reminders** fire while the app is open or alive in the background. Reliable background delivery needs a push server.
+- Real mode does not infer street pollution differences from a city-wide model; spatial confidence remains unvalidated.
+- Traffic and safety inputs remain missing rather than filled with rush-hour priors.
+
+## Where things live
+
+```
+src/
+  app/                       page, layout, manifest
+  state/app.tsx              all app state: preferences, data, navigation, reminders
+  components/
+    shell/                   MobileShell (phone frame), TabBar
+    map/                     MapStage (steers the camera per screen), SportMap (MapLibre)
+    screens/                 Today, Explore, Place, RideCard, Coach, Analytics, Devices (+ WatchAlerts), Me, Onboarding
+    sheets/                  LocationSheet, WeekSheet
+    ui/                      DayDial, HourBars, Sheet, Toggle, ActivityPicker
+  lib/
+    api/                     types (the backend contract), client, demo data, atrai, geocode
+    score.ts  lens.ts  rank.ts  ride.ts  dial.ts  reminders.ts  prefs.ts
+    coach/engine.ts          the Coach's analyst
+```
+
+Preferences, saved places and reminders live only in the phone's `localStorage`.
 
 ## Expected API endpoints
 
@@ -17,7 +104,7 @@ returns, the rules the UI relies on, how often it is called and what users see w
 It is written for the backend (`services/backend`) and for anyone wiring the client to real data.
 
 - **Source of truth for the shapes:** `src/lib/api/types.ts` (core API) and `src/lib/api/consumer.ts`
-  (optional street scores), in the app on the `web/ecomab-frontend` branch. File paths below are relative to `apps/web`.
+  (optional street scores). File paths below are relative to `apps/web`.
 - **Working reference implementation:** `src/lib/api/demo.ts` and `src/lib/model.ts`. With no backend configured the
   client runs in *demo mode*: real Open-Meteo weather and air quality, spread over the city by a local model. A backend
   can copy that logic and replace its inputs with real data.
@@ -48,13 +135,13 @@ It is written for the backend (`services/backend`) and for anyone wiring the cli
 | Endpoint | Needed for | Called by the client today | Exists in `services/backend` |
 |---|---|---|---|
 | `GET /health` | Liveness (deploy checks) | No | **Yes** |
-| `GET /api/v1/day?date=` | Best time, timeline, reasons, week outlook, Analytics, Coach | **Yes** (required) | No |
-| `GET /api/v1/grid?date=` | Best places, per-place view, ranking, tap-a-place | **Yes** (required) | No |
-| `GET /api/v1/sensors` | Sensor markers and their details sheet | **Yes** (optional, degrades to no markers) | No |
-| `GET /scores` | Street segment colours on the map | Only if `NEXT_PUBLIC_ECOMAB_API_BASE_URL` is set | No |
-| `GET /score` | "Street conditions" details sheet | Only if the above is set | No |
+| `GET /api/v1/day?date=` | Best time, timeline, reasons, week outlook, Analytics, Coach | **Yes** (required) | **Yes, mock data** |
+| `GET /api/v1/grid?date=` | Best places, per-place view, ranking, tap-a-place | **Yes** (required) | **Yes, mock data** |
+| `GET /api/v1/sensors` | Sensor markers and their details sheet | **Yes** (optional, degrades to no markers) | **Yes, mock data** |
+| `GET /scores` | Street segment colours on the map | Only if `NEXT_PUBLIC_ECOMAB_API_BASE_URL` is set | **Yes, mock data** |
+| `GET /score` | "Street conditions" details sheet | Only if the above is set | **Yes, mock data** |
 | `GET /tiles/segments/{z}/{x}/{y}.pbf` | Street segment geometry (vector tiles) | Only if the above is set | No |
-| `GET /status`, `GET /events` (SSE) | Build/freshness, live refresh | Not yet (reserved) | No |
+| `GET /status`, `GET /events` (SSE) | Build/freshness, live refresh | Not yet (reserved) | Status exists; SSE deferred |
 
 The three core endpoints (`day`, `grid`, `sensors`) are all the app needs to run end to end. Everything in section 6 is
 an optional enhancement and is **off** unless configured.
@@ -92,7 +179,7 @@ CORS preflight is triggered. Keep it that way: please do not require custom requ
 | Compression | Please serve gzip or brotli. The grid is roughly 600 KB uncompressed. |
 | Caching | `day` and `grid` for a past date are immutable; for today/future they change as forecasts update. Recommended: `Cache-Control: public, max-age=300` for today and the next days, `max-age=86400, immutable` for past dates. `sensors`: `max-age=60`. |
 | Versioning | Core paths are under `/api/v1`. A breaking change needs `/api/v2`; additive fields are safe (the client ignores unknown fields). |
-| Errors | The client only checks `res.ok`. Any non-2xx is a failure and the body is **not** read. Use standard codes anyway (below) and, ideally, a JSON body such as `{ "detail": "…" }` for logs. |
+| Errors | The client only checks `res.ok`. Any non-2xx is a failure and the body is **not** read. Use standard codes anyway (below) and, ideally, the backend Google-style `{ "error": { "code": 404, "status": "NOT_FOUND", "message": "…", "details": [] } }` envelope for logs. |
 | Auth | None. The API is public and read-only. |
 
 **Status codes the backend should use**
@@ -370,9 +457,10 @@ Off by default. Set `NEXT_PUBLIC_ECOMAB_API_BASE_URL` to switch it on. When on, 
 segment coloured by its score, and tapping a street opens a "Street conditions" sheet. Segment geometry arrives as vector
 tiles; scores arrive separately and are joined by an integer `segment_id`.
 
-> Status: implemented in the client (`src/lib/api/consumer.ts`, `src/components/map/segmentOverlay.ts`) and exercised only
-> against a stub server. **It has not been verified against a deployed backend, and no backend implements it yet.**
-> Responses are validated before use; anything that does not match is rejected and the normal map stays.
+> Status: backend score/detail JSON passes the actual client validators using mock data.
+> **Vector tiles remain deferred, so keep this optional overlay disabled.** The backend
+> serves demo segment GeoJSON separately. See [the backend API contract](../../docs/backend-api.md).
+> Mock provenance is labelled simulated; these responses are not current measurements.
 
 #### `GET /scores`
 
@@ -399,7 +487,7 @@ Scores for **all segments** for one profile and one hour.
 | Field | Rules |
 |---|---|
 | `profile`, `t` | **Must echo the request exactly**, or the client discards the response (guards against stale/out-of-order answers). |
-| `kind` | `observed` or `forecast`; shown as "Street scores · observed/forecast". |
+| `kind` | `observed` or `forecast`; `source: mock` overrides the badge to "Street scores · simulated". |
 | `version` | Non-empty string. |
 | `build_id` | Non-empty string identifying the segment geometry build. The client reloads tiles when it changes and never joins scores from a different build. |
 | `scores` | Object keyed by **integer** `segment_id` (as a string). Each value is the tuple `[score, confidence, flags]`: `score` integer 0–100 (**0 is a valid score**), `confidence` 0–1, `flags` non-negative integer bit field. An absent segment is drawn neutral grey. |
@@ -564,8 +652,8 @@ A second frontend for the people who run the platform: it monitors the data endp
 reviews system health. It shares the web client's visual identity (palette, Inter, logo) but is a **separate app**, so its
 code and endpoint settings never ship inside the public phone app.
 
-- **Where it lives:** the `admin/` app in the frontend workspace (Next.js, `npm run dev` serves it on port 3200). It is
-  **not in this repository yet**; its intended place is `apps/admin`.
+- **Where it lives:** `apps/admin` (Next.js, `npm run dev` serves it on port 3200), on the `web/ecomab-frontend` branch
+  until it is merged. Its own README is `apps/admin/README.md`.
 - **Source of truth (in that app):** `src/lib/types.ts` (shapes), `src/lib/defaults.ts` (the endpoint catalogue),
   `src/lib/health.ts` (status rules), `src/lib/validate.ts` (input rules) and `src/lib/sim.ts` (the shape of the simulated
   client data).
@@ -868,3 +956,13 @@ behind an authenticating proxy. For the admin API (A4) we expect:
 - **What counts as a request** for "Total requests": public API calls only, per endpoint, per client?
 - **Who signs in to the admin** and with which identity provider?
 - **Where is the admin hosted,** and is it reachable from the public internet?
+
+
+## Docker
+
+From the repository root, `just up` builds and starts the API, web and admin;
+`just down` removes the application containers/network without deleting volumes.
+Web is at http://localhost:3000, admin at http://localhost:3200 and API docs at
+http://localhost:8000/docs. See [stack configuration](../../README.md#run-everything-with-docker)
+for custom ports and the browser API URL, which is embedded during image builds.
+The existing npm development and validation commands remain available.

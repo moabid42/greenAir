@@ -12,6 +12,12 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const cli = join(root, "node_modules/@commitlint/cli/cli.js");
 const zeroSha = "0".repeat(40);
 
+// Git hooks export GIT_DIR (absolute in linked worktrees); without this, the
+// temporary repositories below would write into the repository being pushed.
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("GIT_")) delete process.env[name];
+}
+
 function repository(t) {
   const cwd = mkdtempSync(join(tmpdir(), "greenair-ci-"));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));

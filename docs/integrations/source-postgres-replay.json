@@ -1,0 +1,94 @@
+{
+  "checked_at_utc": "2026-10-28T23:01:49.638274+00:00",
+  "database_image": "timescale/timescaledb-ha:pg17@sha256:3f0b3f6bdf4912878444a36e6113a18346309583c4d1a61d81a0c511342a1afd",
+  "extensions": [
+    "plpgsql",
+    "timescaledb_toolkit",
+    "postgis",
+    "timescaledb"
+  ],
+  "scope": "isolated real capture replay; not fresh upstream queries or serving",
+  "results": [
+    {
+      "source": "openmeteo_fcst",
+      "local_capture_raw_ref": 1,
+      "sha256": "0332565cbc0298be7f0a5926b713c4e527be4b5f76e0f35fcb14d08a3438af45",
+      "canonical_rows": 384,
+      "projected_rows": 288,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "openmeteo_aq",
+      "local_capture_raw_ref": 2,
+      "sha256": "166667d43421c19b8d730c43b58d048fe6caba2c27f30bd5cd7b90ff3c9bbe4b",
+      "canonical_rows": 528,
+      "projected_rows": 192,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "brightsky",
+      "local_capture_raw_ref": 3,
+      "sha256": "9c6fa062d933d1a22e961a1c7b624b21ddcb84bdff584d5ad2ea89da096afb0e",
+      "canonical_rows": 2,
+      "projected_rows": 1,
+      "second_replay_new_rows": 0,
+      "status": "PARTIAL"
+    },
+    {
+      "source": "osem",
+      "local_capture_raw_ref": 5,
+      "sha256": "fa314a255af1f9f276cc5a996adc37fe395893f1da1912d1df1449369b47e162",
+      "canonical_rows": 91,
+      "projected_rows": 88,
+      "second_replay_new_rows": 0,
+      "status": "PARTIAL"
+    },
+    {
+      "source": "uba_226_1",
+      "local_capture_raw_ref": 11,
+      "sha256": "e813e8565b0a8220d75864a374127606f159c8b9a4140fb75154613655430aa2",
+      "canonical_rows": 24,
+      "projected_rows": 24,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "uba_226_3",
+      "local_capture_raw_ref": 12,
+      "sha256": "d41b060724dd1697668d6fab058d853de9cfd6fed211728ead77738684e20f0d",
+      "canonical_rows": 24,
+      "projected_rows": 24,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "uba_226_5",
+      "local_capture_raw_ref": 13,
+      "sha256": "c0fdb350cb92f79b0d0c81e96d6d4f86c679751f0b8c2fa702ce195b4c195039",
+      "canonical_rows": 24,
+      "projected_rows": 24,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "uba_226_9",
+      "local_capture_raw_ref": 14,
+      "sha256": "a944455f001c574a38b8a036c9df8c0ec6bc0f416750bb1d415e5bd51651383b",
+      "canonical_rows": 24,
+      "projected_rows": 24,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    },
+    {
+      "source": "uba_353_5",
+      "local_capture_raw_ref": 15,
+      "sha256": "48f902519482ba2328009994a866020890d1586cfb737e183b8037e311fac4d1",
+      "canonical_rows": 24,
+      "projected_rows": 24,
+      "second_replay_new_rows": 0,
+      "status": "SUCCESS"
+    }
+  ]
+}
