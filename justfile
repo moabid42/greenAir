@@ -87,3 +87,11 @@ check-admin:
     npm run lint --prefix apps/admin
     npm test --prefix apps/admin
     npm run build --prefix apps/admin
+
+# Apply ingestion migrations to an explicitly selected PostgreSQL database.
+migrate:
+    uv run --locked --directory services/backend alembic upgrade head
+
+# Test storage against an isolated disposable PostgreSQL/PostGIS/TimescaleDB.
+test-storage:
+    python3 scripts/test-storage.py

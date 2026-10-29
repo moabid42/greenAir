@@ -17,11 +17,11 @@ box in the diagram. Keep polling and heavy jobs outside API startup/reload.
 | REST API, future SSE | `services/backend/app/api/` | Health, mock serving APIs, dynamic OpenAPI/Swagger; SSE deferred |
 | Application configuration | `services/backend/app/core/` | Environment-backed settings |
 | Canonical observation/event contracts | `services/backend/app/schemas/` | Raw/normalized observations, processing results, serving responses |
-| Scheduler, adapters, raw landing | `services/backend/app/ingestion/` | Optional live openSenseMap station adapter; scheduler/raw landing deferred |
+| Scheduler, adapters, raw landing | `services/backend/app/ingestion/` | Optional live openSenseMap station adapter; station status adapter plus raw-storage contracts; source polling deferred |
 | Normalizer/QC, spatial and temporal builders | `services/backend/app/processing/` | Implemented; input supplied by caller |
 | Forecaster | `services/backend/app/processing/forecaster.py` | Bias correction and climatology fallback; provider fetching deferred |
 | Sport/segment/hour scoring | `services/backend/app/scoring/` | Formulas, engine, best-time queries; API runs on dummy inputs |
-| PostgreSQL + PostGIS + TimescaleDB | `services/backend/app/storage/`, `services/backend/migrations/` | Planned; no driver, schema, extensions, or server provisioned |
+| PostgreSQL + PostGIS + TimescaleDB | `services/backend/app/storage/`, `services/backend/migrations/` | Explicit migrations and raw-first repository; isolated extension tests; API remains independent |
 | Event bus and cache | `services/backend/app/messaging/`, `infrastructure/` | Transport/cache choice deferred; no broker provisioned |
 | Vector tiles | `infrastructure/` | Martin/pg_tileserv choice deferred |
 | MapLibre web client | `apps/web/` | Next.js mobile app integrated with mock backend core routes |
