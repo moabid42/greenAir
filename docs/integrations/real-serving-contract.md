@@ -71,3 +71,21 @@ PostgreSQL service uses host.docker.internal in its URL; use an explicitly selec
 migrated database and keep credentials in environment variables. The public API is
 read-only; refresh remains an independent command. Offline SQLite capture replay
 is also supported for local tests; it does not emulate PostGIS/TimescaleDB.
+
+## Frontend layer labels
+
+A persistent expandable source notice identifies modelled city conditions, partial
+coverage and stale stored results with separate retrieval/build times in Berlin.
+It names Open-Meteo/CAMS attribution and states when street grids/rankings are
+unavailable. Station sheets label measured versus synthetic data, indoor/outdoor
+exposure, stale channels, units and per-channel observation times. Modelled NO2 is
+never labelled as an official station observation. City-wide recommendations cannot
+open a fabricated street/place. Coach declines park/street ranking without spatial
+coverage, and its facts retain source/coverage metadata.
+
+Direct cycling overlays and statistics are disabled in stored mode until verified
+spatial integration. Mock mode remains clearly separate. Berlin calendar/hour
+selection is explicit even when the browser timezone is UTC. Reminder conversion
+rejects nonexistent spring hours and selects the earliest repeated autumn instant.
+Missing/out-of-horizon days display the typed no-coverage error and offer a date
+picker instead of retaining old map data or spinning indefinitely.

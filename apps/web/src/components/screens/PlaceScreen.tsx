@@ -1,5 +1,6 @@
 "use client";
 
+import { berlinInstant } from "@/lib/time";
 import { displayNumber } from "@/lib/format";
 
 import { useMemo } from "react";
@@ -49,8 +50,8 @@ export default function PlaceScreen() {
   const remind = () => {
     if (!best) return showToast("Nothing good is left today. Try tomorrow.");
     if (nowHour != null && best.start <= nowHour) return showToast("Your window is open right now. Go and enjoy it!");
-    const [y, m, d] = date.split("-").map(Number);
-    const when = new Date(y, m - 1, d, best.start, 0);
+    const when = berlinInstant(date, best.start);
+    if (!when) return showToast("This hour does not exist in Berlin on the selected date.");
     when.setMinutes(when.getMinutes() - 15);
     void addReminder(when, `Your window opens in 15 min`, `${p.place} · ${range(best.start, best.end)} · score ${best.score}`);
   };

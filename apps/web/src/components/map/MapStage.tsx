@@ -81,7 +81,7 @@ export default function MapStage() {
         mode={mode}
         grid={grid}
         values={values}
-        bikeLayers={bikeLayers}
+        bikeLayers={day?.source === "mock" ? bikeLayers : []}
         sensors={onMapTab && showSensors ? sensors : []}
         onSensorTap={inspectSensor}
         segments={onMapTab ? segments : null}

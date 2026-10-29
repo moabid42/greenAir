@@ -8,6 +8,7 @@ import { clearHistory, HISTORY_CLEARED_EVENT, loadHistory, saveHistory, type Sto
 import { useAI } from "@/lib/ai/useAI";
 import { buildFacts, answer, intentOf, type CoachAction, type CoachCard, type CoachCtx, type CoachReply } from "@/lib/coach/engine";
 import { cn } from "@/lib/cn";
+import SourceNotice from "./SourceNotice";
 import { useApp } from "@/state/app";
 
 interface Message extends StoredMessage {
@@ -222,7 +223,7 @@ export default function CoachScreen({ active }: { active: boolean }) {
         </span>
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <h1 className="font-display text-xl font-extrabold">Coach</h1>
-          <span className="truncate text-xs font-bold text-mute">{day?.source === "mock" ? (aiOn ? "Private AI · simulated data" : "Answers from simulated data") : (aiOn ? "Private AI · on your phone" : "Answers from available data")}</span>
+          <span className="truncate text-xs font-bold text-mute">{day?.source === "mock" ? (aiOn ? "Private AI · simulated data" : "Answers from simulated data") : (aiOn ? "Private AI · on your phone" : "Answers from modelled city data")}</span>
         </div>
         <button
           type="button"
@@ -245,6 +246,7 @@ export default function CoachScreen({ active }: { active: boolean }) {
           <SquarePen className="size-5" aria-hidden />
         </button>
       </header>
+      {active && <div className="relative px-3 pb-2"><SourceNotice /></div>}
 
       <div className="relative mx-4 mb-2 flex items-center gap-1.5 rounded-[14px] bg-white px-3 py-2 text-xs font-bold text-mute shadow-sm">
         <span aria-hidden className="size-[7px] rounded-full bg-great" />

@@ -1,5 +1,7 @@
 "use client";
 
+import SourceNotice from "./SourceNotice";
+
 import { displayNumber } from "@/lib/format";
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
@@ -33,7 +35,7 @@ function Card({ title, children, className }: { title: string; children: ReactNo
 
 /** Analytics: your environment, your wearable sessions, and what the weather and air were while you moved. */
 export default function AnalyticsScreen() {
-  const { day, hour, activity, tune, today, focusScores, setTab, prefs } = useApp();
+  const { day, hour, activity, tune, today, focusScores, setTab } = useApp();
   const w = useWearables();
   const [range, setRange] = useState<Range>("today");
   const [session, setSession] = useState("");
@@ -90,6 +92,7 @@ export default function AnalyticsScreen() {
       </header>
 
       <div className="mx-3 flex flex-col gap-2">
+        <SourceNotice />
         <div role="radiogroup" aria-label="Time range" className="flex gap-2">
           {(["today", "7", "30"] as Range[]).map((r) => (
             <button key={r} type="button" role="radio" aria-checked={range === r} onClick={() => setRange(r)} className={cn("min-h-11 flex-1 rounded-xl text-[13px]", range === r ? "bg-ink font-extrabold text-white" : "bg-white font-bold shadow-sm")}>
@@ -113,7 +116,7 @@ export default function AnalyticsScreen() {
               <div className="mt-1 flex justify-between text-[10px] font-semibold text-mute">
                 <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
               </div>
-              <p className="mt-2 text-[11px] font-semibold text-mute">{prefs.home?.label ?? "Heilbronn"} · hourly values from Open-Meteo and the city’s own sensors · Europe/Berlin.</p>
+              <p className="mt-2 text-[11px] font-semibold text-mute">{day?.source === "mock" ? "Synthetic city conditions" : "City-wide model weather and air; station measurements are separate"} · Europe/Berlin.</p>
             </>
           ) : range === "7" ? (
             week ? (
@@ -127,7 +130,7 @@ export default function AnalyticsScreen() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-2 text-[11px] font-semibold text-mute">Best window score for each of the next 7 days.</p>
+                <p className="mt-2 text-[11px] font-semibold text-mute">Best available window scores · {week.length} of 7 dates have coverage.</p>
               </>
             ) : (
               <p className="mt-1 text-sm text-mute">Loading the week…</p>

@@ -1,3 +1,4 @@
+import { berlinInstant } from "@/lib/time";
 import { getDay, getGrid } from "@/lib/api/client";
 import type { Activity, DayForecast, Factor, GridFeature, GridResponse, Hour, TimeWindow } from "@/lib/api/types";
 import { finiteValues, rangeText, dayWord, shortDate, tempWord } from "@/lib/format";
@@ -122,8 +123,8 @@ function spotsAt(i: DayInfo, h: Hour, ctx: CoachCtx, n = 3): Spot[] {
 }
 
 function remind(i: DayInfo, w: TimeWindow, place: string): CoachAction | null {
-  const [y, m, d] = i.date.split("-").map(Number);
-  const at = new Date(y, m - 1, d, w.start, 0);
+  const at = berlinInstant(i.date, w.start);
+  if (!at) return null;
   at.setMinutes(at.getMinutes() - 15);
   if (at.getTime() <= Date.now()) return null;
   return {
@@ -139,6 +140,12 @@ const compact = <T,>(xs: (T | null | undefined)[]): T[] => xs.filter((x): x is T
 
 /** Answers a question from the live data. Always works, with or without a language model. */
 export async function answer(question: string, ctx: CoachCtx): Promise<CoachReply> {
+  const reply = await answerFromInputs(question, ctx);
+  if (ctx.day.status === "stale") reply.note = `${reply.note ? reply.note + " " : ""}Based on stale stored model data; source retrieval times are shown in the data notice.`;
+  return reply;
+}
+
+async function answerFromInputs(question: string, ctx: CoachCtx): Promise<CoachReply> {
   const q = question.toLowerCase();
   const has = (...w: string[]) => w.some((x) => q.includes(x));
   const date = parseDate(q, ctx);
@@ -148,7 +155,7 @@ export async function answer(question: string, ctx: CoachCtx): Promise<CoachRepl
 
   const i = await dayInfo(ctx, date);
   const when = dayWord(date, ctx.today);
-  const place = ctx.homeLabel ?? "Heilbronn";
+  const place = i.grid.status === "unavailable" ? "City-wide Heilbronn" : ctx.homeLabel ?? "Heilbronn";
   const best = i.windows[0];
   const bestSpot = best ? spotsAt(i, best.start, ctx, 1)[0] : undefined;
   const verb = VERB[ctx.activity];
@@ -253,7 +260,7 @@ export async function answer(question: string, ctx: CoachCtx): Promise<CoachRepl
   if (has("where", "which park", "which place", "best place", "best spot", "spot", "park", "coolest", "cleanest", "quietest", "area", "neighbourhood")) {
     const h = hour ?? best?.start ?? ctx.hourNow;
     const spots = spotsAt(i, h, ctx, 3);
-    if (spots.length === 0) return { text: "Nothing within your reach yet. Try a bigger distance in your location settings." };
+    if (spots.length === 0) return { text: i.grid.status === "unavailable" ? "Verified street layers are not connected. I can compare available city-wide hours, but cannot rank parks or streets." : "Nothing within your reach yet. Try a bigger distance in your location settings." };
     return {
       text: `For ${pad(h)}:00 ${when}, ${spots[0].place} is your best bet (score ${spots[0].score})${spots[0].distanceKm != null ? `, ${fmtKm(spots[0].distanceKm)} away` : ""}.`,
       cards: spots.map((s) => ({ score: s.score, title: s.place, sub: s.distanceKm != null ? `${fmtKm(s.distanceKm)} away` : "In Heilbronn" })),
@@ -334,12 +341,12 @@ export function buildFacts(ctx: CoachCtx, reply: CoachReply) {
   return {
     date: ctx.date,
     sport: ctx.activity,
-    area: ctx.homeLabel ?? "Heilbronn (whole city)",
+    area: ctx.grid.status === "unavailable" ? "Heilbronn city model (no street coverage)" : ctx.homeLabel ?? "Heilbronn (whole city)",
     reachKm: ctx.radiusKm,
     sensitiveToAir: ctx.airSensitive,
     tempRangeC: finiteValues(waking.map((h) => h.tempC)).length ? [Math.round(Math.min(...finiteValues(waking.map((h) => h.tempC)))), Math.round(Math.max(...finiteValues(waking.map((h) => h.tempC))))] : [],
     rushHours: waking.filter((h) => h.rush != null && h.rush > 0.45).map((h) => fmtHour(h.hour)),
-    analysis: reply.text,
+    analysis: `Source: ${ctx.day.source}; coverage: ${ctx.day.status ?? "unknown"}. ${reply.text}`,
     options: (reply.cards ?? []).map((c) => `${c.title}: score ${c.score} (${c.sub})`),
   };
 }

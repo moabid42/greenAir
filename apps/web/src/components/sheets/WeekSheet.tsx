@@ -1,5 +1,6 @@
 "use client";
 
+import { berlinHour } from "@/lib/time";
 import { displayNumber, finiteValues } from "@/lib/format";
 
 import { useEffect, useMemo, useState } from "react";
@@ -37,7 +38,7 @@ export default function WeekSheet() {
     () =>
       (days ?? []).map((d) => {
         const scores = d.hours.map((h) => hourScore(h, activity, tune));
-        const upcoming = bestWindows(maskPast(scores, d.date === today ? new Date().getHours() : null))[0];
+        const upcoming = bestWindows(maskPast(scores, d.date === today ? berlinHour() : null))[0];
         const best = upcoming ?? bestWindows(scores)[0];
         const temps = finiteValues(d.hours.map((h) => h.tempC));
         return { date: d.date, scores, best, max: temps.length ? displayNumber(Math.max(...temps)) : "—", min: temps.length ? displayNumber(Math.min(...temps)) : "—" };
@@ -81,6 +82,7 @@ export default function WeekSheet() {
 
         <div>
           <p className="mb-2 text-[11px] font-extrabold tracking-[0.12em] text-mute">THE NEXT 7 DAYS · BEST WINDOW FOR YOUR SPORT</p>
+          {days && <p className="mb-2 text-xs text-mute">{rows.length} of 7 dates have available data. Missing dates are not estimated.</p>}
           {!days ? (
             <p className="flex items-center gap-2 py-6 text-sm text-mute">
               <Loader2 className="size-4 animate-spin" aria-hidden /> Reading the forecast…

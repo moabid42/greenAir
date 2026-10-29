@@ -1,5 +1,6 @@
 "use client";
 
+import { berlinInstant } from "@/lib/time";
 import { displayNumber } from "@/lib/format";
 
 import { useState, type ReactNode } from "react";
@@ -59,8 +60,8 @@ export default function WatchAlerts() {
   const toggleNudge = async (on: boolean) => {
     update({ watchNudge: on });
     if (!on || !best || date !== today) return;
-    const at = new Date();
-    at.setHours(best.start, 0, 0, 0);
+    const at = berlinInstant(date, best.start);
+    if (!at) return showToast("This hour does not exist in Berlin on the selected date.");
     at.setMinutes(at.getMinutes() - 15);
     if (at.getTime() > Date.now()) await addReminder(at, "Your window opens in 15 min", `${place} · ${range(best.start, best.end)} · score ${best.score}`);
   };

@@ -46,3 +46,16 @@ test('real zero remains a numeric value and partial windows exclude missing hour
   assert.equal(format.rangeText([null, 0, 10]), '0° to 10°');
   assert.equal(format.rangeText([null]), 'No temperature data');
 });
+
+const time = load('time');
+test('Berlin dates and hours handle UTC midnight boundaries and DST explicitly', () => {
+  assert.equal(time.berlinDate(new Date('2026-10-28T23:30:00Z')), '2026-10-29');
+  assert.equal(time.berlinHour(new Date('2026-10-28T23:30:00Z')), 0);
+  assert.equal(time.berlinHour(new Date('2026-10-25T00:30:00Z')), 2);
+  assert.equal(time.berlinHour(new Date('2026-10-25T01:30:00Z')), 2);
+});
+
+test('reminders reject nonexistent Berlin hours and choose first repeated instant', () => {
+  assert.equal(time.berlinInstant('2026-03-29',2), null);
+  assert.equal(time.berlinInstant('2026-10-25',2).toISOString(), '2026-10-25T00:00:00.000Z');
+});

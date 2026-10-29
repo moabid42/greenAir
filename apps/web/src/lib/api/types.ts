@@ -35,8 +35,8 @@ export interface HourConditions {
   hour: Hour;
   tempC: number | null;
   humidity: number | null; // %
-  pm25: number | null; // µg/m³ (senseBox:home)
-  no2: number | null; // µg/m³ (LUBW Weinsberger Straße)
+  pm25: number | null; // µg/m³; source kind is explicit in provenance
+  no2: number | null; // µg/m³; model output is distinct from station measurements
   windKmh: number | null;
   /** 0–1, how strongly this hour is a commuter peak (bike counts + NO2 fingerprint). */
   rush: number | null;
