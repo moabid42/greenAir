@@ -70,3 +70,13 @@ the web client; if the identity changes, update both.
 - The date range controls the simulated figures; real check history only goes back to the first check in this browser.
 - Browser consoles log a "Failed to load resource" line when a checked endpoint answers with an error. That is the check working.
 - Not yet verified: a real greenAir backend (only `/health` exists there today), and Safari/Firefox.
+
+
+## Docker
+
+From the repository root, `just up` builds and starts the API, web and admin;
+`just down` removes the application containers/network without deleting volumes.
+Web is at http://localhost:3000, admin at http://localhost:3200 and API docs at
+http://localhost:8000/docs. See [stack configuration](../../README.md#run-everything-with-docker)
+for custom ports and the browser API URL, which is embedded during image builds.
+The existing npm development and validation commands remain available.

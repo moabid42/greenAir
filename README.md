@@ -37,31 +37,65 @@ data/               Source endpoint catalog
 See [the architecture mapping](docs/architecture.md) for implemented versus
 reserved components, based on [the research](docs/research.md).
 
-## Run the integrated demo
+## Run everything with Docker
+
+With Docker running, build and start the API, mobile web client and admin together:
 
 ```sh
-just backend-up
-just setup-web
-NEXT_PUBLIC_API_URL=http://localhost:8000 just dev-web
+just up
 ```
 
-Open the mobile client at <http://localhost:3000> and Swagger at
-<http://localhost:8000/docs>. Keep `NEXT_PUBLIC_ECOMAB_API_BASE_URL` empty while
-vector tiles are deferred. Day/grid scores, street geometry and sensor readings
-are synthetic and labelled as such. See [the API contract](docs/backend-api.md).
+- Web: <http://localhost:3000>
+- Admin: <http://localhost:3200>
+- API / Swagger: <http://localhost:8000/docs>
 
-The optional admin app runs separately:
+The command builds production images, starts them in the background and waits for
+all three health checks. Node/npm/Python do not need to be installed on the host
+for this path; Docker and `just` are enough. The first build downloads dependencies
+and Google Fonts. The API defaults to mock data with synthetic labels. No database
+or broker is required in that mode. Existing stored-data configuration still works
+with an explicitly selected, migrated database and snapshots; `just up` does not
+start ingestion, migrate databases or replace existing data.
+
+Stop and remove this application's containers and Compose network:
 
 ```sh
-just setup-admin
-NEXT_PUBLIC_API_URL=http://localhost:8000 just dev-admin
+just down
 ```
 
-Open <http://localhost:3200>. Admin endpoint probes are real HTTP checks; its
-traffic/client-data charts are simulated and its settings are local to the browser.
-Use `just check-web` and `just check-admin` for frontend lint/build checks and admin
-tests. CI runs these alongside the backend and container checks. Node.js 24 is pinned
-in `.nvmrc`. `just backend-down` stops the demo backend.
+This does not delete volumes, images or containers from other Compose projects,
+including the existing ingestion PostgreSQL/Redis services. The Compose project
+remains `greenair-demo`. Use `docker compose logs --follow` for all application logs.
+`just backend-up` / `backend-down` start/stop only the API; `just down` tears down
+the full application stack.
+
+Ports can be changed with `GREENAIR_PORT`, `GREENAIR_WEB_PORT` and
+`GREENAIR_ADMIN_PORT`. If the API address changes, set `GREENAIR_PUBLIC_API_URL`
+to its **browser-accessible** URL before rebuilding. For example:
+
+```sh
+GREENAIR_PORT=8010 GREENAIR_WEB_PORT=3010 GREENAIR_ADMIN_PORT=3210 \
+  GREENAIR_PUBLIC_API_URL=http://localhost:8010 just up
+just down
+```
+
+The frontends embed that address during their builds. A browser cannot resolve
+Compose's internal `backend` hostname. CORS defaults follow the frontend port
+variables; set `GREENAIR_CORS_ORIGINS` for other browser origins. Containers bind
+to loopback by default (`GREENAIR_BIND_HOST`). Keep
+`NEXT_PUBLIC_ECOMAB_API_BASE_URL` empty while vector tiles remain deferred.
+
+Both Next.js images use [standalone output](https://nextjs.org/docs/15/app/api-reference/config/next-config-js/output),
+locked npm installs, Node 24, nonroot runtime users and read-only filesystems with
+temporary caches. [Docker's Next.js guide](https://docs.docker.com/guides/nextjs)
+describes this deployment pattern. Secrets and host build artifacts are excluded
+from their Docker contexts.
+
+For source editing with hot reload, the existing host recipes remain available:
+`just setup-web` / `setup-admin`, then run `just dev-web` or `just dev-admin`
+with `NEXT_PUBLIC_API_URL=http://localhost:8000`. Run `just check-web` and `just check-admin` for checks.
+Admin probes are real HTTP requests; traffic/client-data charts stay explicitly
+simulated and configuration stays in the browser.
 
 ## Research and agent workflow
 

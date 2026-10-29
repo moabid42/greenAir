@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: __dirname,
   devIndicators: false,
   // The admin must never be indexed or framed by another site.
   async headers() {

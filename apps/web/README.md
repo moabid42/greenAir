@@ -951,3 +951,13 @@ behind an authenticating proxy. For the admin API (A4) we expect:
 - **What counts as a request** for "Total requests": public API calls only, per endpoint, per client?
 - **Who signs in to the admin** and with which identity provider?
 - **Where is the admin hosted,** and is it reachable from the public internet?
+
+
+## Docker
+
+From the repository root, `just up` builds and starts the API, web and admin;
+`just down` removes the application containers/network without deleting volumes.
+Web is at http://localhost:3000, admin at http://localhost:3200 and API docs at
+http://localhost:8000/docs. See [stack configuration](../../README.md#run-everything-with-docker)
+for custom ports and the browser API URL, which is embedded during image builds.
+The existing npm development and validation commands remain available.

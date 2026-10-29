@@ -225,3 +225,277 @@ offline. Record a later successful check alongside the earlier failure.
 - User chose local checks only because GitHub CLI is not authenticated for private
   Actions logs. Remote CI success has not been asserted. No ingestion branches or
   personal playground content are included. Optional tiles/SSE remain deferred.
+
+### Real-data integration gap audit — 2026-10-28
+
+- Dev has processing and serving contracts but still constructs DemoRepository.
+  Mock-only response literals and mandatory numeric day fields need real provenance
+  and explicit missing/stale handling before switching serving to real inputs.
+- Unmerged local ingestion foundation/ATRAI commits exist. Weather/UBA, openSenseMap
+  and scheduler/worker/Redis drafts also remain uncommitted in their existing
+  `/private/tmp/greenair-*` worktrees; preserve them before cleanup. Their historical
+  contract notes describe bounded probes/replays, not continuous current coverage.
+- Contracts differ: ingestion `observation.py` uses pm25/temp/ts_utc, forecast kind
+  and km/h; processing `observations.py` uses pm2_5/temperature/observed_at, model kind
+  and canonical m/s. Reconcile explicitly, preserving provenance and raw values.
+- Next slice: preserve/review drafts, adapt contracts, register bounded source jobs,
+  persist real inputs and results, and implement a real ServingRepository projection
+  into day/grid/sensor contracts. Source-specific validation and real forecast issue
+  policy remain required. SSE/tiles are not prerequisites. No services were started
+  and no live source recheck was performed for this audit.
+
+### Session handoff — 2026-10-28
+
+- [NEXT.md](../NEXT.md) records the merged demo, branch/PR history, protected local
+  ingestion drafts, contract conflicts and the ordered atomic commit plan for real
+  data. Read it before updating stale local dev or touching temporary worktrees.
+- Latest verified remote dev is `056a0c7`; the user merged the frontend integration.
+  Previous entries describing it as awaiting merge are historical. The user now
+  wants tested feature branches and merge instructions, rather than automatic merges.
+- Preview/API processes were stopped. Existing DB/Redis were left intact. No new
+  runtime was started to write this handoff; remote CI remains unverified by choice.
+
+### Real-data foundation prepared — 2026-10-28
+
+- Current feature branch: `feat/real-data-foundation`, based on fetched origin/dev
+  `056a0c7`. Reviewed/ported explicit files; no old ingestion ancestry merged.
+  [Recovery inventory](../docs/integrations/recovered-drafts.md) records all draft
+  locations and dependencies. All originals remain unchanged; 21 modified/untracked
+  files also have local hash-inventoried recovery archives under ignored
+  `data/runtime/recovery-20261028/`. Never stage those archives.
+- [Storage](../docs/integrations/raw-storage.md), [contract boundary](../docs/integrations/ingestion-processing-boundary.md)
+  and [HTTP landing](../docs/integrations/raw-http.md) now exist. Recovered migrations
+  plus revision 0003 retain per-value originals, explicit nulls, sensor/sample IDs,
+  raw linkage and separate model issue/retrieval times. Unknown issuance stays null;
+  captured builds use raw refs for identity. Wind conversion occurs once.
+- Local evidence: root lint and tests passed (192 backend passed, one PostgreSQL
+  test skipped offline; 12 research tests; 45 commit tests) on Node 24/Python 3.12.
+  `just test-storage` passed all 25 current storage tests twice across an isolated
+  PostgreSQL 17/PostGIS/TimescaleDB downgrade/upgrade cycle. Container build/health
+  and all 20 HTTP routes/Swagger/OpenAPI smoke passed. No remote CI claim.
+- All containers started for this work were removed. Original DB and Redis remain
+  untouched/running. No providers contacted yet. Frontend/API still use mock data.
+- Next: create `feat/real-data-sources` from this branch; recover weather/air,
+  stationary openSenseMap and UBA adapters with fresh docs/probes and ProviderValue
+  metadata. Old source job IDs differ from canonical namespaces: reconcile with
+  repository source guard explicitly. Then implement registry/refresh/snapshots,
+  real repository/API/frontend and verified spatial stages from NEXT.md.
+- User merge order starts `feat/real-data-foundation` → `dev`, then dependent source,
+  refresh, serving and spatial branches in order once prepared/tested. No branches
+  pushed or merged by this work. NEXT.md and earlier handoff edits stay local.
+
+### Real source adapters prepared — 2026-10-28 UTC / 2026-10-29 Berlin
+
+- Branch `feat/real-data-sources` at the source validation checkpoint depends on
+  `feat/real-data-foundation`. Three atomic source commits recover weather/air,
+  stationary openSenseMap and official UBA adapters with ProviderValue originals.
+  [Validation and next steps](../docs/integrations/real-source-validation.md).
+- Fresh bounded GET checks at 22:56–22:58 UTC returned weather/air 48-slot grids,
+  openSenseMap 81 boxes (30 checked stationary) and five 24-hour UBA station/channel
+  samples. Exact URLs/parameters, hashes, schemas/units and UTCs are in linked notes.
+  Do not reuse historical draft counts as fresh observations.
+- Isolated production PostgreSQL/PostGIS/TimescaleDB replay persisted 1,125 actual
+  captured values and projected 689 supported channels. Second replay added zero
+  for every source. All temporary verification containers/volumes removed; original
+  evidence DB/Redis untouched. Captures live only under ignored
+  `data/runtime/source-check-20261028/`; never stage that directory.
+- Root lint/test passed: 232 backend tests, one offline PostgreSQL skip, 12 research
+  and 45 commit tests. Source sample replay is separate from offline tests/remote CI.
+- Source job IDs also identify canonical rows (e.g. uba_226_1). Raw source guard,
+  receipts and watermarks thus share a namespace. Provider sensor/station IDs are
+  preserved independently. Model issue time stays null when unknown; decoded nulls
+  remain gaps. Community indoor/outdoor exposure and sensor IDs are retained.
+- Next: `feat/real-data-refresh` from sources; recover scheduler/worker, implement
+  actual registry, bounded once pass, restart/locks/partial handling and persistent
+  processed snapshots. Serving/frontend and all spatial work remain pending.
+- User merge order: foundation → dev, sources → dev, then later refresh/serving/
+  spatial branches once tested. No pushes or merges. Original handoff notes remain
+  uncommitted; no original draft worktree files were changed.
+
+### Registered refresh and persisted snapshots — 2026-10-29 Berlin
+
+- Branch `feat/real-data-refresh` depends on sources. Registry/worker recovered in
+  `29a367f`; versioned processing snapshots follow in the next commit. See
+  [worker](../docs/integrations/refresh-worker.md) and
+  [snapshots](../docs/integrations/processed-snapshots.md) for commands and contracts.
+- `just ingest-once`, `process-results` and `refresh-once` require an explicit
+  database URL. Default refresh uses recent bounded windows, PostgreSQL locks and
+  durable checkpoints/outbox; no Redis or API startup polling. Partial upstreams
+  still permit stored-input processing. Retry-After survives process restart.
+- Canonical QC is source-specific; indoor/future measurements are excluded from
+  outdoor levels. Latest model builds stay distinct from measurements and provider
+  issuance remains separate from retrieval/build times. UTC day axes have 23/25
+  actual DST hours; public 24-slot projection remains pending.
+- Live isolated worker ran all nine jobs; second worker returned all NOT_DUE.
+  Three result snapshots persisted (today complete required model coverage,
+  tomorrow partial, sensors partial); second processing CLI retained identical
+  IDs/build times. Portable export/reprocess matched the day build ID.
+- Root checks: 252 backend passed/3 PostgreSQL skips offline; 12 research and 45
+  commit tests passed. Disposable production migration cycle ran 47 tests twice,
+  including real worker kill/restart and snapshot geometry/JSONB persistence.
+  Container smoke passed all 20 routes. All started containers removed.
+- Verification data only under ignored `data/runtime/refresh-check-20261029/`:
+  14 raw captures, 1,115 canonical values and 3 snapshots in captures.sqlite, plus
+  run manifests and optional Timescale dump. Never stage these files. Existing
+  evidence DB/Redis remain untouched/running; original draft worktrees unchanged.
+- Next branch: `feat/real-data-serving` from refresh. Generalize API/frontend
+  missing/provenance contracts, implement real repository/provider selection,
+  verify actual browser with captured inputs/stale/unavailable/restart. Then do
+  NEXT.md spatial stages 13–15. Demo mode still serves synthetic data.
+- User merge order: foundation → dev, sources → dev, refresh → dev; serving and
+  spatial later when prepared. No pushes or merges. Handoff/state edits stay local.
+
+### Stored serving and first real-data slice — 2026-10-29
+
+- Branch `feat/real-data-serving` depends on refresh. Contract commit `29c0460`,
+  provider `558a454`, UI provenance `4047ee7`; captured replay/browser verification
+  follows. [Evidence and reproduction](../docs/integrations/real-serving-validation.md).
+- Explicit GREENAIR_SERVING_DATA_MODE=stored plus DATABASE_URL serves immutable
+  model day/sensor snapshots. Startup does not connect/poll; missing dates are 404,
+  storage outages typed 503, old results retain source/retrieval/build times/stale
+  labels. Default mock mode remains runnable with no infrastructure.
+- Day fields/factors accept null, client sport weights remain client-side, and
+  missing core channels cannot produce recommendations. Modelled air, measured
+  stations and derived daylight stay separate. DST folds average only actual
+  instants; spring gaps stay null. Traffic/safety stay missing. Stored grids/street
+  scores are explicitly unavailable until verified spatial integration.
+- UI shows per-layer source/freshness, attribution, sensor exposure/unit/channel
+  times and gaps. It disables direct unverified cycling overlays in stored mode.
+  Berlin dates/reminders work even in a UTC browser. Partial/no-coverage dates
+  recover via date selection; stale scores are labelled stored, not Go now.
+- Root lint/tests passed: 259 backend +4 PostgreSQL skips offline, 12 research,
+  45 commit-tool tests. Disposable production migration cycle passed 49 tests twice,
+  including captured inputs through PostgreSQL/processing/HTTP and restart/failure.
+  Web lint/four unit checks/type-check/build passed on Node 24. Mock container smoke
+  passed all 20 routes. Stored container preserved identical day JSON after restart.
+- Production Chrome smoke passed Today/markers/all sports/Explore/Analytics/Coach,
+  partial date and no-data recovery, no JS exceptions/direct source API requests.
+  Replay fixtures/captures are explicitly historical (2026-10-28), visibly stale by
+  actual server time; they are not current observations. Small source fixtures have
+  original/selected hashes; full runtime captures remain ignored/outside Git.
+- Verification artifacts: data/runtime/serving-check-20261029/final-production/;
+  isolated fixture.sqlite is reproducible via just replay-real-slice. All preview/API
+  containers/processes started here were stopped. Original DB/Redis remain running,
+  original drafts unchanged. Handoff/state edits remain uncommitted.
+- Next: feat/real-spatial-data from serving, NEXT.md steps 13–15. Recover ATRAI
+  segment adapter, recheck bounded local geometry/IDs/joins/units/completeness;
+  connect verified observations to grids/street scores with explicit gaps and
+  confidence. Do not turn the disabled grid into city-model pollution variations.
+- User merge order: foundation → dev, sources → dev, refresh → dev, serving → dev;
+  spatial later once verified. Nothing pushed or merged; full goal remains active.
+
+### Verified spatial captures — 2026-10-29
+
+- Active branch feat/real-spatial-data from serving. Stage 13 ports the reviewed
+  ATRAI adapter with bounded manual city jobs and full-capture accounting.
+  [Contract/evidence](../docs/integrations/atrai-spatial.md). Live capture 07:56 UTC:
+  34,241 local roads, 9,600 roughness, 1,389 overtaking, 7,154 flow; all local
+  layer geometries uniquely join exact directed road coordinates plus osmid.
+  Three outside-bbox records excluded. Raw bodies remain ignored.
+- Primary provider code resolves roughness scale to percentage0–100 (divide100),
+  contradicting guide0–1; research snapshot preserved. Histogram sums match all
+  1,389 point counts. Build/observation time and cadence unknown. Offset captures
+  are count-consistent, never claimed atomic provider snapshots.
+- Root lint and tests: 265 backend passed/4 PostgreSQL skipped, research12,
+  commit45. Processing/projection stages14–15 still pending. No API/frontend
+  spatial product is enabled by merely importing these inputs.
+
+### Spatial delivery complete — 2026-10-29
+
+- feat/real-spatial-data: import3b6f12d, processinga7c229c, coordinated API/grid/UI
+  projection and final validation complete. [Scope audit and exact merge order](../docs/integrations/real-data-delivery.md),
+  [spatial contract](../docs/integrations/atrai-spatial.md), [validation evidence](../docs/integrations/atrai-spatial-validation-20261029.json).
+- Full live-captured static set produces34,241 real roads and1,562 grid cells;
+  roughness9,600, overtaking1,389, flow7,154. Exact directed joins only; missing
+  fields remain null. Provider roughness0–100 divides100 based on checked source
+  code. Unknown survey/build age and offset-snapshot limitation remain explicit.
+- Stored mode reads spatial-v1 immutable results; no upstream/startup work. Capture
+  reads respect processing cutoff; incomplete/future captures cannot publish.
+  Segment cursors bind build/bbox. Grid polygons remain inside ingestion bounds,
+  each road belongs to one cell by center, counts/IDs/methods retain aggregation.
+- No qualified real spatial PM calibration in this run. Canonical mobile matching
+  is tested using synthetic observations; real mobile-derived static data and
+  stationary temporal-level processing are connected. City air remains a model,
+  confidence0/PM-source-none are explicit, best-time/place rankings stay withheld.
+  Area-level confidence is not validated. No guessed global bike timestamps/filter.
+- Frontend stored surface/close-pass/flow layers use backend captures, unknown-age
+  labels and blank missing values; no direct ATRAI stats/overlays. Cell inspection
+  exposes missing greenery and zero confidence. Home/Coach hour recommendations
+  fall back to city conditions when a cell is not recommendable. Without a spatial
+  artifact, original unavailable-grid behavior still passes browser regression.
+- Final checks: root lint,277 backend passed/5 PG skips offline, research12 and
+  commit45; isolated production DB migrations/66 tests/downgrade/upgrade/66 tests;
+  web lint/5 unit tests/type-check/build. Mock image20 GET routes passed; stored
+  full-set HTTP validated all three sports, real IDs, model-air consistency and
+  zero confidence.16 response fingerprints identical after restart. Production
+  Chrome passed both with/without spatial inputs, no JS errors/provider requests.
+- Live static capture + historical selected weather/station replay is explicitly
+  labelled in evidence; old fixture values do not become current observations.
+  Raw/large captures remain ignored in data/runtime/spatial-check-20261029/.
+- All verification servers/containers stopped. Original DB/Redis remain untouched;
+  all21 original draft hashes rechecked unchanged. No branches deleted/pushed/merged.
+  STATE/NEXT handoff edits stay local. Merge into dev in order: foundation, sources,
+  refresh, serving, spatial (full branch names in linked delivery note).
+- NEXT.md scoped stages0–15 fulfilled with explicit data gaps, not a validated
+  street-pollution product. Deferred: raw global mobile ingestion with verified
+  time/city joins, survey age/cadence/license resolution, calibrated confidence,
+  vector tiles/SSE/large backfills and real admin telemetry.
+- Final spatial branch tip: e44ce57. Only inherited STATE.md/NEXT.md handoff edits
+  remain outside commits. Ports3017/8017/8018 are closed; only original containers
+  remain running. Ready for the user's ordered local merges into dev.
+
+### Full-system e2e and local integration — 2026-10-29
+
+- User explicitly authorized adding end-to-end coverage then merging prepared work
+  locally into dev, with no push. New branch test/full-system-e2e from e44ce57.
+- `just test-e2e` owns a disposable PostgreSQL17/PostGIS/Timescale database,
+  private Docker network/API image, free loopback ports and production web/admin
+  previews. It never reads inherited DB URLs or touches original DB/Redis.
+- Dated source captures are replayed over loopback HTTP through real registry
+  adapters/worker CLI, PostgreSQL, processing CLI and HTTP serving. Bright Sky is
+  explicitly synthetic; selected ATRAI envelope totals model a tiny capture.
+  Page-budget resume runs in a new process; upstream503/API restart/DB503/recovery
+  retain committed snapshots. Browser map background is an empty test style;
+  terrain requests are blocked, environmental APIs are never called.
+- Production browsers cover all6 web screens, both spatial modes, device sample
+  playback, saved places/preferences/reload, all4 admin screens, real CORS probes,
+  endpoint add/edit/search/error recovery, configuration import/export, labelled
+  CSV and mobile layout. See docs/testing.md for exact coverage and limitations.
+- Original draft hashes (21 files) remain unchanged. No Git fetch/push/remote
+  operation is needed for this task; remote-tracking fingerprints saved locally.
+  STATE/NEXT handoff notes remain deliberately uncommitted.
+- Final full `just test-e2e` passed: data/runtime/e2e-8ac1c9fd06e4/results.json.
+  277 backend passed/5 offline PG skips, research12, commit45, migration66 twice,
+  web5/admin11 unit checks and both builds, all system/browser/recovery checks.
+  Docker Hub DNS timeout on a prior run was transient; retry passed unchanged.
+- Test commit9ea8e9d merged with the five prepared branches into LOCAL dev.
+  Final dev06c358f, tracked tree identical to tested test/full-system-e2e.
+  Merge commits: foundation91fdd70, sourcesf78b00b, refreshbcc9783,
+  serving6357d57, spatial0be74bf, tests06c358f. Main/remote refs unchanged;
+  no fetch/push. Post-merge lint and all24 new commit messages passed.
+- Only STATE.md/NEXT.md remain uncommitted; stash was restored and removed.
+  All test-owned containers/network/image/frontend processes cleaned up.
+  Existing greenair-demo-backend-1, greenair-db-1 and greenair-redis-1 left running
+  untouched; no branches/worktrees deleted. User's local merge request complete.
+
+### Frontend containers and application lifecycle — 2026-10-29
+
+- Added apps/web and apps/admin multistage Node24 Dockerfiles, allowlisted build
+  contexts, Next standalone output and app-local tracing roots. Runtime uses
+  nonroot node, read-only filesystem and temporary cache for image optimization.
+- Root Compose now includes backend/web/admin; frontend startup waits for API
+  health. `just up` builds and waits for all3 services; `just down` tears down the
+  application project without volumes. `backend-down` now stops only backend.
+- Default URLs: localhost3000 web,3200 admin,8000 API. Public API URL is embedded
+  at build via GREENAIR_PUBLIC_API_URL (default http://localhost:8000); custom
+  frontend ports update default CORS. Default mock mode needs no DB/Redis; stored
+  mode still requires explicit migrated DB/snapshots. No worker/migration startup.
+- Verified final images via isolated Compose project greenair-frontend-check on
+  ports3027/3227/8027: all health checks,12 HTTP/static/image checks, nonroot UID,
+  CORS and real Chrome API calls across web/admin navigation, no JS errors.
+  Frontend lint/unit/build passed (web5/admin11), root lint/config validation passed.
+  Evidence stays ignored at data/runtime/frontend-docker-check/.
+- Ran just down on the isolated project; all test containers/network removed.
+  Original demo backend/PostgreSQL/Redis IDs unchanged. PostgreSQL/Redis remain
+  running; original demo backend is currently stopped (not stopped by these test commands).
+  No pushes or commits for this change; inherited STATE/NEXT notes preserved.

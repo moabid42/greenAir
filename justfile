@@ -45,13 +45,21 @@ format:
 openapi:
     uv run --locked --directory services/backend python -c 'import json; from app.main import app; print(json.dumps(app.openapi(), indent=2))'
 
+# Build and start backend, mobile web and admin; wait until all are healthy.
+up:
+    docker compose up --build --detach --wait --wait-timeout 180
+
+# Tear down this application project, preserving database volumes and other projects.
+down:
+    docker compose down
+
 # Build and start the standalone demo backend; wait for its health check.
 backend-up:
     docker compose up --build --detach --wait backend
 
 # Stop only this demo backend (does not remove unrelated ingestion infrastructure).
 backend-down:
-    docker compose down
+    docker compose stop backend
 
 # Follow API container logs.
 backend-logs:
