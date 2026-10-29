@@ -1,7 +1,7 @@
 /**
  * The ONLY place the UI gets data from.
  * - NEXT_PUBLIC_API_URL set   → calls the team backend (see the README (Expected API endpoints))
- * - NEXT_PUBLIC_API_URL unset → demo data (Open-Meteo + local model)
+ * - NEXT_PUBLIC_API_URL unset → explicitly synthetic offline demo data
  */
 import type { DayForecast, GridResponse, Sensor } from "./types";
 import { demoDay, demoGrid, demoSensors } from "./demo";
@@ -12,7 +12,10 @@ export const usingBackend = Boolean(BASE);
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} — ${path}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error?.message ?? `Data unavailable (${res.status})`);
+  }
   return res.json() as Promise<T>;
 }
 

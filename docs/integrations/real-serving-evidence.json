@@ -1,0 +1,108 @@
+{
+  "checked_at_utc": "2026-10-29T05:01:47.436708+00:00",
+  "scope": "dated captured replay; not current observations",
+  "selected_date": "2026-10-29",
+  "checks": [
+    "UTC browser chooses Berlin date; partial model provenance, traffic gap and disabled spatial grid are visible",
+    "Real station marker opens per-channel sensor details",
+    "All sports work; unconnected cycling overlays remain disabled",
+    "Explore plays available city conditions without place rankings",
+    "Analytics handles available dates and missing forecast dates",
+    "Coach declines street/park ranking without spatial coverage",
+    "Partial day and out-of-horizon date show explicit gaps/errors with date recovery, without dummy fallback"
+  ],
+  "page_errors": [],
+  "api_responses": [
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-29",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/grid?date=2026-10-29",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/sensors",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-29",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-02",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-01",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-31",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-03",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-04",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-01",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-31",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-02",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-03",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-29",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-11-04",
+      "status": 404
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/grid?date=2026-10-30",
+      "status": 200
+    },
+    {
+      "url": "http://localhost:8010/api/v1/day?date=2026-10-31",
+      "status": 404
+    }
+  ],
+  "direct_provider_requests": [],
+  "container_restart": {
+    "scope": "dated captured replay, not current observations",
+    "build_id": "1aa9f16ab64d02a2ee439cf50ec419ddbce0519831db978e3a270ee76af7479e",
+    "generated_at": "2026-10-28T23:01:00Z",
+    "status": "stale",
+    "source": "forecast",
+    "identical_day_after_container_restart": true,
+    "sensor_count": 2,
+    "grid_source": "unavailable"
+  }
+}

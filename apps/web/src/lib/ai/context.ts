@@ -36,7 +36,7 @@ export function extractFreshFacts(question: string, f: Facts, mode: "data" | "ch
   } else {
     // Chat gets no data on purpose: a small model repeats whatever numbers it sees instead of answering.
   }
-  if (mode === "data" && wants("hot", "heat", "warm", "cool", "temperature", "sun", "when", "best")) lines.push(`Temperature today: ${f.tempRangeC[0]} to ${f.tempRangeC[1]} °C`);
+  if (mode === "data" && f.tempRangeC.length === 2 && wants("hot", "heat", "warm", "cool", "temperature", "sun", "when", "best")) lines.push(`Temperature today: ${f.tempRangeC[0]} to ${f.tempRangeC[1]} °C`);
   if (wants("air", "asthma", "pollut", "breath", "traffic", "rush", "busy", "road") && f.rushHours.length) lines.push(`Rush hours: ${f.rushHours[0]} to ${f.rushHours[f.rushHours.length - 1]}`);
   if (f.sensitiveToAir) lines.push("The user is sensitive to air quality.");
   return lines.join("\n");

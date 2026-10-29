@@ -1,4 +1,5 @@
 import type { Activity, Factor, HourConditions } from "./api/types";
+import { displayNumber } from "./format";
 import { DEALBREAKER, WEIGHTS } from "./score";
 
 export type Tone = "good" | "warn" | "bad";
@@ -13,15 +14,16 @@ const tone = (v: number): Tone => (v >= 75 ? "good" : v >= DEALBREAKER ? "warn" 
 
 /** One short, plain-language sentence per factor — no units jargon unless it helps. */
 function reasonFor(f: Factor, v: number, h: HourConditions, activity: Activity): string {
-  const t = Math.round(h.tempC);
+  const t = displayNumber(h.tempC);
   switch (f) {
     case "heat":
+      if (h.tempC == null) return "Temperature unavailable";
       if (h.tempC < 5) return v >= 75 ? `Fresh, ${t} °C` : `Cold, ${t} °C — dress warm`;
       return v >= 75 ? `Pleasant, ${t} °C` : v >= DEALBREAKER ? `Warm, ${t} °C — bring water` : `Too hot, ${t} °C`;
     case "air":
-      return v >= 75 ? "Clean air" : v >= DEALBREAKER ? "Air is okay" : "Polluted air — traffic fumes & dust";
+      return v >= 75 ? "Clean air" : v >= DEALBREAKER ? "Air is okay" : "Higher modelled pollution";
     case "wind":
-      return v >= 75 ? "Calm wind" : `Windy, ${Math.round(h.windKmh)} km/h`;
+      return v >= 75 ? "Calm wind" : `Windy, ${displayNumber(h.windKmh)} km/h`;
     case "traffic":
       return v >= 75 ? "Quiet roads" : v >= DEALBREAKER ? "Some traffic" : "Rush-hour traffic";
     case "light":

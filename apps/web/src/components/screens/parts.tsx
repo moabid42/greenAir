@@ -67,7 +67,7 @@ export function Stat({ icon, value, label, className }: { icon: React.ReactNode;
 
 /** The measured cycling layers you can switch on. */
 export function BikeChips() {
-  const { bikeLayers, toggleBike } = useApp();
+  const { bikeLayers, toggleBike, grid } = useApp();
   const items = [
     { id: "surface", label: "Road surface" },
     { id: "danger", label: "Close passes" },
@@ -82,7 +82,7 @@ export function BikeChips() {
             key={i.id}
             type="button"
             aria-pressed={on}
-            onClick={() => toggleBike(i.id)}
+            disabled={grid?.status === "unavailable"} onClick={() => toggleBike(i.id)}
             className={cn("h-[34px] shrink-0 rounded-full px-3.5 text-xs", on ? "bg-ink font-extrabold text-white" : "bg-white/96 font-bold shadow-[0_2px_8px_rgb(22_44_41/0.12)]")}
           >
             {i.label}

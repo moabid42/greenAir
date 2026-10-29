@@ -17,25 +17,46 @@ class ClientModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
+DataSource = Literal["mock", "forecast", "measured", "mixed", "unavailable"]
+
+
+class ChannelProvenance(ClientModel):
+    source_id: str
+    kind: Literal["model", "observation", "derived", "mock"]
+    observed_at: list[AwareDatetime] = Field(default_factory=list)
+    retrieved_at: AwareDatetime | None = None
+    issued_at: AwareDatetime | None = None
+    raw_refs: list[int] = Field(default_factory=list)
+    unit: str
+    method: str | None = None
+    qc_flags: list[str] = Field(default_factory=list)
+
+
 class Factors(BaseModel):
-    heat: Score
-    air: Score
-    wind: Score
-    traffic: Score
-    light: Score
-    safety: Score
+    heat: Score | None
+    air: Score | None
+    wind: Score | None
+    traffic: Score | None
+    light: Score | None
+    safety: Score | None
 
 
 class HourConditions(ClientModel):
     hour: int = Field(ge=0, le=23, description="Europe/Berlin wall-clock hour.")
-    temp_c: float = Field(description="Synthetic air temperature in degrees Celsius.")
-    humidity: float = Field(ge=0, le=100, description="Relative humidity, percent.")
-    pm25: float = Field(ge=0, description="Synthetic PM2.5, µg/m³.")
-    no2: float = Field(ge=0, description="Synthetic NO₂, µg/m³.")
-    wind_kmh: float = Field(ge=0, description="Wind speed, km/h.")
-    rush: Fraction
-    daylight: Fraction
+    temp_c: float | None = Field(description="Air temperature in degrees Celsius.")
+    humidity: float | None = Field(ge=0, le=100, description="Relative humidity, percent.")
+    pm25: float | None = Field(ge=0, description="PM2.5, µg/m³.")
+    no2: float | None = Field(ge=0, description="NO₂, µg/m³.")
+    wind_kmh: float | None = Field(ge=0, description="Wind speed, km/h.")
+    rush: Fraction | None
+    daylight: Fraction | None
     factors: Factors
+    instants: list[AwareDatetime] = Field(
+        default_factory=list,
+        description="Actual UTC instants: none for a spring gap, two for a repeated hour.",
+    )
+    provenance: dict[str, ChannelProvenance] = Field(default_factory=dict)
+    missing: list[str] = Field(default_factory=list)
 
 
 class DayForecast(ClientModel):
@@ -43,8 +64,12 @@ class DayForecast(ClientModel):
     date: date
     timezone: Literal["Europe/Berlin"] = "Europe/Berlin"
     generated_at: AwareDatetime
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     hours: list[HourConditions] = Field(min_length=24, max_length=24)
+    build_id: str | None = None
+    status: Literal["available", "partial", "stale"] = "available"
+    retrieved_at: AwareDatetime | None = None
+    attribution: list[str] = Field(default_factory=list)
 
 
 class CellProperties(BaseModel):
@@ -79,9 +104,11 @@ class GridResponse(ClientModel):
     name: str
     date: date
     cell_size_m: float = Field(gt=0)
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     generated_at: AwareDatetime
     cells: GridCells
+    status: Literal["available", "partial", "unavailable"] = "available"
+    message: str | None = None
 
 
 class Sensor(ClientModel):
@@ -93,7 +120,10 @@ class Sensor(ClientModel):
     lng: float = Field(ge=-180, le=180)
     latest: dict[str, float | None]
     updated_at: AwareDatetime | None
-    source: Literal["mock"] = "mock"
+    exposure: Literal["indoor", "outdoor"] | None = None
+    stale: bool = False
+    channel_provenance: dict[str, ChannelProvenance] = Field(default_factory=dict)
+    source: DataSource = "mock"
 
 
 class ListSensorsResponse(BaseModel):
@@ -123,7 +153,7 @@ class ListSegmentsResponse(BaseModel):
     type: Literal["FeatureCollection"] = "FeatureCollection"
     features: list[SegmentFeature]
     next_page_token: str = ""
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     build_id: str
 
 
@@ -138,7 +168,7 @@ class ScoreSnapshot(BaseModel):
     t: str = Field(description="Requested UTC hour, echoed unchanged.")
     # Forecast describes the temporal category; source always identifies synthetic provenance.
     kind: Literal["forecast"] = "forecast"
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     version: str
     build_id: str
     scores: dict[str, tuple[Annotated[int, Field(ge=0, le=100)], Fraction, int]]
@@ -150,7 +180,7 @@ class ScoreComponent(BaseModel):
     value: float | None
     unit: str
     weight: float
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
 
 
 class SegmentDetail(BaseModel):
@@ -159,7 +189,7 @@ class SegmentDetail(BaseModel):
     profile: SportProfile
     t: str
     kind: Literal["forecast"] = "forecast"
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     score: Score
     confidence: Fraction
     components: list[ScoreComponent]
@@ -178,14 +208,16 @@ class BestTimesResponse(BaseModel):
     profile: SportProfile
     date: date
     timezone: Literal["Europe/Berlin"] = "Europe/Berlin"
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     windows: list[TimeWindow]
 
 
 class ServiceStatus(BaseModel):
     name: Literal["status"] = "status"
     build_id: str
-    source: Literal["mock"] = "mock"
+    source: DataSource = "mock"
     generated_at: datetime
-    pipeline_connected: Literal[False] = False
+    pipeline_connected: bool = False
     sources: list[dict[str, str]]
+    available_dates: list[date] = Field(default_factory=list)
+    spatial_source: DataSource = "mock"

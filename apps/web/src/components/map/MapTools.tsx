@@ -9,7 +9,7 @@ export default function MapTools() {
   const { day, error, focusMap, openSheet, showToast, segments } = useApp();
   const [locating, setLocating] = useState(false);
 
-  const status = segments?.source === "mock" ? { text: "Street scores · simulated", dot: "bg-ok" } : segments ? { text: segments.kind === "forecast" ? "Street scores · forecast" : "Street scores · observed", dot: "bg-great" } : error ? { text: "Data unavailable · map only", dot: "bg-bad" } : !day ? { text: "Loading data", dot: "bg-ok" } : day.source === "mock" ? { text: "Simulated day", dot: "bg-ok" } : day.source === "forecast" ? { text: "Live forecast", dot: "bg-great" } : { text: "Live data", dot: "bg-great" };
+  const status = segments?.source === "mock" ? { text: "Street scores · simulated", dot: "bg-ok" } : segments ? { text: segments.kind === "forecast" ? "Street scores · forecast" : "Street scores · observed", dot: "bg-great" } : error ? { text: "Data unavailable · map only", dot: "bg-bad" } : !day ? { text: "Loading data", dot: "bg-ok" } : day.source === "mock" ? { text: "Simulated day", dot: "bg-ok" } : day.status === "stale" ? { text: "Stored conditions · stale", dot: "bg-ok" } : day.source === "forecast" ? { text: "Modelled city conditions", dot: "bg-ok" } : { text: "Source data", dot: "bg-ok" };
 
   const locate = () => {
     if (!navigator.geolocation) return showToast("Your browser can't find your location. You can still explore Heilbronn.");

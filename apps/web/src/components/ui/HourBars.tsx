@@ -1,13 +1,14 @@
 "use client";
 
 import type { KeyboardEvent, PointerEvent } from "react";
+import { displayNumber } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { fmtHour, scoreColor } from "@/lib/score";
 
 interface HourBarsProps {
-  values: number[];
+  values: (number | null)[];
   /** Hours with a commuter peak get a striped background. */
-  rush?: number[];
+  rush?: (number | null)[];
   hour: number;
   nowHour: number | null;
   onPick: (h: number) => void;
@@ -33,7 +34,7 @@ export default function HourBars({ values, rush, hour, nowHour, onPick, height =
         aria-valuemin={0}
         aria-valuemax={23}
         aria-valuenow={hour}
-        aria-valuetext={`${fmtHour(hour)}, ${values[hour]}`}
+        aria-valuetext={`${fmtHour(hour)}, ${displayNumber(values[hour])}`}
         onKeyDown={onKey}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
@@ -45,10 +46,10 @@ export default function HourBars({ values, rush, hour, nowHour, onPick, height =
       >
         {values.map((v, h) => (
           <div key={h} className="relative flex h-full flex-1 flex-col justify-end rounded-[3px]">
-            {rush && rush[h] > 0.45 && <div aria-hidden className="absolute inset-0 rounded-[3px] bg-[repeating-linear-gradient(135deg,#e6e9e2_0_3px,transparent_3px_6px)]" />}
+            {rush && (rush[h] ?? -1) > 0.45 && <div aria-hidden className="absolute inset-0 rounded-[3px] bg-[repeating-linear-gradient(135deg,#e6e9e2_0_3px,transparent_3px_6px)]" />}
             <div
               className={cn("relative rounded-[3px] transition-[height] duration-300", h === hour && "outline-2 outline-offset-1 outline-ink")}
-              style={{ height: `${Math.max(12, v * 0.95)}%`, backgroundColor: scoreColor(v) }}
+              style={{ height: `${v != null && Number.isFinite(v) ? Math.max(12, v * 0.95) : 6}%`, backgroundColor: scoreColor(v ?? Number.NaN) }}
             />
           </div>
         ))}

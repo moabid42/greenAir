@@ -81,7 +81,7 @@ export default function MapStage() {
         mode={mode}
         grid={grid}
         values={values}
-        bikeLayers={bikeLayers}
+        bikeLayers={day?.source === "mock" ? bikeLayers : []}
         sensors={onMapTab && showSensors ? sensors : []}
         onSensorTap={inspectSensor}
         segments={onMapTab ? segments : null}
@@ -107,7 +107,7 @@ export default function MapStage() {
       {error && (
         <div role="alert" className="absolute inset-x-6 top-[38%] rounded-3xl bg-white p-5 text-center shadow-xl">
           <p className="text-sm font-bold">We couldn&apos;t load the data.</p>
-          <p className="mt-1 text-xs text-mute">Check your connection and try again.</p>
+          <p className="mt-1 text-xs text-mute">{error}</p>
           <button type="button" onClick={retry} className="mt-3 h-11 rounded-2xl bg-ink px-6 text-sm font-extrabold text-lime">
             Try again
           </button>

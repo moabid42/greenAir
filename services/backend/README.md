@@ -115,3 +115,13 @@ in [worker behavior](../../docs/integrations/refresh-worker.md) and
 [snapshot semantics](../../docs/integrations/processed-snapshots.md).
 No Redis service is required. The API still defaults to its demo provider until
 the real serving integration is explicitly selected in a later change.
+
+## Serving stored results
+
+Set `GREENAIR_SERVING_DATA_MODE=stored` and `GREENAIR_DATABASE_URL` to the explicitly
+selected, migrated results database. `just dev` or `just backend-up` then reads day
+and sensor snapshots; no fetch or worker starts with the API. Default mode stays
+`mock`. Run the separate refresh command to obtain inputs/results first. Missing
+coverage is 404, storage outages are 503, and stale last-success results keep their
+original dates and labels. Real grid/street layers are disabled until connected.
+See [the real serving contract](../../docs/integrations/real-serving-contract.md).

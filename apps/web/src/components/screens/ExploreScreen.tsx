@@ -1,5 +1,7 @@
 "use client";
 
+import { displayNumber, finiteValues } from "@/lib/format";
+
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Pause, Play, TriangleAlert } from "lucide-react";
 import HourBars from "@/components/ui/HourBars";
@@ -8,11 +10,12 @@ import { shortDate, tempWord } from "@/lib/format";
 import { fmtKm } from "@/lib/rank";
 import { fmtHour, hourScore, scoreColor, VERDICT_TEXT, verdict } from "@/lib/score";
 import { useApp } from "@/state/app";
+import SourceNotice from "./SourceNotice";
 import { LensChips } from "./parts";
 
 /** Explore the city on a flat map. Scrub or play through the day and see the best places for the chosen layer. */
 export default function ExploreScreen() {
-  const { day, hour, setHour, nowHour, lens, activity, tune, openSheet, openPlace, spots, date } = useApp();
+  const { grid, day, hour, setHour, nowHour, lens, activity, tune, openSheet, openPlace, spots, date } = useApp();
   const [playing, setPlaying] = useState(false);
 
   // Play steps through the day, one hour every 0.7 s.
@@ -24,17 +27,17 @@ export default function ExploreScreen() {
 
   // The city-wide value of the active layer for every hour.
   const series = useMemo(() => {
-    if (!day) return Array<number>(24).fill(0);
+    if (!day) return Array<number>(24).fill(Number.NaN);
     return day.hours.map((h) => {
       if (lens === "index") return hourScore(h, activity, tune);
-      if (lens === "safety") return h.factors.safety;
-      return h.factors[lens];
+      if (lens === "safety") return h.factors.safety ?? Number.NaN;
+      return h.factors[lens] ?? Number.NaN;
     });
   }, [day, lens, activity, tune]);
 
   const hot = useMemo(() => {
     if (!day) return null;
-    const max = Math.max(...day.hours.map((h) => h.tempC));
+    const max = Math.max(...finiteValues(day.hours.map((h) => h.tempC)));
     return max >= 28 ? { max: Math.round(max), at: day.hours.findIndex((h) => h.tempC === max) } : null;
   }, [day]);
 
@@ -42,15 +45,15 @@ export default function ExploreScreen() {
   const subtitle = !cond
     ? ""
     : lens === "heat"
-      ? `${Math.round(cond.tempC)} °C · ${tempWord(cond.tempC)}`
+      ? `${displayNumber(cond.tempC)} °C · ${tempWord(cond.tempC)}`
       : lens === "air"
-        ? `PM2.5 ${Math.round(cond.pm25)} · NO₂ ${Math.round(cond.no2)} µg/m³`
+        ? `PM2.5 ${displayNumber(cond.pm25)} · NO₂ ${displayNumber(cond.no2)} µg/m³`
         : lens === "traffic"
-          ? cond.rush > 0.45
+          ? cond.rush == null ? "No traffic data" : cond.rush > 0.45
             ? "Commuter peak"
             : "Quiet roads"
           : lens === "wind"
-            ? `${Math.round(cond.windKmh)} km/h wind`
+            ? `${displayNumber(cond.windKmh)} km/h wind`
             : lens === "safety"
               ? "Surface & overtaking safety"
               : VERDICT_TEXT[verdict(series[hour])];
@@ -81,6 +84,7 @@ export default function ExploreScreen() {
         )}
       </header>
 
+      <div className="pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+6.5rem)]"><SourceNotice /></div>
       <section aria-label={`${lensInfo?.label ?? "Layer"} through the day`} className="above-nav pointer-events-auto absolute inset-x-3 flex flex-col gap-2.5 rounded-[28px] bg-white/97 p-3.5 shadow-[0_10px_40px_rgb(22_44_41/0.22)]">
         <div className="flex items-center gap-3">
           <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause" : "Play through the day"} className="grid size-11 shrink-0 place-items-center rounded-full bg-ink text-lime">
@@ -91,7 +95,7 @@ export default function ExploreScreen() {
             <span className="truncate text-xs font-bold text-mute">{subtitle}</span>
           </span>
           <span className="rounded-xl px-2.5 py-1.5 font-display text-sm font-extrabold" style={{ backgroundColor: scoreColor(series[hour]), color: series[hour] >= 60 ? "#162c29" : "#fff" }}>
-            {series[hour]}
+            {displayNumber(series[hour])}
           </span>
         </div>
 
@@ -100,7 +104,7 @@ export default function ExploreScreen() {
         <div>
           <p className="mb-1.5 text-[10px] font-extrabold tracking-[0.12em] text-mute">BEST FOR {lensInfo?.label.toUpperCase()} AT {fmtHour(hour)}</p>
           <div className="grid grid-cols-3 gap-1.5">
-            {top.length === 0 && <p className="col-span-3 py-2 text-xs text-mute">No places within reach. Try a bigger distance.</p>}
+            {top.length === 0 && <p className="col-span-3 py-2 text-xs text-mute">{grid?.status === "unavailable" ? "Verified street rankings are unavailable. The chart shows city-wide conditions." : "No places within reach. Try a bigger distance."}</p>}
             {top.map((s) => (
               <button key={s.cellId} type="button" onClick={() => openPlace(s.cellId)} className="flex min-w-0 flex-col rounded-[14px] bg-wash px-2.5 py-2 text-left leading-tight">
                 <span className="font-display text-sm font-extrabold" style={{ color: s.score >= 60 ? "#14653e" : "#9a3a12" }}>

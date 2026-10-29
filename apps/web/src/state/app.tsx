@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Activity, DayForecast, GridFeature, GridResponse, Hour, Sensor, TimeWindow } from "@/lib/api/types";
 import { getDay, getGrid, getSensors } from "@/lib/api/client";
+import { berlinDate, berlinHour } from "@/lib/time";
 import type { BikeLayer } from "@/lib/api/atrai";
 import { type Lens, lensValue } from "@/lib/lens";
 import { clearPrefs, DEFAULT_PREFS, loadPrefs, type Prefs, type Reminder, type SavedPlace, savePrefs } from "@/lib/prefs";
@@ -115,7 +116,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [ready, setReady] = useState(false);
 
-  const today = useMemo(() => isoDate(new Date()), []);
+  const today = useMemo(() => berlinDate(), []);
   const [tab, setTab] = useState<Tab>("today");
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<SheetName>(null);
@@ -124,7 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [segments, setSegments] = useState<SegmentSnapshot | null>(null);
   const [segmentView, setSegmentView] = useState<SegmentView | null>(null);
   const [date, setDate] = useState(today);
-  const [hour, setHour] = useState<Hour>(() => new Date().getHours());
+  const [hour, setHour] = useState<Hour>(() => berlinHour());
   const [lens, setLensState] = useState<Lens>("index");
   const [bikeLayers, setBikeLayers] = useState<BikeLayer[]>([]);
 
@@ -181,6 +182,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     setDay(null);
+    setGrid(null);
+    setSensors([]);
     setError(null);
     (async () => {
       try {
@@ -200,7 +203,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!day) return;
-    getSensors(day, hour).then(setSensors).catch(() => setSensors([]));
+    let cancelled = false;
+    getSensors(day, hour).then((rows) => !cancelled && setSensors(rows)).catch(() => !cancelled && setSensors([]));
+    return () => { cancelled = true; };
   }, [day, hour]);
 
   const retry = useCallback(() => setAttempt((a) => a + 1), []);
@@ -226,7 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Cycling stats come from the real senseBox:bike data inside the user's reach.
   useEffect(() => {
-    if (!ready || activity !== "ride") return;
+    if (!ready || activity !== "ride" || !day || grid?.status === "unavailable") return;
     let cancelled = false;
     computeRideStats(home, prefs.radiusKm)
       .then((s) => !cancelled && setRide(s))
@@ -236,7 +241,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     // `home` is rebuilt as a new array on every render; its text form is the stable key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, activity, home?.join(), prefs.radiusKm]);
+  }, [ready, activity, home?.join(), prefs.radiusKm, day?.source, grid?.status]);
 
   const effectiveLens: Lens = lens === "safety" && activity !== "ride" ? "index" : lens;
 
@@ -249,13 +254,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [grid, hour, effectiveLens, activity, tune]);
 
   const focusScores = useMemo(() => {
-    if (!day) return Array<number>(24).fill(0);
+    if (!day) return Array<number>(24).fill(Number.NaN);
     if (homeCell) return Array.from({ length: 24 }, (_, h) => cellScore(homeCell.properties, h, activity, tune));
     return day.hours.map((h) => hourScore(h, activity, tune));
   }, [day, homeCell, activity, tune]);
 
   // Today only looks forward: a window that is already over is not a recommendation.
-  const nowH = new Date().getHours();
+  const nowH = berlinHour();
   const windows = useMemo(() => bestWindows(maskPast(focusScores, date === today ? nowH : null)), [focusScores, date, today, nowH]);
 
   const spots = useCallback(
@@ -359,7 +364,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrefs((cur) => ({ ...cur, reminders: cur.reminders.filter((r) => r.id !== id) }));
   }, []);
 
-  const nowHour = date === today ? new Date().getHours() : null;
+  const nowHour = date === today ? berlinHour() : null;
 
   const value: AppValue = {
     ready,

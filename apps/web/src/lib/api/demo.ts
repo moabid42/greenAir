@@ -1,9 +1,4 @@
-/**
- * Demo data source used when NEXT_PUBLIC_API_URL is not set.
- * City-wide hours come from Open-Meteo (real weather + CAMS air quality) when
- * reachable, otherwise from a synthetic seasonal model. The grid then spreads
- * those city values over Heilbronn using simple local features.
- */
+/** Offline synthetic demo; real inputs are fetched/persisted by the backend. */
 import type { CellProperties, DayForecast, GridResponse, HourConditions, Sensor } from "./types";
 import { GREEN, MAIN_ROADS, NECKAR, HEILBRONN_CENTER, distKm, distToLineKm, squareGrid, nearestPlace } from "../geo";
 import { airScore, daylightCurve, heatScore, lightScore, rushCurve, trafficScore, windScore } from "../model";
@@ -16,44 +11,9 @@ interface RawHour {
   no2: number;
 }
 
-const LAT = 49.1427;
-const LNG = 9.2185;
-
 function parseDate(date: string): Date {
-  const [y, m, d] = date.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-/** Days between `date` and today (negative = in the past). */
-function daysFromToday(date: string): number {
-  const now = new Date();
-  return Math.round((parseDate(date).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000);
-}
-
-async function fetchOpenMeteo(date: string): Promise<RawHour[] | null> {
-  const q = `latitude=${LAT}&longitude=${LNG}&timezone=Europe%2FBerlin&start_date=${date}&end_date=${date}`;
-  const weatherVars = "hourly=temperature_2m,relative_humidity_2m,wind_speed_10m";
-  const ago = daysFromToday(date);
-  // Open-Meteo's forecast service covers about the last 3 months; older days live in the archive.
-  // The air-quality service covers a similar window, so older days use typical values instead.
-  const weatherUrl = ago < -85 ? `https://archive-api.open-meteo.com/v1/archive?${q}&${weatherVars}` : `https://api.open-meteo.com/v1/forecast?${q}&${weatherVars}`;
-  try {
-    const [w, a] = await Promise.all([
-      fetch(weatherUrl).then((r) => (r.ok ? r.json() : fetch(`https://archive-api.open-meteo.com/v1/archive?${q}&${weatherVars}`).then((x) => x.json()))),
-      ago < -85 ? Promise.resolve(null) : fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${q}&hourly=pm2_5,nitrogen_dioxide`).then((r) => (r.ok ? r.json() : null)),
-    ]);
-    const t: (number | null)[] = w?.hourly?.temperature_2m ?? [];
-    if (t.length < 24 || t.some((v) => v == null)) return null;
-    return t.slice(0, 24).map((tempC, h) => ({
-      tempC: tempC as number,
-      humidity: w.hourly.relative_humidity_2m[h] ?? 60,
-      windKmh: w.hourly.wind_speed_10m[h] ?? 8,
-      pm25: a?.hourly?.pm2_5?.[h] ?? 10,
-      no2: a?.hourly?.nitrogen_dioxide?.[h] ?? 20,
-    }));
-  } catch {
-    return null;
-  }
+  const [y,m,d] = date.split("-").map(Number);
+  return new Date(y,m-1,d);
 }
 
 // Monthly mean min / max for Heilbronn (approx.)
@@ -107,14 +67,13 @@ function toHour(raw: RawHour, h: number, date: Date): HourConditions {
 }
 
 export async function demoDay(date: string): Promise<DayForecast> {
-  const real = await fetchOpenMeteo(date);
   const d = parseDate(date);
-  const raw = real ?? synthetic(date);
+  const raw = synthetic(date);
   return {
     date,
     timezone: "Europe/Berlin",
     generatedAt: new Date().toISOString(),
-    source: real ? "forecast" : "mock",
+    source: "mock",
     hours: raw.map((r, h) => toHour(r, h, d)),
   };
 }
@@ -144,6 +103,9 @@ export function demoGrid(day: DayForecast): GridResponse {
     };
 
     day.hours.forEach((hr) => {
+      if (day.source !== "mock" || hr.tempC == null || hr.pm25 == null || hr.no2 == null ||
+          hr.windKmh == null || hr.humidity == null || hr.rush == null || hr.daylight == null)
+        throw new Error("Synthetic grids require complete demo inputs");
       const night = 1 - hr.daylight;
       // Urban heat island: strongest in the evening/night, greenery and the Neckar cool.
       const t = hr.tempC + urban * (1.2 + 1.6 * night) - cool * 2.2 + jitter * 0.8;
@@ -159,7 +121,7 @@ export function demoGrid(day: DayForecast): GridResponse {
 
     return { type: "Feature" as const, geometry: { type: "Polygon" as const, coordinates: [ring] }, properties: props };
   });
-  return { date: day.date, cellSizeM: 250, cells: { type: "FeatureCollection", features: cells } };
+  return { date: day.date, source: "mock", cellSizeM: 250, cells: { type: "FeatureCollection", features: cells } };
 }
 
 /** Demo readings placed at fixed sensor locations; these are never station observations. */

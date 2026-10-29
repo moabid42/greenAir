@@ -1,5 +1,8 @@
 "use client";
 
+import { berlinHour } from "@/lib/time";
+import { displayNumber, finiteValues } from "@/lib/format";
+
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import Sheet from "@/components/ui/Sheet";
@@ -35,14 +38,14 @@ export default function WeekSheet() {
     () =>
       (days ?? []).map((d) => {
         const scores = d.hours.map((h) => hourScore(h, activity, tune));
-        const upcoming = bestWindows(maskPast(scores, d.date === today ? new Date().getHours() : null))[0];
+        const upcoming = bestWindows(maskPast(scores, d.date === today ? berlinHour() : null))[0];
         const best = upcoming ?? bestWindows(scores)[0];
-        const temps = d.hours.map((h) => h.tempC);
-        return { date: d.date, scores, best, max: Math.round(Math.max(...temps)), min: Math.round(Math.min(...temps)) };
+        const temps = finiteValues(d.hours.map((h) => h.tempC));
+        return { date: d.date, scores, best, max: temps.length ? displayNumber(Math.max(...temps)) : "—", min: temps.length ? displayNumber(Math.min(...temps)) : "—" };
       }),
     [days, activity, tune, today],
   );
-  const topScore = rows.length ? Math.max(...rows.map((r) => r.best.score)) : 0;
+  const topScore = rows.length ? Math.max(...rows.map((r) => (r.best?.score ?? Number.NaN))) : 0;
 
   const pick = (d: string) => {
     setDate(d);
@@ -79,6 +82,7 @@ export default function WeekSheet() {
 
         <div>
           <p className="mb-2 text-[11px] font-extrabold tracking-[0.12em] text-mute">THE NEXT 7 DAYS · BEST WINDOW FOR YOUR SPORT</p>
+          {days && <p className="mb-2 text-xs text-mute">{rows.length} of 7 dates have available data. Missing dates are not estimated.</p>}
           {!days ? (
             <p className="flex items-center gap-2 py-6 text-sm text-mute">
               <Loader2 className="size-4 animate-spin" aria-hidden /> Reading the forecast…
@@ -87,7 +91,7 @@ export default function WeekSheet() {
             <ul className="flex flex-col gap-1.5">
               {rows.map((r) => {
                 const on = r.date === date;
-                const star = r.best.score === topScore && rows.length > 1;
+                const star = (r.best?.score ?? Number.NaN) === topScore && rows.length > 1;
                 return (
                   <li key={r.date}>
                     <button
@@ -96,18 +100,18 @@ export default function WeekSheet() {
                       aria-current={on ? "date" : undefined}
                       className={cn("flex w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left", on ? "border-ink bg-wash" : "border-line")}
                     >
-                      <DayDial scores={r.scores} size={46} hour={r.best.start} window={r.best} label={`${shortDate(r.date)} overview`} />
+                      <DayDial scores={r.scores} size={46} hour={r.best?.start ?? 0} window={r.best} label={`${shortDate(r.date)} overview`} />
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-extrabold">
                           {r.date === today ? "Today" : shortDate(r.date)}
                           {star && <span className="ml-1.5 rounded-full bg-lime px-2 py-0.5 text-[10px] font-extrabold">BEST DAY</span>}
                         </span>
                         <span className="block text-xs font-semibold text-mute">
-                          {String(r.best.start).padStart(2, "0")}–{String(r.best.end).padStart(2, "0")} · {r.min}° to {r.max}°
+                          {r.best ? `${String(r.best.start).padStart(2,"0")}–${String(r.best.end).padStart(2,"0")}` : "No recommendation"} · {r.min}° to {r.max}°
                         </span>
                       </span>
-                      <span className="grid size-11 place-items-center rounded-xl font-display text-sm font-extrabold" style={{ backgroundColor: scoreColor(r.best.score), color: r.best.score >= 60 ? "#162c29" : "#fff" }}>
-                        {r.best.score}
+                      <span className="grid size-11 place-items-center rounded-xl font-display text-sm font-extrabold" style={{ backgroundColor: scoreColor((r.best?.score ?? Number.NaN)), color: (r.best?.score ?? Number.NaN) >= 60 ? "#162c29" : "#fff" }}>
+                        {displayNumber(r.best?.score)}
                       </span>
                     </button>
                   </li>

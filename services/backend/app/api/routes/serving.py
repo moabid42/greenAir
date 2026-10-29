@@ -48,7 +48,7 @@ Repository = Annotated[ServingRepository, Depends(get_repository)]
 
 def check_date(selected: Date) -> None:
     if not Date(2020, 1, 1) <= selected <= Date(2100, 12, 31):
-        raise HTTPException(404, "Demo dates are supported from 2020-01-01 through 2100-12-31.")
+        raise HTTPException(404, "Date is outside the supported calendar range.")
 
 
 def parse_hour(t: str) -> datetime:
@@ -78,9 +78,18 @@ def page(items: list, page_size: int, page_token: str) -> tuple[list, str]:
     return items[offset:end], f"mock-v1-{end}" if end < len(items) else ""
 
 
-def set_headers(response: Response, repository: ServingRepository, max_age: int = 300) -> None:
-    response.headers["Cache-Control"] = f"public, max-age={max_age}"
-    response.headers["X-Data-Source"] = "mock"
+def set_headers(
+    response: Response,
+    repository: ServingRepository,
+    max_age: int = 300,
+    *,
+    source: str | None = None,
+) -> None:
+    source = source or getattr(repository, "source", "mock")
+    response.headers["Cache-Control"] = (
+        f"public, max-age={max_age}" if source == "mock" else "no-cache"
+    )
+    response.headers["X-Data-Source"] = source
     response.headers["X-Build-Id"] = repository.build_id
 
 
@@ -99,14 +108,17 @@ def set_headers(response: Response, repository: ServingRepository, max_age: int 
     summary="Get a day resource",
 )
 def get_day(date: Date, response: Response, repository: Repository) -> DayForecast:
-    """Return 24 Berlin wall-clock slots, including on DST days. All values are mock.
+    """Return 24 Berlin slots with explicit missing values and per-channel provenance.
 
     The frontend applies sport weights to the factor scores; this response has no combined index.
     Try date `2026-10-29`. Supported demo dates: 2020-01-01 through 2100-12-31.
     """
     check_date(date)
-    set_headers(response, repository)
-    return repository.day(date)
+    data = repository.day(date)
+    set_headers(response, repository, source=data.source)
+    if data.build_id:
+        response.headers["X-Build-Id"] = data.build_id
+    return data
 
 
 @router.get(
@@ -129,8 +141,9 @@ def get_grid(date: Date, response: Response, repository: Repository) -> GridResp
     Try date `2026-10-29`. The response is compressed when the client accepts gzip.
     """
     check_date(date)
-    set_headers(response, repository)
-    return repository.grid(date)
+    data = repository.grid(date)
+    set_headers(response, repository, source=data.source)
+    return data
 
 
 @router.get(
@@ -138,11 +151,16 @@ def get_grid(date: Date, response: Response, repository: Repository) -> GridResp
     response_model=list[Sensor],
     tags=["Frontend compatibility"],
     operation_id="GetFrontendSensors",
-    summary="Get demo sensor markers",
+    summary="Get sensor markers",
 )
 def frontend_sensors(response: Response, repository: Repository) -> list[Sensor]:
-    """Return synthetic markers in the existing frontend's array format. None are real stations."""
-    set_headers(response, repository, 60)
+    """Return sensor markers from the selected provider in the compatible array format."""
+    set_headers(
+        response,
+        repository,
+        60,
+        source="mock" if getattr(repository, "source", "mock") == "mock" else "measured",
+    )
     return repository.sensors()
 
 
@@ -156,8 +174,13 @@ def frontend_sensors(response: Response, repository: Repository) -> list[Sensor]
 def list_sensors(
     response: Response, repository: Repository, page_size: PageSize = 50, page_token: PageToken = ""
 ) -> ListSensorsResponse:
-    """List synthetic sensor resources with bounded pagination."""
-    set_headers(response, repository, 60)
+    """List selected-provider sensor resources with bounded pagination."""
+    set_headers(
+        response,
+        repository,
+        60,
+        source="mock" if getattr(repository, "source", "mock") == "mock" else "measured",
+    )
     sensors, token = page(repository.sensors(), page_size, page_token)
     return ListSensorsResponse(sensors=sensors, next_page_token=token)
 
@@ -170,7 +193,7 @@ def list_sensors(
     summary="Get a sensor resource",
 )
 def get_sensor(sensor_id: str, repository: Repository) -> Sensor:
-    """Get a synthetic sensor by stable ID, for example `mock-1`."""
+    """Get a sensor by an ID returned from ListSensors (mock example: `mock-1`)."""
     sensor = next((s for s in repository.sensors() if s.id == sensor_id), None)
     if sensor is None:
         raise HTTPException(404, "Sensor not found. List sensors to select a supported ID.")
@@ -228,7 +251,10 @@ def list_segments(
         ]
     features, token = page(segments, page_size, page_token)
     return ListSegmentsResponse(
-        features=features, next_page_token=token, build_id=repository.build_id
+        features=features,
+        next_page_token=token,
+        build_id=repository.build_id,
+        source=getattr(repository, "spatial_source", "mock"),
     )
 
 
@@ -275,7 +301,10 @@ def list_scores(profile: SportProfile, t: UtcHour, repository: Repository) -> Sc
     return ScoreSnapshot(
         profile=profile,
         t=t,
-        version="mock-scoring-v1",
+        source=getattr(repository, "spatial_source", "mock"),
+        version="mock-scoring-v1"
+        if getattr(repository, "source", "mock") == "mock"
+        else "unavailable",
         build_id=repository.build_id,
         scores={str(d.segment_id): (round(d.score), d.confidence, 0) for d in details},
     )
@@ -354,9 +383,11 @@ def best_times(
     summary="Get serving status",
 )
 def get_status(repository: Repository) -> ServiceStatus:
-    """Report the active mock geometry build and disconnected pipeline. This is separate
-    from process liveness (`/health`). SSE and upstream refresh are deferred.
+    """Report selected-provider snapshots, actual coverage dates and source state.
+    This is separate from process liveness (`/health`) or a claim of continuous polling.
     """
+    if hasattr(repository, "status"):
+        return repository.status()
     return ServiceStatus(
         build_id=repository.build_id,
         generated_at=repository.generated_at,
