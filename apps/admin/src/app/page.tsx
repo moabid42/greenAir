@@ -14,8 +14,10 @@ import { cn } from "@/lib/cn";
 import { fmtInt } from "@/lib/format";
 import type { Health } from "@/lib/types";
 
-/** The reference design shows four endpoints; in the one-screen layout the ones that need attention come first. */
+/** The reference design shows four endpoints; taller screens have room for six. The ones that need attention come first. */
 const FIT_ROWS = 4;
+const TALL_ROWS = 6;
+const TALL_QUERY = "(min-height: 1000px)";
 const SEVERITY: Record<Health, number> = { offline: 0, unverified: 1, degraded: 2, checking: 3, healthy: 4, unconfigured: 5 };
 
 export default function Overview() {
@@ -23,6 +25,8 @@ export default function Overview() {
   const dialogs = useEndpointDialogs();
   // One screen, no page scroll, like the reference. Smaller windows get the stacked layout that scrolls.
   const fit = useMedia(FIT_QUERY);
+  const tall = useMedia(TALL_QUERY);
+  const fitRows = tall ? TALL_ROWS : FIT_ROWS;
   const pipeline = usePipeline(a.settings.backendUrl);
 
   const checkable = a.endpoints.filter((e) => a.blockedReason(e) == null);
@@ -43,9 +47,9 @@ export default function Overview() {
     return a.endpoints
       .map((e, i) => ({ e, i, s: SEVERITY[a.healthOf(e)] }))
       .sort((x, y) => x.s - y.s || x.i - y.i)
-      .slice(0, FIT_ROWS)
+      .slice(0, fitRows)
       .map((x) => x.e);
-  }, [a, fit]);
+  }, [a, fit, fitRows]);
 
   const firstVisible = rows[0]?.id;
   const selectFirst = a.select;
@@ -85,9 +89,9 @@ export default function Overview() {
           <EndpointTable rows={rows} onEdit={dialogs.openEdit} dense={fit} />
         )}
       </div>
-      {fit && a.ready && a.endpoints.length > FIT_ROWS && (
+      {fit && a.ready && a.endpoints.length > fitRows && (
         <p className="mt-2 text-xs text-mute">
-          Showing the {FIT_ROWS} that need attention first. <Link href="/endpoints" className="font-bold text-brand hover:underline">View all {a.endpoints.length} endpoints →</Link>
+          Showing the {fitRows} that need attention first. <Link href="/endpoints" className="font-bold text-brand hover:underline">View all {a.endpoints.length} endpoints →</Link>
         </p>
       )}
     </section>
