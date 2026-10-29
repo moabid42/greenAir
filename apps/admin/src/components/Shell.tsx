@@ -12,7 +12,7 @@ import { type ReactNode, useEffect, useState } from "react";
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Overview", icon: House },
   { href: "/endpoints", label: "Endpoints", icon: Database },
-  { href: "/environment", label: "Environmental conditions", icon: Leaf },
+  { href: "/environment", label: "Live Data", icon: Leaf },
   { href: "/client-data", label: "Source data", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -96,7 +96,7 @@ function BottomNav() {
             <span className={cn("grid h-7 w-12 place-items-center rounded-full", on && "bg-great-soft")}>
               <Icon className="size-5" aria-hidden />
             </span>
-            {href === "/environment" ? "Environment" : label}
+            {label}
           </Link>
         );
       })}

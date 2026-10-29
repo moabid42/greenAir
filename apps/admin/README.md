@@ -1,7 +1,7 @@
 > Current runtime (2026-10-29): `just up` serves real stored provider data. Overview
 > and Source data read `/api/v1/data-status`; synthetic traffic/upload figures have
 > been removed. Client uploads and server request analytics remain unavailable.
-> Environmental conditions show measured pollutants, model weather, hourly forecasts,
+> Live Data show measured pollutants, model weather, hourly forecasts,
 > station filters and network availability. See [environmental data](../../docs/integrations/admin-environment.md).
 > Configuration and endpoint-probe history stay in this browser. The older API
 > proposals below are historical; see [runtime details](../../docs/integrations/real-data-runtime.md).
@@ -16,7 +16,7 @@ It is a **second frontend**, separate from the public web client (`../frontend`)
 |---|---|
 | **Overview** | Endpoint health, stored provider counts and ingestion/build status. Wide screens use a dense endpoint workspace. |
 | **Endpoints** | Search, filter, configure and probe endpoints; inspect HTTP status and latency history. Configuration changes apply to this browser only. |
-| **Environmental conditions** | Dedicated `/environment` tab for pollutant readings, exposure/provider filters, hourly model forecasts and station availability. |
+| **Live Data** | Dedicated `/environment` tab for pollutant readings, exposure/provider filters, hourly model forecasts and station availability. |
 | **Source data** | Source refresh status, processing attempts and source-status CSV export. |
 | **Settings** | Backend URL, check interval, timeout, "slow" threshold, default range, export / import configuration, restore defaults, clear history, access and privacy notes |
 
