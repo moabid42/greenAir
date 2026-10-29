@@ -168,4 +168,4 @@ def test_explicit_provider_selection_is_lazy_and_database_failures_are_typed(tmp
         assert response.status_code == 503 and response.json()["error"]["status"] == "UNAVAILABLE"
         assert "sqlite" not in response.text and "password" not in response.text
     with pytest.raises(ValueError, match="DATABASE_URL"):
-        create_app(Settings(_env_file=None, serving_data_mode="stored"))
+        create_app(Settings(_env_file=None, serving_data_mode="stored", database_url=None))

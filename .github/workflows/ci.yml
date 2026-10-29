@@ -86,7 +86,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
       - name: Start backend image
-        run: docker compose up --build --detach --wait --wait-timeout 120 backend
+        env:
+          GREENAIR_SERVING_DATA_MODE: mock
+          GREENAIR_STATION_DATA_MODE: mock
+        run: docker compose up --build --no-deps --detach --wait --wait-timeout 120 backend
       - name: Exercise documented routes
         run: python3 scripts/smoke-backend.py
       - name: Container logs

@@ -6,7 +6,9 @@ from app.main import create_app
 
 
 def test_service_starts_and_exposes_health_without_external_infrastructure():
-    application = create_app(Settings(_env_file=None, app_name="Test API", cors_origins=[]))
+    settings = Settings(_env_file=None, app_name="Test API", cors_origins=[])
+    assert settings.serving_data_mode == "stored" and settings.station_data_mode == "live"
+    application = create_app(settings)
     with TestClient(application) as client:
         response = client.get("/health")
         assert response.status_code == 200

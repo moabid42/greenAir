@@ -1,17 +1,70 @@
 name: greenair-demo
 
+x-data-environment: &data-environment
+  GREENAIR_DATABASE_URL: postgresql+psycopg://greenair:greenair-local@database:5432/greenair
+
 services:
+  database:
+    image: timescale/timescaledb-ha:pg17@sha256:3f0b3f6bdf4912878444a36e6113a18346309583c4d1a61d81a0c511342a1afd
+    environment:
+      POSTGRES_USER: greenair
+      POSTGRES_PASSWORD: greenair-local
+      POSTGRES_DB: greenair
+    ports:
+      - "127.0.0.1:${GREENAIR_DATA_PORT:-55433}:5432"
+    volumes:
+      - real-data:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenair -d greenair"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  migrate:
+    image: greenair-backend:demo
+    build:
+      context: ./services/backend
+    environment: *data-environment
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+
+  refresh:
+    image: greenair-backend:demo
+    build:
+      context: ./services/backend
+    environment: *data-environment
+    command: ["python", "-m", "app.ingestion.runtime"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: unless-stopped
+    # This image's default health check targets the API, not the worker.
+    healthcheck:
+      disable: true
+
   backend:
     image: greenair-backend:demo
     build:
       context: ./services/backend
     ports:
       - "${GREENAIR_BIND_HOST:-127.0.0.1}:${GREENAIR_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     environment:
+      <<: *data-environment
       GREENAIR_CORS_ORIGINS: '${GREENAIR_CORS_ORIGINS:-["http://localhost:${GREENAIR_WEB_PORT:-3000}","http://localhost:${GREENAIR_ADMIN_PORT:-3200}","http://localhost:5173"]}'
-      GREENAIR_SERVING_DATA_MODE: "${GREENAIR_SERVING_DATA_MODE:-mock}"
-      GREENAIR_DATABASE_URL: "${GREENAIR_DATABASE_URL:-}"
-      GREENAIR_STATION_DATA_MODE: "${GREENAIR_STATION_DATA_MODE:-mock}"
+      GREENAIR_SERVING_DATA_MODE: "${GREENAIR_SERVING_DATA_MODE:-stored}"
+      GREENAIR_STATION_DATA_MODE: "${GREENAIR_STATION_DATA_MODE:-live}"
     read_only: true
     tmpfs:
       - /tmp
@@ -66,3 +119,6 @@ services:
       - no-new-privileges:true
     init: true
     restart: unless-stopped
+
+volumes:
+  real-data:

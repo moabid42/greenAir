@@ -1,7 +1,9 @@
 """Exercise the documented backend over HTTP; no development dependencies required.
 
-Start with `just backend-up`, then `just backend-smoke`. Override GREENAIR_SMOKE_URL
-when testing another port or a deployed instance. This script expects mock mode.
+This offline contract smoke requires an explicitly configured mock API:
+GREENAIR_SERVING_DATA_MODE=mock GREENAIR_STATION_DATA_MODE=mock just backend-up
+Then run `just backend-smoke`. Override GREENAIR_SMOKE_URL for another port.
+Normal `just up` is real data; use /api/v1/data-status for its coverage/status.
 """
 
 import gzip

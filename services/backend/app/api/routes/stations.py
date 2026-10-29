@@ -60,8 +60,8 @@ def get_box_fetcher(request: Request) -> BoxFetcher:
 def station_status(
     request: Request, fetcher: Annotated[BoxFetcher, Depends(get_box_fetcher)]
 ) -> StationStatusResponse:
-    """Station upload status and latest readings. Defaults to synthetic data; explicit
-    GREENAIR_STATION_DATA_MODE=live opts into openSenseMap requests.
+    """Station upload status and latest readings. Uses live openSenseMap by default.
+    Explicit GREENAIR_STATION_DATA_MODE=mock is reserved for offline demos/tests.
     """
     settings: Settings = request.app.state.settings
     try:

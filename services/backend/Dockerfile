@@ -10,10 +10,12 @@ FROM python:3.12-slim AS runtime
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    GREENAIR_STATION_DATA_MODE=mock
+    GREENAIR_STATION_DATA_MODE=live
 WORKDIR /app
 COPY --from=dependencies /app/.venv /app/.venv
 COPY app ./app
+COPY alembic.ini ./alembic.ini
+COPY migrations ./migrations
 USER 10001:10001
 EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
